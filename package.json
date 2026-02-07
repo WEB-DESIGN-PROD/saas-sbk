@@ -1,6 +1,6 @@
 {
   "name": "create-saas-sbk",
-  "version": "0.3.1",
+  "version": "0.4.5",
   "description": "CLI pour générer des projets SaaS Next.js 15+ complets et clés en main",
   "type": "module",
   "bin": {

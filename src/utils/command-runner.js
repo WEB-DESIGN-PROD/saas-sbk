@@ -15,15 +15,37 @@ export function runCommand(command, args = [], options = {}) {
       ...options
     });
 
+    let stdout = '';
+    let stderr = '';
+
+    // Capturer stdout et stderr si stdio est 'pipe'
+    if (options.stdio === 'pipe') {
+      if (proc.stdout) {
+        proc.stdout.on('data', (data) => {
+          stdout += data.toString();
+        });
+      }
+      if (proc.stderr) {
+        proc.stderr.on('data', (data) => {
+          stderr += data.toString();
+        });
+      }
+    }
+
     proc.on('close', (code) => {
       if (code !== 0) {
-        reject(new Error(`La commande ${command} a échoué avec le code ${code}`));
+        const error = new Error(`La commande ${command} a échoué avec le code ${code}`);
+        error.stdout = stdout;
+        error.stderr = stderr;
+        reject(error);
       } else {
         resolve();
       }
     });
 
     proc.on('error', (error) => {
+      error.stdout = stdout;
+      error.stderr = stderr;
       reject(error);
     });
   });

@@ -11,7 +11,8 @@ export function generatePackageJson(config) {
       build: 'next build',
       start: 'next start',
       lint: 'next lint',
-      'db:push': 'prisma db push',
+      postinstall: 'prisma generate',
+      'db:push': 'prisma generate && prisma db push',
       'db:migrate': 'prisma migrate dev',
       'db:studio': 'prisma studio',
       'db:generate': 'prisma generate'
@@ -21,7 +22,7 @@ export function generatePackageJson(config) {
       react: '^19.0.0',
       'react-dom': '^19.0.0',
       'better-auth': '^1.3.0',
-      '@prisma/client': '^6.2.0',
+      '@prisma/client': '^6.19.2',
       'next-themes': '^0.4.6',
       clsx: '^2.1.1',
       'tailwind-merge': '^2.6.0',
@@ -32,7 +33,7 @@ export function generatePackageJson(config) {
       '@types/react': '^19.0.9',
       '@types/react-dom': '^19.0.5',
       typescript: '^5.7.3',
-      prisma: '^6.2.0',
+      prisma: '^6.19.2',
       tailwindcss: '^3.4.17',
       postcss: '^8.4.49',
       autoprefixer: '^10.4.20',
@@ -86,7 +87,7 @@ export function generatePackageJson(config) {
 
   // i18n (optionnel, pour v2)
   if (config.i18n.languages.length > 1) {
-    packageJson.dependencies['next-intl'] = '^3.29.0';
+    packageJson.dependencies['next-intl'] = '^4.8.0';
   }
 
   // Shadcn UI components (ajoutés progressivement)
@@ -95,6 +96,7 @@ export function generatePackageJson(config) {
   packageJson.dependencies['@radix-ui/react-dialog'] = '^1.1.4';
   packageJson.dependencies['@radix-ui/react-label'] = '^2.1.1';
   packageJson.dependencies['lucide-react'] = '^0.469.0';
+  packageJson.dependencies['sonner'] = '^1.7.1';
 
   return JSON.stringify(packageJson, null, 2);
 }

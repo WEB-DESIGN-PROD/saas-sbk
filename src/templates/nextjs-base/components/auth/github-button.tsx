@@ -4,6 +4,13 @@ import { signIn } from "@/lib/auth/client"
 import { Button } from "@/components/ui/button"
 
 export function GitHubButton() {
+  // Vérifier si GitHub OAuth est configuré
+  const isGitHubEnabled = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID !== undefined
+
+  if (!isGitHubEnabled) {
+    return null
+  }
+
   const handleGitHubLogin = async () => {
     await signIn.social({
       provider: "github",

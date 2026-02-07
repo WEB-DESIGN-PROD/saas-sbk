@@ -1,27 +1,93 @@
-import { runCommandSync } from '../utils/command-runner.js';
+import path from 'path';
+import { writeFile } from '../utils/file-utils.js';
 import { logger } from '../utils/logger.js';
 
 /**
- * Lance la commande `/init` de Claude Code sur le projet
+ * Génère le fichier CLAUDE.md avec la liste des skills installés
  */
-export function initClaude(projectPath, config) {
-  if (!config.claude.cliInstalled) {
-    logger.warn('Claude Code CLI non installé - skip /init');
-    logger.info('Pour installer Claude Code : https://claude.ai/docs/cli');
-    return;
+function generateClaudeMd(config, installedSkills) {
+  const lines = [
+    `# ${config.projectName}`,
+    '',
+    'Projet SaaS généré avec create-saas-sbk.',
+    '',
+    '## Stack technique',
+    '',
+    '- **Next.js 15+** avec App Router',
+    '- **React 19** avec Server Components',
+    '- **Better Auth** pour l\'authentification',
+    '- **Prisma** + **PostgreSQL**',
+    '- **Tailwind CSS** + **Shadcn UI**',
+  ];
+
+  if (config.payments.enabled) {
+    lines.push('- **Stripe** pour les paiements');
   }
 
-  logger.step('Initialisation de Claude Code sur le projet...');
+  if (config.email.provider === 'resend') {
+    lines.push('- **Resend** pour les emails');
+  }
+
+  if (config.storage.enabled) {
+    lines.push(`- **${config.storage.type === 'minio' ? 'MinIO' : 'AWS S3'}** pour le stockage`);
+  }
+
+  if (config.ai.provider !== 'none') {
+    lines.push(`- **${config.ai.provider}** pour l'IA`);
+  }
+
+  lines.push('');
+  lines.push('## Skills Claude Code installés');
+  lines.push('');
+
+  if (installedSkills.length > 0) {
+    lines.push('Les skills suivants sont disponibles dans `.claude/skills/` :');
+    lines.push('');
+    installedSkills.forEach(skill => {
+      lines.push(`- **${skill.name}** - \`${skill.fileName}\``);
+    });
+    lines.push('');
+    lines.push('Ces skills sont versionnés avec votre projet et partagés avec votre équipe.');
+  } else {
+    lines.push('Aucun skill installé.');
+  }
+
+  lines.push('');
+  lines.push('## Commandes utiles');
+  lines.push('');
+  lines.push('```bash');
+  lines.push('npm run dev          # Démarrer le serveur de développement');
+
+  if (config.database.type === 'docker' || (config.storage.enabled && config.storage.type === 'minio')) {
+    lines.push('npm run docker:up    # Démarrer les services Docker');
+  }
+
+  lines.push('npm run db:push      # Synchroniser le schéma Prisma');
+  lines.push('npm run db:studio    # Ouvrir Prisma Studio');
+  lines.push('```');
+  lines.push('');
+  lines.push('## Documentation');
+  lines.push('');
+  lines.push('Consultez `.claude/README.md` pour la documentation complète de la stack.');
+
+  return lines.join('\n');
+}
+
+/**
+ * Génère le fichier CLAUDE.md automatiquement
+ */
+export function initClaude(projectPath, config, installedSkills = []) {
+  logger.step('Génération du fichier CLAUDE.md...');
 
   try {
-    runCommandSync('claude /init', {
-      cwd: projectPath,
-      stdio: 'inherit'
-    });
+    const claudeMdContent = generateClaudeMd(config, installedSkills);
+    writeFile(path.join(projectPath, 'CLAUDE.md'), claudeMdContent);
 
-    logger.success('Claude Code initialisé avec succès');
+    logger.success('CLAUDE.md créé avec la liste des skills');
+    logger.info('');
+    logger.info('💡 Votre projet est prêt pour Claude Code !');
+    logger.info('   Lancez "claude" dans le répertoire du projet pour démarrer.');
   } catch (error) {
-    logger.warn('Échec de l\'initialisation de Claude Code (non bloquant)');
-    logger.info('Vous pouvez lancer manuellement : cd ' + config.projectName + ' && claude /init');
+    logger.warn('Échec de la génération de CLAUDE.md (non bloquant)');
   }
 }

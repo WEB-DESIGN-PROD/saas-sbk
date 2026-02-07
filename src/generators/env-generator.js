@@ -28,6 +28,7 @@ export function generateEnvFile(config) {
   if (config.auth.methods.includes('github')) {
     lines.push(`GITHUB_CLIENT_ID="${sanitizeForEnv(config.auth.githubClientId)}"`);
     lines.push(`GITHUB_CLIENT_SECRET="${sanitizeForEnv(config.auth.githubClientSecret)}"`);
+    lines.push(`NEXT_PUBLIC_GITHUB_CLIENT_ID="${sanitizeForEnv(config.auth.githubClientId)}"`);
   }
   lines.push('');
 
@@ -75,8 +76,10 @@ export function generateEnvFile(config) {
 
   // i18n
   lines.push('# Internationalisation');
+  lines.push('# Note: next-intl sera installé si plus d\'une langue est configurée');
   lines.push(`DEFAULT_LANGUAGE="${config.i18n.defaultLanguage}"`);
   lines.push(`SUPPORTED_LANGUAGES="${config.i18n.languages.join(',')}"`);
+  lines.push(`# Langues configurées : ${config.i18n.languages.join(', ')}`);
   lines.push('');
 
   // AI

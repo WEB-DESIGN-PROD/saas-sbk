@@ -1,110 +1,57 @@
-import { runCommandSync } from '../utils/command-runner.js';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { logger } from '../utils/logger.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 /**
- * Mapping configuration → skills Claude Code avec URLs GitHub
+ * Liste des skills à copier selon la configuration
  */
 function getSkillsForConfig(config) {
   const skills = [];
 
-  // Next.js - skill par défaut
-  skills.push({
-    name: 'Next.js Best Practices',
-    command: 'npx skills add next-best-practices'
-  });
+  // Skills de base (toujours copiés)
+  skills.push('next-best-practices.md');
+  skills.push('prisma-expert.md');
+  skills.push('better-auth-best-practices.md');
+  skills.push('shadcn-ui.md');
 
-  // Prisma - toujours inclus
-  skills.push({
-    name: 'Prisma Expert',
-    command: 'npx skills add https://github.com/sickn33/antigravity-awesome-skills --skill prisma-expert'
-  });
-
-  // Better Auth - toujours inclus
-  skills.push({
-    name: 'Better Auth',
-    command: 'npx skills add https://github.com/better-auth/skills --skill better-auth-best-practices'
-  });
-
-  // Shadcn UI - toujours inclus
-  skills.push({
-    name: 'Shadcn UI',
-    command: 'npx skills add https://github.com/giuseppe-trisciuoglio/developer-kit --skill shadcn-ui'
-  });
-
-  // Stripe si paiements activés
+  // Skills conditionnels
   if (config.payments.enabled) {
-    skills.push({
-      name: 'Stripe',
-      command: 'npx skills add https://github.com/stripe/ai --skill stripe-best-practices'
-    });
+    skills.push('stripe-best-practices.md');
   }
 
-  // Resend si email provider est resend
   if (config.email.provider === 'resend') {
-    skills.push({
-      name: 'Email Best Practices',
-      command: 'npx skills add https://github.com/resend/email-best-practices --skill email-best-practices'
-    });
-    skills.push({
-      name: 'React Email',
-      command: 'npx skills add https://github.com/resend/react-email --skill react-email'
-    });
-    skills.push({
-      name: 'Resend',
-      command: 'npx skills add https://github.com/resend/resend-skills --skill resend'
-    });
-    skills.push({
-      name: 'Send Email',
-      command: 'npx skills add https://github.com/resend/resend-skills --skill send-email'
-    });
+    skills.push('email-best-practices.md');
+    skills.push('react-email.md');
   }
 
-  // MinIO si storage type est minio
   if (config.storage.enabled && config.storage.type === 'minio') {
-    skills.push({
-      name: 'MinIO',
-      command: 'npx skills add https://github.com/vm0-ai/vm0-skills --skill minio'
-    });
+    skills.push('minio.md');
   }
 
   return skills;
 }
 
 /**
- * Installe les skills Claude Code adaptés à la configuration
+ * Copie les skills depuis les templates vers le projet
+ * Note: Les skills sont déjà copiés via copyDirectory dans nextjs-generator.js
+ * Cette fonction retourne juste la liste pour CLAUDE.md
+ * @returns {Array} Liste des skills copiés
  */
 export async function installSkills(projectPath, config) {
-  const skills = getSkillsForConfig(config);
+  const skillFiles = getSkillsForConfig(config);
 
-  if (skills.length === 0) {
-    logger.info('Aucun skill Claude Code à installer');
-    return;
-  }
+  logger.step(`${skillFiles.length} skills inclus dans le projet`);
 
-  logger.step(`Installation de ${skills.length} skills Claude Code...`);
+  const installedSkills = skillFiles.map(fileName => ({
+    name: fileName.replace('.md', '').split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+    fileName: fileName
+  }));
 
-  let successCount = 0;
-  let failCount = 0;
+  logger.success(`Skills disponibles dans .claude/skills/`);
 
-  for (const skill of skills) {
-    try {
-      logger.info(`  → Installation de ${skill.name}...`);
-      runCommandSync(skill.command, {
-        cwd: projectPath,
-        stdio: 'pipe' // Masquer sortie verbose
-      });
-      successCount++;
-    } catch (error) {
-      logger.warn(`  ⚠ Échec de l'installation de ${skill.name} (non bloquant)`);
-      failCount++;
-    }
-  }
-
-  if (successCount > 0) {
-    logger.success(`${successCount} skills installés avec succès`);
-  }
-
-  if (failCount > 0) {
-    logger.warn(`${failCount} skills ont échoué (non bloquant)`);
-  }
+  return installedSkills;
 }

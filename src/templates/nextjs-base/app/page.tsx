@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Home() {
   return (
@@ -17,6 +18,7 @@ export default function Home() {
             <Link href="/about" className="text-sm font-medium hover:underline">
               À propos
             </Link>
+            <ThemeToggle />
             <Link href="/login">
               <Button variant="ghost" size="sm">
                 Connexion

@@ -69,7 +69,13 @@ export async function showSummaryAndConfirm(config) {
   }
 
   console.log(chalk.bold('Internationalisation:'));
-  console.log(`  Langues: ${chalk.cyan(config.i18n.languages.join(', '))}`);
+  console.log(`  Langue par défaut: ${chalk.cyan(config.i18n.defaultLanguage)}`);
+  console.log(`  Toutes les langues: ${chalk.cyan(config.i18n.languages.join(', '))}`);
+  if (config.i18n.languages.length > 1) {
+    console.log(`  ${chalk.green('✓')} next-intl sera installé (${config.i18n.languages.length} langues configurées)`);
+  } else {
+    console.log(`  ${chalk.yellow('⚠')} next-intl ne sera pas installé (une seule langue)`);
+  }
   logger.newline();
 
   if (config.ai.provider !== 'none') {

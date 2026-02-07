@@ -1,16 +1,22 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
+import { cookies } from "next/headers"
 import { Button } from "@/components/ui/button"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { LogoutButton } from "@/components/auth/logout-button"
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  // TODO: Vérifier la session avec Better Auth
-  // const session = await auth()
-  // if (!session) {
-  //   redirect("/login")
-  // }
+  // Vérifier la session Better Auth
+  const cookieStore = await cookies()
+  const sessionToken = cookieStore.get('better-auth.session_token')
+
+  if (!sessionToken) {
+    redirect("/login")
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -50,12 +56,11 @@ export default function DashboardLayout({
             </nav>
           </div>
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <Button variant="ghost" size="sm" asChild>
               <Link href="/">Retour au site</Link>
             </Button>
-            <Button variant="outline" size="sm">
-              Déconnexion
-            </Button>
+            <LogoutButton />
           </div>
         </div>
       </header>

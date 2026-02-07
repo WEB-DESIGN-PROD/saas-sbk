@@ -2,12 +2,17 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import { signUp } from "@/lib/auth/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { GitHubButton } from "@/components/auth/github-button"
 
 export default function RegisterPage() {
+  const router = useRouter()
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -18,23 +23,75 @@ export default function RegisterPage() {
     e.preventDefault()
 
     if (password !== confirmPassword) {
-      alert("Les mots de passe ne correspondent pas")
+      toast.error("Erreur de validation", {
+        description: "Les mots de passe ne correspondent pas"
+      })
+      return
+    }
+
+    if (password.length < 8) {
+      toast.error("Mot de passe trop court", {
+        description: "Le mot de passe doit contenir au moins 8 caractères"
+      })
       return
     }
 
     setIsLoading(true)
 
     try {
-      // TODO: Implémenter la logique d'inscription avec Better Auth
-      console.log("Register attempt:", { name, email, password })
+      console.log("🔄 Début de l'inscription...", { email, name })
 
-      // Simulation
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Inscription avec Better Auth
+      const result = await signUp.email({
+        email,
+        password,
+        name,
+      })
 
-      // Rediriger vers le dashboard ou login
-      // window.location.href = "/dashboard"
-    } catch (error) {
-      console.error("Register error:", error)
+      console.log("📦 Résultat signUp:", result)
+
+      if (result.error) {
+        console.error("❌ Erreur Better Auth:", result.error)
+        console.error("Type d'erreur:", typeof result.error)
+        console.error("Clés de l'erreur:", Object.keys(result.error))
+
+        const errorMessage = result.error.message || JSON.stringify(result.error)
+
+        // Détecter si l'utilisateur existe déjà
+        if (errorMessage.includes("already exists") || errorMessage.includes("déjà") || errorMessage.includes("unique")) {
+          toast.error("Compte existant", {
+            description: "Un compte avec cet email existe déjà. Essayez de vous connecter."
+          })
+        } else if (!errorMessage || errorMessage === "{}") {
+          toast.error("Erreur de configuration", {
+            description: "Vérifiez que la base de données est démarrée et configurée. Consultez la console pour plus de détails."
+          })
+        } else {
+          toast.error("Échec de l'inscription", {
+            description: errorMessage
+          })
+        }
+        return
+      }
+
+      console.log("✅ Inscription réussie, redirection...")
+
+      toast.success("Compte créé avec succès !", {
+        description: "Bienvenue ! Redirection vers le dashboard..."
+      })
+
+      // Rediriger vers le dashboard après inscription réussie
+      setTimeout(() => {
+        router.push("/dashboard")
+        router.refresh()
+      }, 500)
+    } catch (error: any) {
+      console.error("❌ Exception lors de l'inscription:", error)
+      console.error("Stack trace:", error.stack)
+
+      toast.error("Erreur d'inscription", {
+        description: error?.message || "Une erreur est survenue lors de l'inscription"
+      })
     } finally {
       setIsLoading(false)
     }
@@ -111,7 +168,7 @@ export default function RegisterPage() {
               {isLoading ? "Création..." : "Créer mon compte"}
             </Button>
 
-            {/* TODO: Ajouter les boutons OAuth si configurés */}
+            <GitHubButton />
 
             <p className="text-center text-sm text-muted-foreground">
               Déjà un compte ?{" "}

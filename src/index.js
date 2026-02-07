@@ -1,4 +1,5 @@
 import path from 'path';
+import fs from 'fs';
 import { logger } from './utils/logger.js';
 import { exists } from './utils/file-utils.js';
 import { askQuestions } from './core/questions.js';
@@ -11,7 +12,6 @@ import { generatePackageJson } from './generators/package-generator.js';
 import { generateNextjsProject } from './generators/nextjs-generator.js';
 import { installDependencies } from './installers/dependencies.js';
 import { installSkills } from './installers/skills.js';
-import { installShadcnComponents } from './installers/shadcn.js';
 import { initClaude } from './installers/claude-init.js';
 import { writeFile } from './utils/file-utils.js';
 import chalk from 'chalk';
@@ -64,7 +64,7 @@ export async function main() {
 
   // --version ou -v
   if (args.includes('--version') || args.includes('-v')) {
-    console.log('v0.3.1');
+    console.log('v0.4.5');
     return;
   }
 
@@ -76,9 +76,15 @@ export async function main() {
 
   console.clear();
 
-  // Bannière
-  logger.title('🚀 create-saas-sbk');
-  console.log(chalk.gray('  Générateur de projets SaaS Next.js 15+ complets'));
+  // Bannière ASCII art
+  console.log(chalk.cyan(`
+ _____________________________    _____________________ __
+__  ___/__    |__    |_  ___/    __  ___/__  __ )__  //_/
+_____ \\__  /| |_  /| |____ \\     _____ \\__  __  |_  ,<
+____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
+/____/ /_/  |_/_/  |_/____/      /____/ /_____/ /_/ |_|
+  `));
+  console.log(chalk.gray('       Générateur de projets SaaS Next.js 15+ complets'));
   console.log('');
 
   try {
@@ -140,27 +146,28 @@ export async function main() {
       logger.success('docker-compose.yml créé');
     }
 
-    // 5. Générer .claude/README.md
+    // 5. Générer .claude/README.md et créer les dossiers skills/agents
     logger.step('Génération de la documentation Claude...');
     const claudeReadme = generateClaudeReadme(config);
     writeFile(path.join(projectPath, '.claude/README.md'), claudeReadme);
-    logger.success('.claude/README.md créé');
+
+    // Créer les dossiers skills et agents pour Claude Code
+    fs.mkdirSync(path.join(projectPath, '.claude/skills'), { recursive: true });
+    fs.mkdirSync(path.join(projectPath, '.claude/agents'), { recursive: true });
+
+    logger.success('.claude/README.md créé + dossiers skills/agents');
 
     // 6. Installer les dépendances
     logger.newline();
     await installDependencies(projectPath);
 
-    // 7. Installer les composants Shadcn UI
+    // 7. Récupérer la liste des skills (déjà copiés avec les templates)
     logger.newline();
-    await installShadcnComponents(projectPath);
+    const installedSkills = await installSkills(projectPath, config);
 
-    // 8. Installer les skills Claude Code
+    // 8. Générer CLAUDE.md avec les skills installés
     logger.newline();
-    await installSkills(projectPath, config);
-
-    // 9. Initialiser Claude Code
-    logger.newline();
-    initClaude(projectPath, config);
+    initClaude(projectPath, config, installedSkills);
 
     // Message final
     logger.newline();

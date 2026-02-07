@@ -10,9 +10,9 @@ const authRoutes = ['/login', '/register']
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // TODO: Vérifier le token de session
-  // const session = request.cookies.get('session')?.value
-  const isAuthenticated = false // Remplacer par la vraie vérification
+  // Vérifier le cookie de session Better Auth
+  const sessionToken = request.cookies.get('better-auth.session_token')?.value
+  const isAuthenticated = !!sessionToken
 
   // Protéger les routes dashboard
   if (protectedRoutes.some(route => pathname.startsWith(route))) {

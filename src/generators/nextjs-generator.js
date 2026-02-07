@@ -78,8 +78,8 @@ export function generateNextjsProject(projectPath, config) {
   // Générer README.md
   generateReadme(projectPath, config);
 
-  // Générer schéma Prisma
-  generatePrismaSchema(projectPath, config);
+  // NOTE: Le schéma Prisma est déjà copié depuis les templates (ligne 29)
+  // Ne pas appeler generatePrismaSchema car il écraserait le bon schéma !
 
   // Copier les variantes conditionnelles
   copyConditionalVariants(projectPath, config);
@@ -140,7 +140,7 @@ const nextConfig = {
 export default nextConfig;
 `;
 
-  writeFile(path.join(projectPath, 'next.config.js'), content);
+  writeFile(path.join(projectPath, 'next.config.mjs'), content);
 }
 
 function generateTsConfig(projectPath) {

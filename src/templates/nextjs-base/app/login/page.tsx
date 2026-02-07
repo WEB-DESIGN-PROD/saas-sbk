@@ -2,12 +2,17 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import { signIn } from "@/lib/auth/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { GitHubButton } from "@/components/auth/github-button"
 
 export default function LoginPage() {
+  const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -17,16 +22,31 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      // TODO: Implémenter la logique de connexion avec Better Auth
-      console.log("Login attempt:", { email, password })
+      // Connexion avec Better Auth
+      const result = await signIn.email({
+        email,
+        password,
+      })
 
-      // Simulation
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      if (result.error) {
+        toast.error("Échec de la connexion", {
+          description: result.error.message || "Email ou mot de passe incorrect"
+        })
+        return
+      }
 
-      // Rediriger vers le dashboard
-      // window.location.href = "/dashboard"
-    } catch (error) {
+      toast.success("Connexion réussie !", {
+        description: "Redirection vers le dashboard..."
+      })
+
+      // Rediriger vers le dashboard après connexion réussie
+      router.push("/dashboard")
+      router.refresh()
+    } catch (error: any) {
       console.error("Login error:", error)
+      toast.error("Erreur de connexion", {
+        description: error?.message || "Une erreur est survenue lors de la connexion"
+      })
     } finally {
       setIsLoading(false)
     }
@@ -84,7 +104,7 @@ export default function LoginPage() {
               {isLoading ? "Connexion..." : "Se connecter"}
             </Button>
 
-            {/* TODO: Ajouter les boutons OAuth si configurés */}
+            <GitHubButton />
 
             <p className="text-center text-sm text-muted-foreground">
               Pas encore de compte ?{" "}

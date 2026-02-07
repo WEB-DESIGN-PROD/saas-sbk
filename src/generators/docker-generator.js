@@ -65,8 +65,6 @@ export function generateDockerCompose(config) {
 
   // Construire le fichier complet
   const lines = [
-    'version: "3.8"',
-    '',
     'services:',
     ...services.map(s => s),
     '',
