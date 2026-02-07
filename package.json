@@ -1,0 +1,44 @@
+{
+  "name": "create-saas-sbk",
+  "version": "0.3.1",
+  "description": "CLI pour générer des projets SaaS Next.js 15+ complets et clés en main",
+  "type": "module",
+  "bin": {
+    "create-saas-sbk": "./bin/create-saas-sbk.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "dev": "node bin/create-saas-sbk.js",
+    "verify": "node scripts/verify.js",
+    "prepublishOnly": "npm run verify"
+  },
+  "keywords": [
+    "saas",
+    "nextjs",
+    "cli",
+    "boilerplate",
+    "starter",
+    "better-auth",
+    "prisma",
+    "stripe"
+  ],
+  "author": "Jerome",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "inquirer": "^9.2.12",
+    "ora": "^8.0.1",
+    "nanoid": "^5.0.4"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

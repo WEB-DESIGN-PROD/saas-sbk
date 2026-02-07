@@ -1,0 +1,26 @@
+# Tests
+*.test.js
+__tests__/
+coverage/
+
+# Development
+.vscode/
+.idea/
+*.log
+
+# Documentation
+docs/
+
+# Git
+.git/
+.gitignore
+
+# Claude
+.claude/
+CLAUDE.md
+
+# Misc
+.DS_Store
+*.swp
+*.swo
+node_modules/

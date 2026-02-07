@@ -1,0 +1,100 @@
+/**
+ * Génère le contenu du fichier package.json pour le projet
+ */
+export function generatePackageJson(config) {
+  const packageJson = {
+    name: config.projectName,
+    version: '0.1.0',
+    private: true,
+    scripts: {
+      dev: 'next dev',
+      build: 'next build',
+      start: 'next start',
+      lint: 'next lint',
+      'db:push': 'prisma db push',
+      'db:migrate': 'prisma migrate dev',
+      'db:studio': 'prisma studio',
+      'db:generate': 'prisma generate'
+    },
+    dependencies: {
+      next: '^15.1.0',
+      react: '^19.0.0',
+      'react-dom': '^19.0.0',
+      'better-auth': '^1.3.0',
+      '@prisma/client': '^6.2.0',
+      'next-themes': '^0.4.6',
+      clsx: '^2.1.1',
+      'tailwind-merge': '^2.6.0',
+      'class-variance-authority': '^0.7.1'
+    },
+    devDependencies: {
+      '@types/node': '^22.10.5',
+      '@types/react': '^19.0.9',
+      '@types/react-dom': '^19.0.5',
+      typescript: '^5.7.3',
+      prisma: '^6.2.0',
+      tailwindcss: '^3.4.17',
+      postcss: '^8.4.49',
+      autoprefixer: '^10.4.20',
+      eslint: '^9.18.0',
+      'eslint-config-next': '^15.1.0'
+    }
+  };
+
+  // Ajouter docker scripts si nécessaire
+  if (config.database.type === 'docker' || (config.storage.enabled && config.storage.type === 'minio')) {
+    packageJson.scripts['docker:up'] = 'docker compose up -d';
+    packageJson.scripts['docker:down'] = 'docker compose down';
+    packageJson.scripts['docker:logs'] = 'docker compose logs -f';
+  }
+
+  // Dépendances selon configuration
+
+  // Stripe
+  if (config.payments.enabled) {
+    packageJson.dependencies.stripe = '^17.6.0';
+    packageJson.dependencies['@stripe/stripe-js'] = '^5.3.0';
+  }
+
+  // Resend
+  if (config.email.provider === 'resend') {
+    packageJson.dependencies.resend = '^4.0.3';
+  } else if (config.email.provider === 'smtp') {
+    packageJson.dependencies.nodemailer = '^6.9.16';
+    packageJson.devDependencies['@types/nodemailer'] = '^6.4.17';
+  }
+
+  // Storage S3
+  if (config.storage.enabled && config.storage.type === 's3') {
+    packageJson.dependencies['@aws-sdk/client-s3'] = '^3.716.0';
+    packageJson.dependencies['@aws-sdk/s3-request-presigner'] = '^3.716.0';
+  }
+
+  // Storage MinIO
+  if (config.storage.enabled && config.storage.type === 'minio') {
+    packageJson.dependencies.minio = '^8.0.2';
+  }
+
+  // AI providers
+  if (config.ai.provider === 'claude') {
+    packageJson.dependencies['@anthropic-ai/sdk'] = '^0.35.0';
+  } else if (config.ai.provider === 'openai') {
+    packageJson.dependencies.openai = '^4.77.3';
+  } else if (config.ai.provider === 'gemini') {
+    packageJson.dependencies['@google/generative-ai'] = '^0.24.0';
+  }
+
+  // i18n (optionnel, pour v2)
+  if (config.i18n.languages.length > 1) {
+    packageJson.dependencies['next-intl'] = '^3.29.0';
+  }
+
+  // Shadcn UI components (ajoutés progressivement)
+  packageJson.dependencies['@radix-ui/react-slot'] = '^1.1.1';
+  packageJson.dependencies['@radix-ui/react-dropdown-menu'] = '^2.1.4';
+  packageJson.dependencies['@radix-ui/react-dialog'] = '^1.1.4';
+  packageJson.dependencies['@radix-ui/react-label'] = '^2.1.1';
+  packageJson.dependencies['lucide-react'] = '^0.469.0';
+
+  return JSON.stringify(packageJson, null, 2);
+}
