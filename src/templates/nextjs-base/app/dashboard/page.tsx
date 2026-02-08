@@ -1,16 +1,13 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
-export default function DashboardPage() {
-  // TODO: Récupérer les données utilisateur depuis la session
-  // const session = await auth()
-  // const user = session?.user
-
+// Page dashboard simple SANS appels auth
+export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Tableau de bord</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Bienvenue !</h1>
         <p className="text-muted-foreground">
-          Bienvenue sur votre espace personnel
+          Voici votre tableau de bord personnel
         </p>
       </div>
 

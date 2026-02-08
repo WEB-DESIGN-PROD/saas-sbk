@@ -12,7 +12,7 @@ export function generateClaudeReadme(config) {
     '## Configuration choisie',
     '',
     '### Frontend & Backend',
-    '- **Next.js 15+** avec App Router',
+    '- **Next.js 16+** avec App Router',
     '- **React 19** avec Server Components',
     '- **TypeScript** pour la sécurité des types',
     '- **Tailwind CSS** pour le styling',

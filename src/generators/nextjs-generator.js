@@ -343,7 +343,7 @@ Consultez \`.claude/README.md\` pour la documentation complète de la stack tech
 
 ## Stack
 
-- Next.js 15+ (App Router)
+- Next.js 16+ (App Router)
 - React 19
 - Better Auth
 - Prisma + PostgreSQL

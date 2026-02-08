@@ -41,7 +41,6 @@ export default function LoginPage() {
 
       // Rediriger vers le dashboard après connexion réussie
       router.push("/dashboard")
-      router.refresh()
     } catch (error: any) {
       console.error("Login error:", error)
       toast.error("Erreur de connexion", {

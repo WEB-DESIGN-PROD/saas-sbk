@@ -13,7 +13,7 @@ function generateClaudeMd(config, installedSkills) {
     '',
     '## Stack technique',
     '',
-    '- **Next.js 15+** avec App Router',
+    '- **Next.js 16+** avec App Router',
     '- **React 19** avec Server Components',
     '- **Better Auth** pour l\'authentification',
     '- **Prisma** + **PostgreSQL**',

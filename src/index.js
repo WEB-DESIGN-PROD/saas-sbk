@@ -21,7 +21,7 @@ import chalk from 'chalk';
  */
 function showHelp() {
   console.log(chalk.bold('\n🚀 create-saas-sbk\n'));
-  console.log('Générateur de projets SaaS Next.js 15+ complets et clés en main\n');
+  console.log('Générateur de SaaS Next.js\n');
 
   console.log(chalk.bold('Usage:'));
   console.log('  npx create-saas-sbk@latest');
@@ -32,7 +32,7 @@ function showHelp() {
   console.log('  -v, --version   Afficher la version\n');
 
   console.log(chalk.bold('Fonctionnalités:'));
-  console.log('  ✓ Next.js 15+ avec App Router');
+  console.log('  ✓ Next.js 16+ avec App Router');
   console.log('  ✓ Better Auth (email, GitHub OAuth, Magic Link)');
   console.log('  ✓ Prisma + PostgreSQL (Docker ou distant)');
   console.log('  ✓ Stripe pour les paiements');
@@ -84,7 +84,7 @@ _____ \\__  /| |_  /| |____ \\     _____ \\__  __  |_  ,<
 ____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
 /____/ /_/  |_/_/  |_/____/      /____/ /_____/ /_/ |_|
   `));
-  console.log(chalk.gray('       Générateur de projets SaaS Next.js 15+ complets'));
+  console.log(chalk.gray('       Générateur de SaaS Next.js'));
   console.log('');
 
   try {
@@ -175,31 +175,38 @@ ____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
     logger.title('🎉 Votre SaaS est prêt !');
     logger.newline();
 
-    console.log(chalk.bold('Pour démarrer :'));
+    console.log(chalk.bold('🚀 Première fois - Démarrer le projet :'));
     console.log('');
     console.log(chalk.cyan(`  cd ${config.projectName}`));
 
     if (config.database.type === 'docker' || (config.storage.enabled && config.storage.type === 'minio')) {
-      console.log(chalk.cyan('  npm run docker:up'));
+      console.log(chalk.cyan('  npm run docker:up    ') + chalk.gray('# Démarre PostgreSQL'));
     }
 
-    console.log(chalk.cyan('  npm run db:push'));
-    console.log(chalk.cyan('  npm run dev'));
+    console.log(chalk.cyan('  npm run db:push      ') + chalk.gray('# Crée les tables'));
+    console.log(chalk.cyan('  npm run dev          ') + chalk.gray('# Lance le serveur'));
     console.log('');
 
-    console.log(chalk.bold('Ensuite :'));
+    if (config.database.type === 'docker') {
+      console.log(chalk.bold('🔄 Prochaines fois (après redémarrage) :'));
+      console.log('');
+      console.log(chalk.cyan('  npm run docker:up    ') + chalk.gray('# Redémarre PostgreSQL (données conservées ✅)'));
+      console.log(chalk.cyan('  npm run dev          ') + chalk.gray('# Lance le serveur (pas besoin de db:push)'));
+      console.log('');
+    }
+
+    console.log(chalk.bold('📖 Ressources :'));
     console.log('');
-    console.log('  • Ouvrez ' + chalk.cyan('http://localhost:3000'));
-    console.log('  • Consultez ' + chalk.cyan('.claude/README.md') + ' pour la documentation');
+    console.log('  • Interface : ' + chalk.cyan('http://localhost:3000'));
+    console.log('  • Workflow de développement : ' + chalk.cyan('DEVELOPMENT.md'));
+    console.log('  • Documentation technique : ' + chalk.cyan('.claude/README.md'));
 
     if (config.claude.cliInstalled) {
-      console.log('  • Utilisez ' + chalk.cyan('/generate-features') + ' pour générer des fonctionnalités');
+      console.log('  • Générer des fonctionnalités : ' + chalk.cyan('/generate-features'));
     }
 
     console.log('');
-    console.log(chalk.gray('📚 Documentation complète dans ./README.md'));
-    console.log('');
-    console.log(chalk.green('Bon développement ! 🚀'));
+    console.log(chalk.green('✨ Bon développement ! 🚀'));
     console.log('');
 
   } catch (error) {

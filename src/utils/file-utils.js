@@ -40,6 +40,11 @@ export function copyFile(src, dest, replacements = {}) {
     content = content.replace(regex, value);
   }
 
+  // Remplacer "Mon SaaS" par le nom du projet (permet au template d'être testable)
+  if (replacements.PROJECT_NAME) {
+    content = content.replace(/Mon SaaS/g, replacements.PROJECT_NAME);
+  }
+
   fs.writeFileSync(dest, content, 'utf-8');
 }
 

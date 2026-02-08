@@ -1,6 +1,6 @@
 # Next.js Best Practices
 
-Expert Next.js 15+ avec App Router et Server Components.
+Expert Next.js 16+ avec App Router et Server Components.
 
 ## Expertise
 

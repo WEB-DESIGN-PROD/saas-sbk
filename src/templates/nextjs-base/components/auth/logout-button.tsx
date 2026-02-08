@@ -13,7 +13,6 @@ export function LogoutButton() {
       await signOut()
       toast.success("Déconnexion réussie")
       router.push("/")
-      router.refresh()
     } catch (error) {
       console.error("Erreur de déconnexion:", error)
       toast.error("Échec de la déconnexion")

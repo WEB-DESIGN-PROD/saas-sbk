@@ -125,7 +125,7 @@ export default function AboutPage() {
                     >
                       <path d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span className="text-sm">Next.js 15+</span>
+                    <span className="text-sm">Next.js 16+</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <svg

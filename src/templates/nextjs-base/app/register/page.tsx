@@ -83,7 +83,6 @@ export default function RegisterPage() {
       // Rediriger vers le dashboard après inscription réussie
       setTimeout(() => {
         router.push("/dashboard")
-        router.refresh()
       }, 500)
     } catch (error: any) {
       console.error("❌ Exception lors de l'inscription:", error)
