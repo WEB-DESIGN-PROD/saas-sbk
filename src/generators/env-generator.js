@@ -83,14 +83,16 @@ export function generateEnvFile(config) {
   lines.push('');
 
   // AI
-  if (config.ai.provider !== 'none') {
-    lines.push('# Intelligence Artificielle');
-    if (config.ai.provider === 'claude') {
-      lines.push(`ANTHROPIC_API_KEY="${sanitizeForEnv(config.ai.apiKey)}"`);
-    } else if (config.ai.provider === 'openai') {
-      lines.push(`OPENAI_API_KEY="${sanitizeForEnv(config.ai.apiKey)}"`);
-    } else if (config.ai.provider === 'gemini') {
-      lines.push(`GOOGLE_API_KEY="${sanitizeForEnv(config.ai.apiKey)}"`);
+  if (config.ai.providers.length > 0) {
+    lines.push('# Intelligence Artificielle pour utilisateurs finaux');
+    if (config.ai.providers.includes('claude') && config.ai.claudeApiKey) {
+      lines.push(`ANTHROPIC_API_KEY="${sanitizeForEnv(config.ai.claudeApiKey)}"`);
+    }
+    if (config.ai.providers.includes('openai') && config.ai.openaiApiKey) {
+      lines.push(`OPENAI_API_KEY="${sanitizeForEnv(config.ai.openaiApiKey)}"`);
+    }
+    if (config.ai.providers.includes('gemini') && config.ai.geminiApiKey) {
+      lines.push(`GOOGLE_API_KEY="${sanitizeForEnv(config.ai.geminiApiKey)}"`);
     }
     lines.push('');
   }

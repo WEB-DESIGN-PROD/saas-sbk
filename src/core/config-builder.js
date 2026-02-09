@@ -64,8 +64,10 @@ export function buildConfig(answers) {
 
     // AI
     ai: {
-      provider: answers.aiProvider || 'none',
-      apiKey: answers.aiApiKey || ''
+      providers: answers.aiProviders || [],
+      claudeApiKey: answers.claudeApiKey || '',
+      openaiApiKey: answers.openaiApiKey || '',
+      geminiApiKey: answers.geminiApiKey || ''
     },
 
     // Claude Code

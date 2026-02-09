@@ -1,6 +1,6 @@
 # create-saas-sbk
 
-CLI npm pour générer des projets SaaS Next.js 15+ complets et clés en main.
+CLI npm pour générer des projets SaaS Next.js 16+ complets et clés en main.
 
 ## Installation et utilisation
 
@@ -16,26 +16,28 @@ npx create-saas-sbk@latest
 
 ## Fonctionnalités
 
-✅ **Installation interactive** - Questions guidées pour configurer votre projet
-✅ **Next.js 15+** - App Router, React 19, TypeScript
+✅ **Installation interactive** - Questions guidées avec instructions en français
+✅ **Next.js 16+** - App Router, React 19, TypeScript, Turbopack
 ✅ **Better Auth** - Email/password, OAuth GitHub, Magic Link
-✅ **Prisma + PostgreSQL** - ORM moderne avec migrations
-✅ **Stripe** - Paiements et abonnements
-✅ **Resend/SMTP** - Envoi d'emails transactionnels
-✅ **AWS S3 / MinIO** - Stockage de fichiers médias
+✅ **Bases de données multiples** - PostgreSQL, MongoDB, SQLite (ou ignorer pour plus tard)
+✅ **Prisma** - ORM moderne avec migrations
+✅ **Stripe** - Paiements et abonnements (optionnel)
+✅ **Resend/SMTP** - Envoi d'emails transactionnels (ou ignorer)
+✅ **AWS S3 / MinIO** - Stockage de fichiers médias (optionnel)
 ✅ **Shadcn UI + Tailwind** - Interface moderne et responsive
-✅ **i18n** - Support multilingue
-✅ **Intégration IA** - Claude, ChatGPT, Gemini
-✅ **Docker ready** - PostgreSQL et MinIO en local
+✅ **i18n** - Support multilingue (FR, EN, ES, DE)
+✅ **Intégration IA** - Claude, ChatGPT, Gemini (choix multiples possibles)
+✅ **Docker ready** - PostgreSQL, MongoDB et MinIO en local
 ✅ **Claude Code** - Skills et agents pré-installés
+✅ **Mode flexible** - Possibilité d'ignorer DB/Auth pour configurer plus tard
 
 ## Stack technique
 
 ### Frontend & Backend
-- **Next.js 15+** avec App Router
+- **Next.js 16.1.6+** avec App Router et Turbopack
 - **React 19** avec Server Components
 - **TypeScript** pour la sécurité des types
-- **Tailwind CSS** + **Shadcn UI**
+- **Tailwind CSS** + **Shadcn UI** - Nouveau template dashboard moderne
 
 ### Authentification
 - **Better Auth** - Authentification moderne et flexible
@@ -44,9 +46,12 @@ npx create-saas-sbk@latest
 - Magic Link (lien par email)
 
 ### Base de données
-- **PostgreSQL** - Base de données relationnelle
+- **PostgreSQL** - Local Docker ou distant (Neon, Supabase)
+- **MongoDB** - Local Docker ou distant (Atlas)
+- **SQLite** - Fichier local, idéal pour prototypage
+- **Ignorer pour l'instant** - Configuration possible plus tard
 - **Prisma** - ORM TypeScript avec migrations
-- Support Docker local ou base distante (Neon, Supabase)
+- **Mongoose** - Pour MongoDB (à venir)
 
 ### Paiements
 - **Stripe** en mode test
@@ -212,23 +217,36 @@ src/
 
 ## Roadmap
 
-### Phase 1 (actuelle) ✅
-- CLI interactif complet
-- Génération de projet fonctionnel
-- Installation automatique des skills
-- Support Docker
+📍 **Version actuelle : v0.4.5** (9 février 2026)
 
-### Phase 2 (à venir)
-- Templates Next.js complets (pages, composants)
+### ✅ Phase 1 - CLI Interactif (TERMINÉE)
+- ✅ CLI interactif avec questions guidées en français
+- ✅ Génération de projet Next.js 16+ fonctionnel
+- ✅ Installation automatique des skills Claude Code
+- ✅ Support multi-bases de données (PostgreSQL, MongoDB, SQLite)
+- ✅ Mode flexible (possibilité d'ignorer DB/Auth)
+- ✅ Docker Compose pour services locaux
+- ✅ Nouveau dashboard template moderne
+
+### 🚧 Phase 2 - Templates Complets (EN COURS - 30%)
+- 🚧 Templates Next.js complets (landing, dashboard, auth)
+- 🚧 Templates multilingues (FR, EN, ES, DE)
+- 🚧 Template sans système de connexion
+- 📅 Configuration MongoDB et SQLite complète
+- 📅 Migration vers @clack/prompts pour UX améliorée
+
+### 📅 Phase 3 - Génération IA (PLANIFIÉE)
 - Commande `/generate-features` pour génération IA
 - Agents spécialisés (dev, sécurité, SEO, perf)
-- Templates de features (blog, e-commerce, CRM)
+- Templates de features (blog, e-commerce, CRM, chat)
 
-### Phase 3 (future)
+### 💭 Phase 4 - Écosystème (VISION)
 - Interface web pour la configuration
-- Marketplace de features
+- Marketplace de features communautaires
 - Templates personnalisables
-- Intégrations tierces
+- Intégrations tierces (Vercel, GitHub Actions, monitoring)
+
+📄 **Voir [ROADMAP.md](./ROADMAP.md) pour les détails complets**
 
 ## Contribution
 

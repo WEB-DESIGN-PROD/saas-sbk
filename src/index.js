@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import { logger } from './utils/logger.js';
 import { exists } from './utils/file-utils.js';
-import { askQuestions } from './core/questions.js';
+import { askQuestions } from './core/questions-v2.js';
 import { buildConfig } from './core/config-builder.js';
 import { showSummaryAndConfirm } from './core/summary.js';
 import { generateEnvFile } from './generators/env-generator.js';
@@ -127,13 +127,11 @@ ____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
     generateNextjsProject(projectPath, config);
 
     // 2. Générer package.json
-    logger.step('Génération du package.json...');
     const packageJsonContent = generatePackageJson(config);
     writeFile(path.join(projectPath, 'package.json'), packageJsonContent);
     logger.success('package.json créé');
 
     // 3. Générer .env
-    logger.step('Génération du fichier .env...');
     const envContent = generateEnvFile(config);
     writeFile(path.join(projectPath, '.env'), envContent);
     logger.success('.env créé');
@@ -141,13 +139,11 @@ ____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
     // 4. Générer docker-compose.yml (si nécessaire)
     const dockerContent = generateDockerCompose(config);
     if (dockerContent) {
-      logger.step('Génération du docker-compose.yml...');
       writeFile(path.join(projectPath, 'docker-compose.yml'), dockerContent);
       logger.success('docker-compose.yml créé');
     }
 
     // 5. Générer .claude/README.md et créer les dossiers skills/agents
-    logger.step('Génération de la documentation Claude...');
     const claudeReadme = generateClaudeReadme(config);
     writeFile(path.join(projectPath, '.claude/README.md'), claudeReadme);
 
@@ -155,7 +151,7 @@ ____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
     fs.mkdirSync(path.join(projectPath, '.claude/skills'), { recursive: true });
     fs.mkdirSync(path.join(projectPath, '.claude/agents'), { recursive: true });
 
-    logger.success('.claude/README.md créé + dossiers skills/agents');
+    logger.success('.claude/README.md créé');
 
     // 6. Installer les dépendances
     logger.newline();

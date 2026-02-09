@@ -92,11 +92,13 @@ export function generatePackageJson(config) {
   }
 
   // AI providers
-  if (config.ai.provider === 'claude') {
+  if (config.ai.providers.includes('claude')) {
     packageJson.dependencies['@anthropic-ai/sdk'] = '^0.35.0';
-  } else if (config.ai.provider === 'openai') {
+  }
+  if (config.ai.providers.includes('openai')) {
     packageJson.dependencies.openai = '^4.77.3';
-  } else if (config.ai.provider === 'gemini') {
+  }
+  if (config.ai.providers.includes('gemini')) {
     packageJson.dependencies['@google/generative-ai'] = '^0.24.0';
   }
 

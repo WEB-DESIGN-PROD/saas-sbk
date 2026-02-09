@@ -11,8 +11,6 @@ const __dirname = path.dirname(__filename);
  * Copie les templates Next.js et génère les fichiers de configuration
  */
 export function generateNextjsProject(projectPath, config) {
-  logger.step('Génération du projet Next.js...');
-
   // Chemin vers les templates
   const templatesDir = path.join(__dirname, '../templates');
   const nextjsBaseDir = path.join(templatesDir, 'nextjs-base');
@@ -27,10 +25,8 @@ export function generateNextjsProject(projectPath, config) {
   // Copier le template de base
   try {
     copyDirectory(nextjsBaseDir, projectPath, replacements);
-    logger.info('  → Templates copiés');
   } catch (error) {
     // Si le template n'existe pas encore, créer la structure minimale
-    logger.warn('  → Templates non trouvés, création de la structure minimale');
 
     const dirs = [
       'app',
@@ -101,7 +97,6 @@ function copyConditionalVariants(projectPath, config) {
     if (fs.existsSync(githubButtonSrc)) {
       fs.mkdirSync(path.dirname(githubButtonDest), { recursive: true });
       fs.copyFileSync(githubButtonSrc, githubButtonDest);
-      logger.info('  → GitHub OAuth button ajouté');
     }
   }
 
@@ -113,7 +108,6 @@ function copyConditionalVariants(projectPath, config) {
     if (fs.existsSync(billingSrc)) {
       fs.mkdirSync(path.dirname(billingDest), { recursive: true });
       fs.copyFileSync(billingSrc, billingDest);
-      logger.info('  → Page de facturation ajoutée');
     }
   }
 }

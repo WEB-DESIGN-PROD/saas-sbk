@@ -79,15 +79,16 @@ export function generateClaudeReadme(config) {
   lines.push(`- Langues supportées: ${config.i18n.languages.join(', ')}`);
   lines.push('');
 
-  if (config.ai.provider !== 'none') {
-    lines.push('### Intelligence Artificielle');
+  if (config.ai.providers.length > 0) {
+    lines.push('### Intelligence Artificielle pour utilisateurs finaux');
     const providerNames = {
       claude: 'Claude (Anthropic)',
       openai: 'ChatGPT (OpenAI)',
       gemini: 'Gemini (Google)'
     };
-    lines.push(`- Provider: ${providerNames[config.ai.provider]}`);
-    lines.push('- Prêt pour intégration de features IA');
+    const selectedProviders = config.ai.providers.map(p => providerNames[p]).join(', ');
+    lines.push(`- Providers: ${selectedProviders}`);
+    lines.push('- Prêt pour intégration de features IA pour vos utilisateurs');
     lines.push('');
   }
 

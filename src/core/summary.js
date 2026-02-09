@@ -19,7 +19,7 @@ function maskSensitive(value) {
  */
 export async function showSummaryAndConfirm(config) {
   logger.newline();
-  logger.title('📋 Récapitulatif de votre configuration');
+  logger.title('📋 Récap\' de votre SAAS');
 
   console.log(chalk.bold('Projet:'));
   console.log(`  Nom: ${chalk.cyan(config.projectName)}`);
@@ -55,10 +55,14 @@ export async function showSummaryAndConfirm(config) {
   }
 
   console.log(chalk.bold('Emails:'));
-  console.log(`  Provider: ${chalk.cyan(config.email.provider === 'resend' ? 'Resend' : 'SMTP')}`);
-  if (config.email.provider === 'smtp') {
-    console.log(`  Hôte: ${chalk.cyan(config.email.smtpHost)}`);
-    console.log(`  Port: ${chalk.cyan(config.email.smtpPort)}`);
+  if (config.email.provider === 'skip') {
+    console.log(`  Provider: ${chalk.yellow('À configurer plus tard ⏭️')}`);
+  } else {
+    console.log(`  Provider: ${chalk.cyan(config.email.provider === 'resend' ? 'Resend 📮' : 'SMTP 📧')}`);
+    if (config.email.provider === 'smtp') {
+      console.log(`  Hôte: ${chalk.cyan(config.email.smtpHost)}`);
+      console.log(`  Port: ${chalk.cyan(config.email.smtpPort)}`);
+    }
   }
   logger.newline();
 
@@ -78,9 +82,9 @@ export async function showSummaryAndConfirm(config) {
   }
   logger.newline();
 
-  if (config.ai.provider !== 'none') {
-    console.log(chalk.bold('Intelligence Artificielle:'));
-    console.log(`  Provider: ${chalk.cyan(config.ai.provider)}`);
+  if (config.ai.providers.length > 0) {
+    console.log(chalk.bold('Intelligence Artificielle pour utilisateurs finaux:'));
+    console.log(`  Providers: ${chalk.cyan(config.ai.providers.join(', '))}`);
     logger.newline();
   }
 
@@ -99,6 +103,7 @@ export async function showSummaryAndConfirm(config) {
   ]);
 
   if (!confirmed) {
+    console.log(chalk.gray('💡 Flèches ↑↓ = naviguer • Entrée = valider\n'));
     const { action } = await inquirer.prompt([
       {
         type: 'list',
