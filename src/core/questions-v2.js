@@ -92,7 +92,7 @@ function showHeader(answers = {}) {
 
   // Afficher les réponses validées sur 2 colonnes
   if (Object.keys(answers).length > 0) {
-    console.log(chalk.gray('━━━ Vos choix ━━━'));
+    console.log(chalk.gray('━━━ Récap\' de votre SAAS ━━━'));
 
     const leftChoices = [];
     const rightChoices = [];
@@ -804,9 +804,16 @@ export async function askQuestions() {
     process.exit(0);
   }
 
-  // Si "none" est sélectionné, vider le tableau
+  // Si "none" est sélectionné avec d'autres langues, retirer "none"
+  // Si seulement "none", vider le tableau
   if (i18nLanguages.includes('none')) {
-    answers.i18nLanguages = [];
+    if (i18nLanguages.length > 1) {
+      // Retirer "none" et garder les autres langues
+      answers.i18nLanguages = i18nLanguages.filter(lang => lang !== 'none');
+    } else {
+      // Seulement "none" sélectionné = aucune langue supplémentaire
+      answers.i18nLanguages = [];
+    }
   } else {
     answers.i18nLanguages = i18nLanguages;
   }
@@ -832,9 +839,16 @@ export async function askQuestions() {
     process.exit(0);
   }
 
-  // Si "none" est sélectionné, vider le tableau
+  // Si "none" est sélectionné avec d'autres IA, retirer "none"
+  // Si seulement "none", vider le tableau
   if (aiProviders.includes('none')) {
-    answers.aiProviders = [];
+    if (aiProviders.length > 1) {
+      // Retirer "none" et garder les autres IA
+      answers.aiProviders = aiProviders.filter(provider => provider !== 'none');
+    } else {
+      // Seulement "none" sélectionné = aucune IA
+      answers.aiProviders = [];
+    }
   } else {
     answers.aiProviders = aiProviders;
   }
