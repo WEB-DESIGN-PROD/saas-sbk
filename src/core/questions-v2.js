@@ -85,7 +85,7 @@ function showHeader(answers = {}) {
     const leftChoices = [];
     const rightChoices = [];
 
-    // Colonne gauche
+    // Colonne gauche : Projet, Thème, BDD, Auth, Stockage
     if (answers.projectName) {
       leftChoices.push(chalk.green(figures.tick) + ' Projet : ' + chalk.cyan(answers.projectName));
     }
@@ -114,19 +114,16 @@ function showHeader(answers = {}) {
       const authDisplay = answers.authMethods.map(m => methodNames[m] || m).join(' + ');
       leftChoices.push(chalk.green(figures.tick) + ' Auth : ' + chalk.cyan(authDisplay));
     }
-    if (answers.claudeCodeInstalled !== undefined) {
-      leftChoices.push(chalk.green(figures.tick) + ' Claude Code : ' + chalk.cyan(answers.claudeCodeInstalled ? 'Oui ✓' : 'Non'));
-    }
-
-    // Colonne droite
     if (answers.storageEnabled !== undefined) {
       let storageDisplay = 'Désactivé';
       if (answers.storageEnabled) {
         if (answers.storageType === 'minio') storageDisplay = 'MinIO 🐳';
         else if (answers.storageType === 's3') storageDisplay = 'AWS S3 ☁️';
       }
-      rightChoices.push(chalk.green(figures.tick) + ' Stockage : ' + chalk.cyan(storageDisplay));
+      leftChoices.push(chalk.green(figures.tick) + ' Stockage : ' + chalk.cyan(storageDisplay));
     }
+
+    // Colonne droite : Email, Paiements, I18n, IA, Claude Code
     if (answers.emailProvider !== undefined) {
       let provider = 'Plus tard';
       if (answers.emailProvider === 'resend') {
@@ -151,6 +148,9 @@ function showHeader(answers = {}) {
       const aiDisplay = answers.aiProviders.length === 0 ? 'Aucune' :
                        answers.aiProviders.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(', ');
       rightChoices.push(chalk.green(figures.tick) + ' IA : ' + chalk.cyan(aiDisplay));
+    }
+    if (answers.claudeCodeInstalled !== undefined) {
+      rightChoices.push(chalk.green(figures.tick) + ' Claude Code : ' + chalk.cyan(answers.claudeCodeInstalled ? 'Oui ✓' : 'Non'));
     }
 
     // Afficher sur 2 colonnes
