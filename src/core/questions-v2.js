@@ -299,8 +299,8 @@ export async function askQuestions() {
 
     showHeader(answers);
     const databasePassword = await p.password({
-      message: 'Mot de passe PostgreSQL',
-      placeholder: 'postgres',
+      message: 'Mot de passe PostgreSQL (défaut: postgres)',
+      initialValue: 'postgres',
       validate: (value) => {
         const result = validatePassword(value);
         return result === true ? undefined : result;
