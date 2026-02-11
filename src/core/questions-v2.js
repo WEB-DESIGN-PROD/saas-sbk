@@ -102,8 +102,17 @@ function showHeader(answers = {}) {
 
       leftChoices.push(chalk.green(figures.tick) + ' Base de données : ' + chalk.cyan(dbDisplay));
     }
-    if (answers.authMethods) {
-      leftChoices.push(chalk.green(figures.tick) + ' Auth : ' + chalk.cyan(answers.authMethods.length + ' méthode(s)'));
+    if (answers.authMethods && answers.authMethods.length > 0) {
+      // Afficher les noms des méthodes
+      const methodNames = {
+        'email': 'Email',
+        'github': 'GitHub',
+        'google': 'Google',
+        'magiclink': 'Magic Link',
+        'otp': 'OTP'
+      };
+      const authDisplay = answers.authMethods.map(m => methodNames[m] || m).join(' + ');
+      leftChoices.push(chalk.green(figures.tick) + ' Auth : ' + chalk.cyan(authDisplay));
     }
     if (answers.claudeCodeInstalled !== undefined) {
       leftChoices.push(chalk.green(figures.tick) + ' Claude Code : ' + chalk.cyan(answers.claudeCodeInstalled ? 'Oui ✓' : 'Non'));
