@@ -26,12 +26,24 @@ const version = packageJson.version;
 
 /**
  * Centre une ligne de texte dans le terminal
+ * Gère automatiquement les codes ANSI et s'adapte au redimensionnement
  */
-function centerText(text, stripAnsi = false) {
-  const terminalWidth = process.stdout.columns || 80;
-  const textLength = stripAnsi ? text.replace(/\u001b\[[0-9;]*m/g, '').length : text.length;
-  const padding = Math.max(0, Math.floor((terminalWidth - textLength) / 2));
-  return ' '.repeat(padding) + text;
+function centerText(text) {
+  // Utiliser la largeur actuelle du terminal avec fallback
+  const terminalWidth = Math.max(process.stdout.columns || 80, 40);
+
+  // Nettoyer tous les codes ANSI et séquences d'échappement pour calculer la longueur réelle
+  const cleanText = text.replace(/\u001b\[[0-9;]*m/g, '').replace(/\u001b\]8;;.*?\u001b\\/g, '');
+  const textLength = cleanText.length;
+
+  // Si le texte est plus large que le terminal, ne pas centrer
+  if (textLength >= terminalWidth) {
+    return text;
+  }
+
+  // Calculer le padding pour centrer
+  const padding = Math.floor((terminalWidth - textLength) / 2);
+  return ' '.repeat(Math.max(0, padding)) + text;
 }
 
 /**
@@ -59,7 +71,7 @@ function showHeader(answers = {}) {
 
   console.log('');
   logoLines.forEach(line => {
-    console.log(centerText(chalk.cyan(line), true));
+    console.log(centerText(chalk.cyan(line)));
   });
   console.log('');
 
@@ -74,7 +86,7 @@ function showHeader(answers = {}) {
   const padding = Math.max(0, Math.floor((terminalWidth - baseline2VisibleText.length) / 2));
   const baseline2 = ' '.repeat(padding) + chalk.gray('Signaler un problème sur ') + githubLink;
 
-  console.log(centerText(baseline1, true));
+  console.log(centerText(baseline1));
   console.log(baseline2);
   console.log('');
 
