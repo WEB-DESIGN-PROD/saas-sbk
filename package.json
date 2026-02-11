@@ -30,9 +30,9 @@
   "author": "Jerome",
   "license": "MIT",
   "dependencies": {
+    "@clack/prompts": "^1.0.0",
     "chalk": "^5.3.0",
     "figures": "^6.1.0",
-    "inquirer": "^9.2.12",
     "nanoid": "^5.0.4",
     "ora": "^8.0.1"
   },

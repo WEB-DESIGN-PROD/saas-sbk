@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import inquirer from 'inquirer';
+import * as p from '@clack/prompts';
 import { logger } from '../utils/logger.js';
 
 /**
@@ -93,30 +93,31 @@ export async function showSummaryAndConfirm(config) {
   logger.newline();
 
   // Demander confirmation
-  const { confirmed } = await inquirer.prompt([
-    {
-      type: 'confirm',
-      name: 'confirmed',
-      message: 'Confirmer et générer le projet ?',
-      default: true
-    }
-  ]);
+  const confirmed = await p.confirm({
+    message: 'Confirmer et générer le projet ?',
+    initialValue: true
+  });
+
+  if (p.isCancel(confirmed)) {
+    p.cancel('Installation annulée.');
+    return 'cancel';
+  }
 
   if (!confirmed) {
-    console.log(chalk.gray('💡 Flèches ↑↓ = naviguer • Entrée = valider\n'));
-    const { action } = await inquirer.prompt([
-      {
-        type: 'list',
-        name: 'action',
-        message: 'Que souhaitez-vous faire ?',
-        choices: [
-          { name: 'Recommencer la configuration', value: 'restart' },
-          { name: 'Annuler et quitter', value: 'cancel' }
-        ]
-      }
-    ]);
+    const action = await p.select({
+      message: 'Que souhaitez-vous faire ?',
+      options: [
+        { value: 'restart', label: 'Recommencer la configuration' },
+        { value: 'cancel', label: 'Annuler et quitter' }
+      ]
+    });
 
-    return action === 'restart' ? 'restart' : 'cancel';
+    if (p.isCancel(action)) {
+      p.cancel('Installation annulée.');
+      return 'cancel';
+    }
+
+    return action;
   }
 
   return 'confirmed';
