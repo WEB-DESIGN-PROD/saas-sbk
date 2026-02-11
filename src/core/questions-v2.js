@@ -3,6 +3,7 @@ import chalk from 'chalk';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import figures from 'figures';
 import {
   validateProjectName,
   validatePassword,
@@ -24,25 +25,83 @@ const packageJson = JSON.parse(readFileSync(join(__dirname, '../../package.json'
 const version = packageJson.version;
 
 /**
- * Pose toutes les questions avec l'interface moderne de @clack/prompts
+ * Affiche le logo et les réponses validées de façon compacte
  */
-export async function askQuestions() {
+function showHeader(answers = {}) {
   console.clear();
 
-  // Introduction avec logo
-  p.intro(chalk.cyan(`
+  // Logo ASCII
+  console.log(chalk.cyan(`
  _____________________________    _____________________ __
 __  ___/__    |__    |_  ___/    __  ___/__  __ )__  //_/
 _____ \\__  /| |_  /| |____ \\     _____ \\__  __  |_  ,<
 ____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
 /____/ /_/  |_/_/  |_/____/      /____/ /_____/ /_/ |_|
+  `));
+  console.log(chalk.gray('       Générateur de SaaS Next.js 16'));
+  console.log(chalk.gray(`       v${version}`) + ' • ' + chalk.blue('https://github.com/WEB-DESIGN-PROD/saas-sbk/issues'));
+  console.log('');
 
-${chalk.gray('Générateur de SaaS Next.js 16')}
-${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PROD/saas-sbk/issues')}`));
+  // Afficher les réponses validées de façon compacte
+  if (Object.keys(answers).length > 0) {
+    console.log(chalk.gray('━━━ Vos choix ━━━'));
 
+    if (answers.projectName) {
+      console.log(chalk.green(figures.tick) + ' Projet : ' + chalk.cyan(answers.projectName));
+    }
+    if (answers.theme) {
+      console.log(chalk.green(figures.tick) + ' Thème : ' + chalk.cyan(answers.theme === 'dark' ? 'Sombre 🌙' : 'Clair ☀️'));
+    }
+    if (answers.databaseType) {
+      let dbDisplay = 'Distant ☁️';
+      if (answers.databaseType === 'docker') dbDisplay = 'PostgreSQL 🐳';
+      else if (answers.databaseType === 'skip') dbDisplay = 'Aucune';
+      else if (answers.databaseType === 'mongodb-local') dbDisplay = 'MongoDB 🐳';
+      else if (answers.databaseType === 'mongodb-remote') dbDisplay = 'MongoDB ☁️';
+      else if (answers.databaseType === 'sqlite') dbDisplay = 'SQLite';
+
+      console.log(chalk.green(figures.tick) + ' Base de données : ' + chalk.cyan(dbDisplay));
+    }
+    if (answers.authMethods) {
+      console.log(chalk.green(figures.tick) + ' Auth : ' + chalk.cyan(answers.authMethods.length + ' méthode(s)'));
+    }
+    if (answers.storageEnabled !== undefined) {
+      console.log(chalk.green(figures.tick) + ' Stockage : ' + chalk.cyan(answers.storageEnabled ? 'Activé' : 'Désactivé'));
+    }
+    if (answers.emailProvider !== undefined) {
+      const provider = answers.emailProvider === 'skip' ? 'Plus tard' :
+                      answers.emailProvider === 'resend' ? 'Resend 📮' : 'SMTP 📧';
+      console.log(chalk.green(figures.tick) + ' Email : ' + chalk.cyan(provider));
+    }
+    if (answers.paymentsEnabled !== undefined) {
+      console.log(chalk.green(figures.tick) + ' Paiements : ' + chalk.cyan(answers.paymentsEnabled ? 'Activé 💳' : 'Désactivé'));
+    }
+    if (answers.i18nDefaultLanguage) {
+      const totalLangs = 1 + (answers.i18nLanguages?.length || 0);
+      console.log(chalk.green(figures.tick) + ' I18n : ' + chalk.cyan(totalLangs + ' langue(s) 🌍'));
+    }
+    if (answers.aiProviders) {
+      console.log(chalk.green(figures.tick) + ' IA : ' + chalk.cyan(
+        answers.aiProviders.length === 0 ? 'Aucune' : answers.aiProviders.join(', ')
+      ));
+    }
+    if (answers.claudeCodeInstalled !== undefined) {
+      console.log(chalk.green(figures.tick) + ' Claude Code : ' + chalk.cyan(answers.claudeCodeInstalled ? 'Oui ✓' : 'Non'));
+    }
+
+    console.log(chalk.gray('━━━━━━━━━━━━━━━━━━━'));
+    console.log('');
+  }
+}
+
+/**
+ * Pose toutes les questions avec l'interface moderne de @clack/prompts
+ */
+export async function askQuestions() {
   const answers = {};
 
   // 1. Nom du projet
+  showHeader(answers);
   const projectName = await p.text({
     message: 'Nom du projet',
     placeholder: 'my-saas',
@@ -60,6 +119,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
   answers.projectName = projectName;
 
   // 2. Thème
+  showHeader(answers);
   const theme = await p.select({
     message: 'Thème par défaut',
     options: [
@@ -78,6 +138,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
   // 3. Base de données avec boucle pour confirmation si "skip"
   let databaseConfigured = false;
   while (!databaseConfigured) {
+    showHeader(answers);
     const databaseType = await p.select({
       message: 'Configuration de la base de données',
       options: [
@@ -98,7 +159,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
 
     // Si skip, afficher avertissement et demander confirmation
     if (databaseType === 'skip') {
-      console.log('');
+      showHeader(answers);
       console.log(chalk.yellow.bold('⚠️  ATTENTION'));
       console.log(chalk.yellow('Sans base de données, le système d\'authentification automatique'));
       console.log(chalk.yellow('ne pourra pas fonctionner. Vous devrez configurer cela plus tard.'));
@@ -128,6 +189,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
 
   // Questions DB selon le type
   if (answers.databaseType === 'docker') {
+    showHeader(answers);
     const databaseUser = await p.text({
       message: 'Nom d\'utilisateur PostgreSQL',
       placeholder: 'postgres',
@@ -144,6 +206,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
     }
     answers.databaseUser = databaseUser;
 
+    showHeader(answers);
     const databasePassword = await p.password({
       message: 'Mot de passe PostgreSQL',
       placeholder: 'postgres',
@@ -159,6 +222,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
     }
     answers.databasePassword = databasePassword;
 
+    showHeader(answers);
     const databaseName = await p.text({
       message: 'Nom de la base de données',
       placeholder: answers.projectName.replace(/-/g, '_'),
@@ -176,6 +240,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
     answers.databaseName = databaseName;
 
   } else if (answers.databaseType === 'remote') {
+    showHeader(answers);
     p.note(
       chalk.cyan('🔗 Neon:') + ' https://console.neon.tech/\n' +
       chalk.cyan('🔗 Supabase:') + ' https://supabase.com/dashboard/project/_/settings/database',
@@ -200,6 +265,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
     }
     answers.databaseUrl = databaseUrl;
   } else if (answers.databaseType === 'mongodb-remote') {
+    showHeader(answers);
     p.note(
       chalk.cyan('🔗 MongoDB Atlas:') + ' https://cloud.mongodb.com/',
       'Lien utile pour MongoDB distant'
@@ -208,6 +274,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
 
   // 4. Authentification (sauf si base de données ignorée)
   if (!answers.skipAuth) {
+    showHeader(answers);
     p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout • Entrée = valider'), 'Astuce');
 
     const authMethods = await p.multiselect({
@@ -229,6 +296,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
 
     // Questions GitHub OAuth si sélectionné
     if (authMethods.includes('github')) {
+      showHeader(answers);
       p.note(
         chalk.cyan('🔗 Créer une OAuth App:') + ' https://github.com/settings/developers\n' +
         chalk.gray('Callback URL: http://localhost:3000/api/auth/callback/github'),
@@ -249,6 +317,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
       }
       answers.githubClientId = githubClientId;
 
+      showHeader(answers);
       const githubClientSecret = await p.password({
         message: 'GitHub OAuth Client Secret',
         validate: (value) => {
@@ -266,6 +335,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
 
     // Questions Google OAuth si sélectionné
     if (authMethods.includes('google')) {
+      showHeader(answers);
       p.note(
         chalk.cyan('🔗 Console Google Cloud:') + ' https://console.cloud.google.com/apis/credentials\n' +
         chalk.gray('Callback URL: http://localhost:3000/api/auth/callback/google'),
@@ -286,6 +356,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
       }
       answers.googleClientId = googleClientId;
 
+      showHeader(answers);
       const googleClientSecret = await p.password({
         message: 'Google OAuth Client Secret',
         validate: (value) => {
@@ -305,6 +376,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
   }
 
   // 5. Stockage médias
+  showHeader(answers);
   const storageEnabled = await p.select({
     message: 'Activer le stockage de fichiers médias ?',
     options: [
@@ -321,6 +393,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
   answers.storageEnabled = storageEnabled;
 
   if (storageEnabled) {
+    showHeader(answers);
     const storageType = await p.select({
       message: 'Type de stockage',
       options: [
@@ -337,6 +410,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
     answers.storageType = storageType;
 
     if (storageType === 's3') {
+      showHeader(answers);
       const s3AccessKey = await p.text({
         message: 'AWS Access Key ID',
         validate: (value) => {
@@ -351,6 +425,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
       }
       answers.s3AccessKey = s3AccessKey;
 
+      showHeader(answers);
       const s3SecretKey = await p.password({
         message: 'AWS Secret Access Key',
         validate: (value) => {
@@ -365,6 +440,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
       }
       answers.s3SecretKey = s3SecretKey;
 
+      showHeader(answers);
       const s3Region = await p.text({
         message: 'AWS Region',
         placeholder: 'us-east-1',
@@ -377,6 +453,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
       }
       answers.s3Region = s3Region;
 
+      showHeader(answers);
       const s3Bucket = await p.text({
         message: 'Nom du bucket S3',
         validate: (input) => input.trim().length > 0 ? undefined : 'Nom requis'
@@ -391,6 +468,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
   }
 
   // 6. Emails
+  showHeader(answers);
   const emailProvider = await p.select({
     message: 'Service d\'envoi d\'emails',
     options: [
@@ -408,6 +486,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
   answers.emailProvider = emailProvider;
 
   if (emailProvider === 'resend') {
+    showHeader(answers);
     p.note(
       chalk.cyan('🔗 Récupérer votre clé API:') + ' https://resend.com/api-keys',
       'Configuration Resend'
@@ -429,6 +508,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
 
     // Proposer Magic Link ou OTP si Resend est choisi
     if (!answers.skipAuth) {
+      showHeader(answers);
       const additionalAuth = await p.confirm({
         message: 'Ajouter une méthode d\'authentification par email (Magic Link ou OTP) ?',
         initialValue: false
@@ -440,6 +520,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
       }
 
       if (additionalAuth) {
+        showHeader(answers);
         const emailAuthType = await p.select({
           message: 'Type d\'authentification par email',
           options: [
@@ -462,6 +543,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
     }
 
   } else if (emailProvider === 'smtp') {
+    showHeader(answers);
     const smtpHost = await p.text({
       message: 'Hôte SMTP',
       validate: (value) => {
@@ -476,6 +558,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
     }
     answers.smtpHost = smtpHost;
 
+    showHeader(answers);
     const smtpPort = await p.text({
       message: 'Port SMTP',
       placeholder: '587',
@@ -492,6 +575,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
     }
     answers.smtpPort = smtpPort;
 
+    showHeader(answers);
     const smtpUser = await p.text({
       message: 'Utilisateur SMTP',
       validate: (value) => {
@@ -506,6 +590,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
     }
     answers.smtpUser = smtpUser;
 
+    showHeader(answers);
     const smtpPassword = await p.password({
       message: 'Mot de passe SMTP',
       validate: (value) => {
@@ -522,6 +607,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
   }
 
   // 7. Paiements
+  showHeader(answers);
   const paymentsEnabled = await p.select({
     message: 'Activer les paiements Stripe ?',
     options: [
@@ -538,6 +624,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
   answers.paymentsEnabled = paymentsEnabled;
 
   if (paymentsEnabled) {
+    showHeader(answers);
     p.note(
       chalk.cyan('🔗 Récupérer vos clés API:') + ' https://dashboard.stripe.com/test/apikeys\n' +
       chalk.gray('Utiliser les clés de test pour le développement'),
@@ -559,6 +646,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
     }
     answers.stripePublicKey = stripePublicKey;
 
+    showHeader(answers);
     const stripeSecretKey = await p.password({
       message: 'Clé secrète Stripe (sk_test_...)',
       validate: (input) => {
@@ -576,6 +664,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
   }
 
   // 8. Internationalisation - Langue par défaut
+  showHeader(answers);
   const i18nDefaultLanguage = await p.select({
     message: 'Langue par défaut',
     options: [
@@ -609,6 +698,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
     ...availableLanguages
   ];
 
+  showHeader(answers);
   p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout • Entrée = valider'), 'Astuce');
 
   const i18nLanguages = await p.multiselect({
@@ -631,6 +721,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
   }
 
   // 10. IA pour utilisateurs finaux
+  showHeader(answers);
   p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout • Entrée = valider'), 'Astuce');
 
   const aiProviders = await p.multiselect({
@@ -661,6 +752,8 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
   if (answers.aiProviders.length > 0) {
     for (const provider of answers.aiProviders) {
       const providerName = provider === 'claude' ? 'Anthropic' : provider === 'openai' ? 'OpenAI' : 'Google';
+
+      showHeader(answers);
 
       // Afficher le lien pour récupérer la clé API
       if (provider === 'claude') {
@@ -697,6 +790,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
   }
 
   // 11. Claude Code
+  showHeader(answers);
   const claudeCodeInstalled = await p.confirm({
     message: 'Avez-vous Claude Code CLI installé ?',
     initialValue: true
@@ -709,6 +803,7 @@ ${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PRO
   answers.claudeCodeInstalled = claudeCodeInstalled;
 
   // Animation finale
+  showHeader(answers);
   const s = p.spinner();
   s.start('Préparation de votre configuration');
   await new Promise(resolve => setTimeout(resolve, 1500));
