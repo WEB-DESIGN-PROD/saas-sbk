@@ -23,22 +23,6 @@ Ou avec npx :
 npx create-saas-sbk@latest
 ```
 
-## Fonctionnalités
-
-- **Installation interactive** - Questions guidées avec instructions en français
-- **Next.js 16+** - App Router, React 19, TypeScript, Turbopack
-- **Better Auth** - Email/password, OAuth (GitHub + Google), Magic Link/OTP
-- **PostgreSQL** - Local Docker ou distant (Neon, Supabase)
-- **Prisma** - ORM moderne avec migrations
-- **Stripe** - Paiements et abonnements (optionnel)
-- **Resend/SMTP** - Envoi d'emails transactionnels
-- **S3/MinIO** - Stockage de fichiers médias (optionnel)
-- **Shadcn UI + Tailwind** - Interface moderne et responsive
-- **Internationalisation** - Support FR, EN, ES, DE
-- **IA intégrée** - Claude, ChatGPT, Gemini (choix multiples)
-- **Docker ready** - PostgreSQL et MinIO en local
-- **Claude Code** - Skills et agents pré-installés
-
 ## Stack technique
 
 ### Frontend & Backend
