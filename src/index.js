@@ -15,6 +15,7 @@ import { installSkills } from './installers/skills.js';
 import { initClaude } from './installers/claude-init.js';
 import { writeFile } from './utils/file-utils.js';
 import chalk from 'chalk';
+import * as p from '@clack/prompts';
 
 /**
  * Affiche l'aide du CLI
@@ -160,6 +161,7 @@ ____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
     // 7. Récupérer la liste des skills (déjà copiés avec les templates)
     logger.newline();
     const installedSkills = await installSkills(projectPath, config);
+    logger.success('Skills Claude Code générés');
 
     // 8. Générer CLAUDE.md avec les skills installés
     logger.newline();
@@ -186,14 +188,11 @@ ____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
 
     // 2. Lien GitHub
     const githubUrl = 'https://github.com/WEB-DESIGN-PROD/saas-sbk/issues';
-    const githubIcon = ''; // Logo GitHub (Nerd Font)
-    const githubLinkText = `${githubIcon} Signaler un problème`;
-    const githubLink = `\x1b]8;;${githubUrl}\x1b\\${githubLinkText}\x1b]8;;\x1b\\`;
-    console.log('Un problème ? ' + chalk.blue(githubLink));
+    console.log('Un problème ? ' + chalk.cyan.underline(githubUrl));
     console.log('');
 
     // 3. Première fois - Démarrer le projet
-    console.log(chalk.bold('🚀 Première fois - Démarrer le projet :'));
+    console.log(chalk.bold('🚀 Démarrer le projet pour la première fois :'));
     console.log('');
     console.log(chalk.cyan(`  cd ${config.projectName}`));
 
@@ -205,12 +204,13 @@ ____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
     console.log(chalk.cyan('  npm run dev          ') + chalk.gray('# Lance le serveur'));
     console.log('');
 
-    // 4. Astuce : Prochaines fois
+    // 4. Astuce : Prochaines fois dans un bloc
     if (config.database.type === 'docker') {
-      console.log(chalk.bold('💡 Astuce : Prochaines fois (après redémarrage) :'));
-      console.log('');
-      console.log(chalk.cyan('  npm run docker:up    ') + chalk.gray('# Redémarre PostgreSQL (données conservées ✅)'));
-      console.log(chalk.cyan('  npm run dev          ') + chalk.gray('# Lance le serveur (pas besoin de db:push)'));
+      const astuceLignes = [
+        chalk.cyan('  npm run docker:up    ') + chalk.gray('# Redémarre PostgreSQL (données conservées ✅)'),
+        chalk.cyan('  npm run dev          ') + chalk.gray('# Lance le serveur (pas besoin de db:push)')
+      ];
+      p.note(astuceLignes.join('\n'), '💡 Astuce pour les prochaines fois (après redémarrage) :');
       console.log('');
     }
 
