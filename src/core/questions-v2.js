@@ -97,8 +97,8 @@ function showHeader(answers = {}) {
     const title = ' Récap\' de votre SAAS ';
     const titleLength = title.length;
     const remainingSpace = Math.max(0, terminalWidth - titleLength);
-    const leftBorder = '━'.repeat(Math.floor(remainingSpace / 2));
-    const rightBorder = '━'.repeat(Math.ceil(remainingSpace / 2));
+    const leftBorder = '─'.repeat(Math.floor(remainingSpace / 2));
+    const rightBorder = '─'.repeat(Math.ceil(remainingSpace / 2));
     const headerLine = chalk.gray(leftBorder) + chalk.gray(title) + chalk.gray(rightBorder);
 
     console.log(headerLine);
@@ -125,16 +125,17 @@ function showHeader(answers = {}) {
       leftChoices.push(chalk.green(figures.tick) + ' Base de données : ' + chalk.cyan(dbDisplay));
     }
     if (answers.authMethods && answers.authMethods.length > 0) {
-      // Afficher les noms des méthodes
+      // Afficher uniquement Email, GitHub, Google (pas Magic Link ni OTP qui sont dans Email)
       const methodNames = {
         'email': 'Email',
         'github': 'GitHub',
-        'google': 'Google',
-        'magiclink': 'Magic Link',
-        'otp': 'OTP'
+        'google': 'Google'
       };
-      const authDisplay = answers.authMethods.map(m => methodNames[m] || m).join(' + ');
-      leftChoices.push(chalk.green(figures.tick) + ' Auth : ' + chalk.cyan(authDisplay));
+      const authMethodsFiltered = answers.authMethods.filter(m => ['email', 'github', 'google'].includes(m));
+      if (authMethodsFiltered.length > 0) {
+        const authDisplay = authMethodsFiltered.map(m => methodNames[m] || m).join(' + ');
+        leftChoices.push(chalk.green(figures.tick) + ' Auth : ' + chalk.cyan(authDisplay));
+      }
     }
     if (answers.storageEnabled !== undefined) {
       let storageDisplay = 'Désactivé';
@@ -192,7 +193,7 @@ function showHeader(answers = {}) {
 
     console.log(''); // Padding du bas
     // Bordure du bas pleine largeur
-    const bottomBorder = '━'.repeat(terminalWidth);
+    const bottomBorder = '─'.repeat(terminalWidth);
     console.log(chalk.gray(bottomBorder));
     console.log('');
   }
@@ -294,8 +295,10 @@ export async function askQuestions() {
     answers.databaseUser = databaseUser;
 
     showHeader(answers);
+    p.note(chalk.gray('💡 Le mot de passe "postgres" est déjà saisi, appuyez sur Entrée pour le valider'), 'Astuce');
+
     const databasePassword = await p.password({
-      message: 'Mot de passe PostgreSQL (défaut: postgres)',
+      message: 'Mot de passe PostgreSQL',
       initialValue: 'postgres',
       validate: (value) => {
         // Si vide, utiliser "postgres" par défaut
