@@ -22,7 +22,7 @@ import * as p from '@clack/prompts';
  */
 function showHelp() {
   console.log(chalk.bold('\n🚀 create-saas-sbk\n'));
-  console.log('Générateur de SaaS Next.js\n');
+  console.log('Générateur de SAAS Next.js\n');
 
   console.log(chalk.bold('Usage:'));
   console.log('  npx create-saas-sbk@latest');
@@ -85,7 +85,7 @@ _____ \\__  /| |_  /| |____ \\     _____ \\__  __  |_  ,<
 ____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
 /____/ /_/  |_/_/  |_/____/      /____/ /_____/ /_/ |_|
   `));
-  console.log(chalk.gray('       Générateur de SaaS Next.js'));
+  console.log(chalk.gray('       Générateur de SAAS Next.js'));
   console.log('');
 
   try {
@@ -169,7 +169,7 @@ ____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
     // Message final
     logger.newline();
     logger.newline();
-    logger.title('🎉 Votre SaaS est prêt !');
+    logger.title('🎉 Votre SAAS est prêt !');
     logger.newline();
 
     // 1. Ressources

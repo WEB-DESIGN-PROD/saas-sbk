@@ -72,7 +72,7 @@ export async function askQuestions() {
   const totalQuestions = 10;
   let currentQuestion = 1;
 
-  console.log(chalk.bold.cyan('\n📋 Configuration de votre projet SaaS\n'));
+  console.log(chalk.bold.cyan('\n📋 Configuration de votre projet SAAS\n'));
   console.log(chalk.gray('Répondez aux questions suivantes pour personnaliser votre projet.'));
   console.log(chalk.gray('Vous pourrez confirmer ou modifier vos choix avant la génération.\n'));
 

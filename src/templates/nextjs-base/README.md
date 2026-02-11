@@ -1,6 +1,6 @@
 # {{PROJECT_NAME}}
 
-Projet SaaS généré avec [create-saas-sbk](https://github.com/jerome/create-saas-sbk)
+Projet SAAS généré avec [create-saas-sbk](https://github.com/jerome/create-saas-sbk)
 
 ## 🚀 Démarrage rapide
 

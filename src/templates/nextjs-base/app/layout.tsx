@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "{{PROJECT_NAME}}",
-  description: "SaaS généré avec create-saas-sbk",
+  description: "SAAS généré avec create-saas-sbk",
 };
 
 export default function RootLayout({

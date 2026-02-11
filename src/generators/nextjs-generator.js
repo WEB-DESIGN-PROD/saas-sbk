@@ -306,7 +306,7 @@ prisma/dev.db-journal
 function generateReadme(projectPath, config) {
   const content = `# ${config.projectName}
 
-Projet SaaS généré avec \`create-saas-sbk\`.
+Projet SAAS généré avec \`create-saas-sbk\`.
 
 ## Démarrage rapide
 

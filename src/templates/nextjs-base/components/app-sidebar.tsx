@@ -88,7 +88,7 @@ export function AppSidebar({
             >
               <Link href="/dashboard">
                 <Home className="!size-5" />
-                <span className="text-base font-semibold">Mon SaaS</span>
+                <span className="text-base font-semibold">Mon SAAS</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

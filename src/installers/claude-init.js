@@ -9,7 +9,7 @@ function generateClaudeMd(config, installedSkills) {
   const lines = [
     `# ${config.projectName}`,
     '',
-    'Projet SaaS généré avec create-saas-sbk.',
+    'Projet SAAS généré avec create-saas-sbk.',
     '',
     '## Stack technique',
     '',

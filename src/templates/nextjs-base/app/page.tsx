@@ -40,7 +40,7 @@ export default function Home() {
             Bienvenue sur {{PROJECT_NAME}}
           </h1>
           <p className="mb-8 text-xl text-muted-foreground">
-            Votre SaaS est prêt à démarrer. Commencez à construire votre application.
+            Votre SAAS est prêt à démarrer. Commencez à construire votre application.
           </p>
           <div className="flex items-center justify-center gap-4">
             <Link href="/register">

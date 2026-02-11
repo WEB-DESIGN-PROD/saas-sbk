@@ -7,7 +7,7 @@ export function generateClaudeReadme(config) {
     '',
     '## Vue d\'ensemble',
     '',
-    `Ce projet est un SaaS généré avec \`create-saas-sbk\`. Il utilise une stack moderne et complète pour démarrer rapidement.`,
+    `Ce projet est un SAAS généré avec \`create-saas-sbk\`. Il utilise une stack moderne et complète pour démarrer rapidement.`,
     '',
     '## Configuration choisie',
     '',

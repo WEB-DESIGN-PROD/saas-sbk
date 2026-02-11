@@ -53,7 +53,7 @@ export default function AboutPage() {
               <CardContent className="space-y-4">
                 <p>
                   {{PROJECT_NAME}} a été créé avec la mission de simplifier et d'accélérer
-                  le développement de projets SaaS modernes. Nous croyons que chaque
+                  le développement de projets SAAS modernes. Nous croyons que chaque
                   développeur devrait avoir accès à une infrastructure de qualité
                   professionnelle sans avoir à réinventer la roue.
                 </p>
