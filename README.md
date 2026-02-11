@@ -25,31 +25,19 @@ npx create-saas-sbk@latest
 
 ## Fonctionnalités
 
-![Interactive](https://img.shields.io/badge/✨-Installation_interactive-8B5CF6?style=flat-square) Questions guidées avec instructions en français
-
-![Next.js](https://img.shields.io/badge/⚡-Next.js_16+-000000?style=flat-square) App Router, React 19, TypeScript, Turbopack
-
-![Auth](https://img.shields.io/badge/🔐-Better_Auth-10B981?style=flat-square) Email/password, OAuth (GitHub + Google), Magic Link/OTP
-
-![Database](https://img.shields.io/badge/🗄️-PostgreSQL-336791?style=flat-square) Local Docker ou distant (Neon, Supabase)
-
-![ORM](https://img.shields.io/badge/🔄-Prisma-2D3748?style=flat-square) ORM moderne avec migrations
-
-![Payments](https://img.shields.io/badge/💳-Stripe-635BFF?style=flat-square) Paiements et abonnements (optionnel)
-
-![Email](https://img.shields.io/badge/📧-Resend/SMTP-F59E0B?style=flat-square) Envoi d'emails transactionnels
-
-![Storage](https://img.shields.io/badge/📁-S3/MinIO-FF9900?style=flat-square) Stockage de fichiers médias (optionnel)
-
-![UI](https://img.shields.io/badge/🎨-Shadcn_UI-0EA5E9?style=flat-square) Interface moderne et responsive avec Tailwind CSS
-
-![i18n](https://img.shields.io/badge/🌍-Multilingue-EC4899?style=flat-square) Support FR, EN, ES, DE
-
-![AI](https://img.shields.io/badge/🤖-IA_intégrée-7C3AED?style=flat-square) Claude, ChatGPT, Gemini (choix multiples)
-
-![Docker](https://img.shields.io/badge/🐳-Docker_ready-2496ED?style=flat-square) PostgreSQL et MinIO en local
-
-![Claude](https://img.shields.io/badge/🧠-Claude_Code-D97706?style=flat-square) Skills et agents pré-installés
+- **Installation interactive** - Questions guidées avec instructions en français
+- **Next.js 16+** - App Router, React 19, TypeScript, Turbopack
+- **Better Auth** - Email/password, OAuth (GitHub + Google), Magic Link/OTP
+- **PostgreSQL** - Local Docker ou distant (Neon, Supabase)
+- **Prisma** - ORM moderne avec migrations
+- **Stripe** - Paiements et abonnements (optionnel)
+- **Resend/SMTP** - Envoi d'emails transactionnels
+- **S3/MinIO** - Stockage de fichiers médias (optionnel)
+- **Shadcn UI + Tailwind** - Interface moderne et responsive
+- **Internationalisation** - Support FR, EN, ES, DE
+- **IA intégrée** - Claude, ChatGPT, Gemini (choix multiples)
+- **Docker ready** - PostgreSQL et MinIO en local
+- **Claude Code** - Skills et agents pré-installés
 
 ## Stack technique
 
