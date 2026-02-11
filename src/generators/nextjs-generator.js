@@ -81,7 +81,7 @@ export function generateNextjsProject(projectPath, config) {
   // Copier les variantes conditionnelles
   copyConditionalVariants(projectPath, config);
 
-  logger.success('Structure du projet Next.js créée' + chalk.gray('     # Votre application web'));
+  logger.successWithComment('Structure du projet Next.js créée', 'Votre application web');
 }
 
 /**
