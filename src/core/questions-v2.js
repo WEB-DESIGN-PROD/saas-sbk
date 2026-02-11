@@ -370,7 +370,7 @@ export async function askQuestions() {
   // 4. Authentification (sauf si base de données ignorée)
   if (!answers.skipAuth) {
     showHeader(answers);
-    p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout • Entrée = valider'), 'Astuce');
+    p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout sélectionner • Entrée = valider'), 'Astuce');
 
     const authMethods = await p.multiselect({
       message: 'Méthodes d\'authentification',
@@ -802,7 +802,7 @@ export async function askQuestions() {
     const availableLanguages = allLanguages.filter(lang => lang.value !== i18nDefaultLanguage);
 
     showHeader(answers);
-    p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout • Entrée = valider'), 'Astuce');
+    p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout sélectionner • Entrée = valider'), 'Astuce');
 
     const i18nLanguages = await p.multiselect({
       message: `Sélectionnez les langues supplémentaires (langue par défaut : ${i18nDefaultLanguage})`,
@@ -837,7 +837,7 @@ export async function askQuestions() {
   if (wantsAI) {
     // Proposer le choix des providers IA
     showHeader(answers);
-    p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout • Entrée = valider'), 'Astuce');
+    p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout sélectionner • Entrée = valider'), 'Astuce');
 
     const aiProviders = await p.multiselect({
       message: 'Sélectionnez les providers IA à intégrer',
