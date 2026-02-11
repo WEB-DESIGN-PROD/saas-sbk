@@ -32,3 +32,7 @@ build/
 # Temp
 tmp/
 temp/
+
+# Projets de test générés
+my-saas/
+test-*/
