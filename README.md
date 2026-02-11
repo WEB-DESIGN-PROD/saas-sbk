@@ -1,6 +1,15 @@
 # create-saas-sbk
 
-CLI npm pour générer des projets SaaS Next.js 16+ complets et clés en main.
+<div align="center">
+
+![Version](https://img.shields.io/badge/version-0.4.5-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)
+![Next.js](https://img.shields.io/badge/Next.js-16+-black.svg)
+
+**CLI npm pour générer des projets SAAS Next.js 16+ complets et clés en main**
+
+</div>
 
 ## Installation et utilisation
 
@@ -16,20 +25,31 @@ npx create-saas-sbk@latest
 
 ## Fonctionnalités
 
-✅ **Installation interactive** - Questions guidées avec instructions en français
-✅ **Next.js 16+** - App Router, React 19, TypeScript, Turbopack
-✅ **Better Auth** - Email/password, OAuth GitHub, Magic Link
-✅ **Bases de données multiples** - PostgreSQL, MongoDB, SQLite (ou ignorer pour plus tard)
-✅ **Prisma** - ORM moderne avec migrations
-✅ **Stripe** - Paiements et abonnements (optionnel)
-✅ **Resend/SMTP** - Envoi d'emails transactionnels (ou ignorer)
-✅ **AWS S3 / MinIO** - Stockage de fichiers médias (optionnel)
-✅ **Shadcn UI + Tailwind** - Interface moderne et responsive
-✅ **i18n** - Support multilingue (FR, EN, ES, DE)
-✅ **Intégration IA** - Claude, ChatGPT, Gemini (choix multiples possibles)
-✅ **Docker ready** - PostgreSQL, MongoDB et MinIO en local
-✅ **Claude Code** - Skills et agents pré-installés
-✅ **Mode flexible** - Possibilité d'ignorer DB/Auth pour configurer plus tard
+![Interactive](https://img.shields.io/badge/✨-Installation_interactive-8B5CF6?style=flat-square) Questions guidées avec instructions en français
+
+![Next.js](https://img.shields.io/badge/⚡-Next.js_16+-000000?style=flat-square) App Router, React 19, TypeScript, Turbopack
+
+![Auth](https://img.shields.io/badge/🔐-Better_Auth-10B981?style=flat-square) Email/password, OAuth (GitHub + Google), Magic Link/OTP
+
+![Database](https://img.shields.io/badge/🗄️-PostgreSQL-336791?style=flat-square) Local Docker ou distant (Neon, Supabase)
+
+![ORM](https://img.shields.io/badge/🔄-Prisma-2D3748?style=flat-square) ORM moderne avec migrations
+
+![Payments](https://img.shields.io/badge/💳-Stripe-635BFF?style=flat-square) Paiements et abonnements (optionnel)
+
+![Email](https://img.shields.io/badge/📧-Resend/SMTP-F59E0B?style=flat-square) Envoi d'emails transactionnels
+
+![Storage](https://img.shields.io/badge/📁-S3/MinIO-FF9900?style=flat-square) Stockage de fichiers médias (optionnel)
+
+![UI](https://img.shields.io/badge/🎨-Shadcn_UI-0EA5E9?style=flat-square) Interface moderne et responsive avec Tailwind CSS
+
+![i18n](https://img.shields.io/badge/🌍-Multilingue-EC4899?style=flat-square) Support FR, EN, ES, DE
+
+![AI](https://img.shields.io/badge/🤖-IA_intégrée-7C3AED?style=flat-square) Claude, ChatGPT, Gemini (choix multiples)
+
+![Docker](https://img.shields.io/badge/🐳-Docker_ready-2496ED?style=flat-square) PostgreSQL et MinIO en local
+
+![Claude](https://img.shields.io/badge/🧠-Claude_Code-D97706?style=flat-square) Skills et agents pré-installés
 
 ## Stack technique
 
@@ -42,16 +62,13 @@ npx create-saas-sbk@latest
 ### Authentification
 - **Better Auth** - Authentification moderne et flexible
 - Email/Mot de passe
-- OAuth (GitHub)
-- Magic Link (lien par email)
+- OAuth (GitHub + Google)
+- Magic Link / OTP (avec Resend)
 
 ### Base de données
 - **PostgreSQL** - Local Docker ou distant (Neon, Supabase)
-- **MongoDB** - Local Docker ou distant (Atlas)
-- **SQLite** - Fichier local, idéal pour prototypage
-- **Ignorer pour l'instant** - Configuration possible plus tard
 - **Prisma** - ORM TypeScript avec migrations
-- **Mongoose** - Pour MongoDB (à venir)
+- _MongoDB et SQLite à venir dans une prochaine version_
 
 ### Paiements
 - **Stripe** en mode test
@@ -70,10 +87,11 @@ npx create-saas-sbk@latest
 - **Claude** (Anthropic)
 - **ChatGPT** (OpenAI)
 - **Gemini** (Google)
+- Choix multiples possibles
 
 ### Internationalisation
-- Support multilingue
-- Français, Anglais, Espagnol, Allemand
+- Support multilingue avec next-intl
+- Français, Anglais (US), Espagnol, Allemand
 
 ## Structure du projet généré
 
@@ -217,23 +235,26 @@ src/
 
 ## Roadmap
 
-📍 **Version actuelle : v0.4.5** (9 février 2026)
+📍 **Version actuelle : v0.4.5** (11 février 2026)
 
 ### ✅ Phase 1 - CLI Interactif (TERMINÉE)
-- ✅ CLI interactif avec questions guidées en français
+- ✅ CLI interactif avec @clack/prompts en français
+- ✅ Logo persistant et liens cliquables vers services externes
 - ✅ Génération de projet Next.js 16+ fonctionnel
 - ✅ Installation automatique des skills Claude Code
-- ✅ Support multi-bases de données (PostgreSQL, MongoDB, SQLite)
-- ✅ Mode flexible (possibilité d'ignorer DB/Auth)
+- ✅ PostgreSQL (Docker ou distant)
+- ✅ OAuth GitHub + Google
+- ✅ Magic Link / OTP avec Resend
 - ✅ Docker Compose pour services locaux
 - ✅ Nouveau dashboard template moderne
+- ✅ Interface UX optimisée avec récapitulatif en colonnes
 
-### 🚧 Phase 2 - Templates Complets (EN COURS - 30%)
-- 🚧 Templates Next.js complets (landing, dashboard, auth)
+### 🚧 Phase 2 - Templates Complets (EN COURS - 40%)
+- ✅ Templates Next.js complets (landing, dashboard, auth)
 - 🚧 Templates multilingues (FR, EN, ES, DE)
-- 🚧 Template sans système de connexion
-- 📅 Configuration MongoDB et SQLite complète
-- 📅 Migration vers @clack/prompts pour UX améliorée
+- 📅 Configuration MongoDB et SQLite
+- 📅 Template sans système de connexion
+- 📅 Plus de variantes de templates (blog, e-commerce)
 
 ### 📅 Phase 3 - Génération IA (PLANIFIÉE)
 - Commande `/generate-features` pour génération IA
