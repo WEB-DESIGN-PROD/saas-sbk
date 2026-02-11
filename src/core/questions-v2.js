@@ -801,13 +801,19 @@ export async function askQuestions() {
 
     const availableLanguages = allLanguages.filter(lang => lang.value !== i18nDefaultLanguage);
 
+    // Pré-cocher US (Anglais) par défaut, sauf si c'est déjà la langue par défaut
+    const defaultLanguages = i18nDefaultLanguage !== 'en' && availableLanguages.some(l => l.value === 'en')
+      ? ['en']
+      : [];
+
     showHeader(answers);
     p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout sélectionner • Entrée = valider'), 'Astuce');
 
     const i18nLanguages = await p.multiselect({
       message: `Sélectionnez les langues supplémentaires (langue par défaut : ${i18nDefaultLanguage})`,
       options: availableLanguages,
-      required: false
+      required: false,
+      initialValues: defaultLanguages
     });
 
     if (p.isCancel(i18nLanguages)) {
@@ -905,7 +911,7 @@ export async function askQuestions() {
   // 11. Thème
   showHeader(answers);
   const theme = await p.select({
-    message: 'Thème par défaut',
+    message: 'Pour l\'interface du SAAS, quel thème désirez-vous par défaut ?',
     options: [
       { value: 'dark', label: '🌙 Sombre' },
       { value: 'light', label: '☀️  Clair' }
