@@ -78,15 +78,19 @@ function showHeader(answers = {}) {
   console.log(baseline2);
   console.log('');
 
-  // Afficher les réponses validées de façon compacte
+  // Afficher les réponses validées sur 2 colonnes
   if (Object.keys(answers).length > 0) {
     console.log(chalk.gray('━━━ Vos choix ━━━'));
 
+    const leftChoices = [];
+    const rightChoices = [];
+
+    // Colonne gauche
     if (answers.projectName) {
-      console.log(chalk.green(figures.tick) + ' Projet : ' + chalk.cyan(answers.projectName));
+      leftChoices.push(chalk.green(figures.tick) + ' Projet : ' + chalk.cyan(answers.projectName));
     }
     if (answers.theme) {
-      console.log(chalk.green(figures.tick) + ' Thème : ' + chalk.cyan(answers.theme === 'dark' ? 'Sombre 🌙' : 'Clair ☀️'));
+      leftChoices.push(chalk.green(figures.tick) + ' Thème : ' + chalk.cyan(answers.theme === 'dark' ? 'Sombre 🌙' : 'Clair ☀️'));
     }
     if (answers.databaseType) {
       let dbDisplay = 'Distant ☁️';
@@ -96,33 +100,63 @@ function showHeader(answers = {}) {
       else if (answers.databaseType === 'mongodb-remote') dbDisplay = 'MongoDB ☁️';
       else if (answers.databaseType === 'sqlite') dbDisplay = 'SQLite';
 
-      console.log(chalk.green(figures.tick) + ' Base de données : ' + chalk.cyan(dbDisplay));
+      leftChoices.push(chalk.green(figures.tick) + ' Base de données : ' + chalk.cyan(dbDisplay));
     }
     if (answers.authMethods) {
-      console.log(chalk.green(figures.tick) + ' Auth : ' + chalk.cyan(answers.authMethods.length + ' méthode(s)'));
-    }
-    if (answers.storageEnabled !== undefined) {
-      console.log(chalk.green(figures.tick) + ' Stockage : ' + chalk.cyan(answers.storageEnabled ? 'Activé' : 'Désactivé'));
-    }
-    if (answers.emailProvider !== undefined) {
-      const provider = answers.emailProvider === 'skip' ? 'Plus tard' :
-                      answers.emailProvider === 'resend' ? 'Resend 📮' : 'SMTP 📧';
-      console.log(chalk.green(figures.tick) + ' Email : ' + chalk.cyan(provider));
-    }
-    if (answers.paymentsEnabled !== undefined) {
-      console.log(chalk.green(figures.tick) + ' Paiements : ' + chalk.cyan(answers.paymentsEnabled ? 'Activé 💳' : 'Désactivé'));
-    }
-    if (answers.i18nDefaultLanguage) {
-      const totalLangs = 1 + (answers.i18nLanguages?.length || 0);
-      console.log(chalk.green(figures.tick) + ' I18n : ' + chalk.cyan(totalLangs + ' langue(s) 🌍'));
-    }
-    if (answers.aiProviders) {
-      console.log(chalk.green(figures.tick) + ' IA : ' + chalk.cyan(
-        answers.aiProviders.length === 0 ? 'Aucune' : answers.aiProviders.join(', ')
-      ));
+      leftChoices.push(chalk.green(figures.tick) + ' Auth : ' + chalk.cyan(answers.authMethods.length + ' méthode(s)'));
     }
     if (answers.claudeCodeInstalled !== undefined) {
-      console.log(chalk.green(figures.tick) + ' Claude Code : ' + chalk.cyan(answers.claudeCodeInstalled ? 'Oui ✓' : 'Non'));
+      leftChoices.push(chalk.green(figures.tick) + ' Claude Code : ' + chalk.cyan(answers.claudeCodeInstalled ? 'Oui ✓' : 'Non'));
+    }
+
+    // Colonne droite
+    if (answers.storageEnabled !== undefined) {
+      let storageDisplay = 'Désactivé';
+      if (answers.storageEnabled) {
+        if (answers.storageType === 'minio') storageDisplay = 'MinIO 🐳';
+        else if (answers.storageType === 's3') storageDisplay = 'AWS S3 ☁️';
+      }
+      rightChoices.push(chalk.green(figures.tick) + ' Stockage : ' + chalk.cyan(storageDisplay));
+    }
+    if (answers.emailProvider !== undefined) {
+      let provider = 'Plus tard';
+      if (answers.emailProvider === 'resend') {
+        provider = 'Resend 📮';
+        // Ajouter Magic Link ou OTP si présent
+        if (answers.authMethods?.includes('magiclink')) provider += ' + Magic Link';
+        else if (answers.authMethods?.includes('otp')) provider += ' + OTP';
+      } else if (answers.emailProvider === 'smtp') {
+        provider = 'SMTP 📧';
+      }
+      rightChoices.push(chalk.green(figures.tick) + ' Email : ' + chalk.cyan(provider));
+    }
+    if (answers.paymentsEnabled !== undefined) {
+      const paymentsDisplay = answers.paymentsEnabled ? 'Stripe 💳' : 'Désactivé';
+      rightChoices.push(chalk.green(figures.tick) + ' Paiements : ' + chalk.cyan(paymentsDisplay));
+    }
+    if (answers.i18nDefaultLanguage) {
+      const allLangs = [answers.i18nDefaultLanguage.toUpperCase(), ...(answers.i18nLanguages?.map(l => l.toUpperCase()) || [])];
+      rightChoices.push(chalk.green(figures.tick) + ' I18n : ' + chalk.cyan(allLangs.join(', ') + ' 🌍'));
+    }
+    if (answers.aiProviders !== undefined) {
+      const aiDisplay = answers.aiProviders.length === 0 ? 'Aucune' :
+                       answers.aiProviders.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(', ');
+      rightChoices.push(chalk.green(figures.tick) + ' IA : ' + chalk.cyan(aiDisplay));
+    }
+
+    // Afficher sur 2 colonnes
+    const maxLines = Math.max(leftChoices.length, rightChoices.length);
+    const columnWidth = 45;
+
+    for (let i = 0; i < maxLines; i++) {
+      const left = leftChoices[i] || '';
+      const right = rightChoices[i] || '';
+
+      // Calculer le padding pour aligner les colonnes
+      const leftStripped = left.replace(/\u001b\[[0-9;]*m/g, '');
+      const padding = ' '.repeat(Math.max(0, columnWidth - leftStripped.length));
+
+      console.log(left + padding + right);
     }
 
     console.log(chalk.gray('━━━━━━━━━━━━━━━━━━━'));
