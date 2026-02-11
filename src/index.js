@@ -171,6 +171,28 @@ ____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
     logger.title('🎉 Votre SaaS est prêt !');
     logger.newline();
 
+    // 1. Ressources
+    console.log(chalk.bold('📖 Ressources :'));
+    console.log('');
+    console.log('  • Interface : ' + chalk.cyan('http://localhost:3000'));
+    console.log('  • Workflow de développement : ' + chalk.cyan('DEVELOPMENT.md'));
+    console.log('  • Documentation technique : ' + chalk.cyan('.claude/README.md'));
+
+    if (config.claude.cliInstalled) {
+      console.log('  • Générer des fonctionnalités : ' + chalk.cyan('/generate-features'));
+    }
+
+    console.log('');
+
+    // 2. Lien GitHub
+    const githubUrl = 'https://github.com/WEB-DESIGN-PROD/saas-sbk/issues';
+    const githubIcon = ''; // Logo GitHub (Nerd Font)
+    const githubLinkText = `${githubIcon} Signaler un problème`;
+    const githubLink = `\x1b]8;;${githubUrl}\x1b\\${githubLinkText}\x1b]8;;\x1b\\`;
+    console.log('Un problème ? ' + chalk.blue(githubLink));
+    console.log('');
+
+    // 3. Première fois - Démarrer le projet
     console.log(chalk.bold('🚀 Première fois - Démarrer le projet :'));
     console.log('');
     console.log(chalk.cyan(`  cd ${config.projectName}`));
@@ -183,32 +205,15 @@ ____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
     console.log(chalk.cyan('  npm run dev          ') + chalk.gray('# Lance le serveur'));
     console.log('');
 
+    // 4. Astuce : Prochaines fois
     if (config.database.type === 'docker') {
-      console.log(chalk.bold('🔄 Prochaines fois (après redémarrage) :'));
+      console.log(chalk.bold('💡 Astuce : Prochaines fois (après redémarrage) :'));
       console.log('');
       console.log(chalk.cyan('  npm run docker:up    ') + chalk.gray('# Redémarre PostgreSQL (données conservées ✅)'));
       console.log(chalk.cyan('  npm run dev          ') + chalk.gray('# Lance le serveur (pas besoin de db:push)'));
       console.log('');
     }
 
-    console.log(chalk.bold('📖 Ressources :'));
-    console.log('');
-    console.log('  • Interface : ' + chalk.cyan('http://localhost:3000'));
-    console.log('  • Workflow de développement : ' + chalk.cyan('DEVELOPMENT.md'));
-    console.log('  • Documentation technique : ' + chalk.cyan('.claude/README.md'));
-
-    if (config.claude.cliInstalled) {
-      console.log('  • Générer des fonctionnalités : ' + chalk.cyan('/generate-features'));
-    }
-
-    // Lien GitHub avec OSC 8 pour lien cliquable
-    const githubUrl = 'https://github.com/WEB-DESIGN-PROD/saas-sbk/issues';
-    const githubIcon = ''; // Logo GitHub (Nerd Font)
-    const githubLinkText = `${githubIcon} Signaler un problème`;
-    const githubLink = `\x1b]8;;${githubUrl}\x1b\\${githubLinkText}\x1b]8;;\x1b\\`;
-    console.log('  • ' + chalk.blue(githubLink));
-
-    console.log('');
     console.log(chalk.green('✨ Bon développement ! 🚀'));
     console.log('');
 
