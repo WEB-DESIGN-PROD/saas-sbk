@@ -64,7 +64,8 @@ function showHeader(answers = {}) {
 
   // Baselines centrées
   const baseline1 = chalk.gray(`Générateur de SaaS Next.js • v${version}`);
-  const githubLink = createLink('https://github.com/WEB-DESIGN-PROD/saas-sbk/issues', chalk.blue('GitHub'));
+  const githubIcon = ''; // Logo GitHub (Nerd Font)
+  const githubLink = createLink('https://github.com/WEB-DESIGN-PROD/saas-sbk/issues', chalk.blue(`${githubIcon} GitHub`));
   const baseline2 = chalk.gray('Signaler un problème sur ') + githubLink;
 
   console.log(centerText(baseline1, true));
