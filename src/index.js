@@ -190,72 +190,26 @@ ____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
     console.log('Un problème ? ' + chalk.cyan.underline(githubUrl));
     console.log('');
 
-    // 3. Première fois et Astuce en 2 colonnes avec bordure englobante
+    // 3. Première fois - Démarrer le projet
+    console.log(chalk.bold('🚀 Démarrer le projet pour la première fois :'));
+    console.log('');
+    console.log(chalk.cyan(`  cd ${config.projectName}`));
+
+    if (config.database.type === 'docker' || (config.storage.enabled && config.storage.type === 'minio')) {
+      console.log(chalk.cyan('  npm run docker:up    ') + chalk.gray('# Démarre PostgreSQL'));
+    }
+
+    console.log(chalk.cyan('  npm run db:push      ') + chalk.gray('# Crée les tables'));
+    console.log(chalk.cyan('  npm run dev          ') + chalk.gray('# Lance le serveur'));
+    console.log('');
+
+    // 4. Tips : Prochaines fois dans un bloc
     if (config.database.type === 'docker') {
-      const terminalWidth = process.stdout.columns || 120;
-      const totalWidth = Math.min(terminalWidth - 4, 100);
-      const columnWidth = Math.floor((totalWidth - 3) / 2); // 3 pour le séparateur │
-
-      // Titres
-      const leftTitle = '🚀 Démarrer le projet pour la première fois :';
-      const rightTitle = '💡 TIPS pour les prochaines fois :';
-
-      // Contenu colonne gauche
-      const leftContent = [
-        '',
-        `  cd ${config.projectName}`,
-        '  npm run docker:up    # Démarre PostgreSQL',
-        '  npm run db:push      # Crée les tables',
-        '  npm run dev          # Lance le serveur',
-        ''
+      const tipsLignes = [
+        chalk.cyan('  npm run docker:up    ') + chalk.gray('# Redémarre PostgreSQL (données conservées ✅)'),
+        chalk.cyan('  npm run dev          ') + chalk.gray('# Lance le serveur (pas besoin de db:push)')
       ];
-
-      // Contenu colonne droite
-      const rightContent = [
-        '',
-        '  npm run docker:up    # Redémarre PostgreSQL (données conservées ✅)',
-        '  npm run dev          # Lance le serveur (pas besoin de db:push)',
-        '',
-        '',
-        ''
-      ];
-
-      // Ligne du haut avec les deux titres
-      const topLeft = '┌─ ' + leftTitle + ' ';
-      const topLeftPadding = '─'.repeat(Math.max(0, columnWidth - leftTitle.length - 3));
-      const topRight = '─ ' + rightTitle + ' ';
-      const topRightPadding = '─'.repeat(Math.max(0, columnWidth - rightTitle.length - 3));
-      console.log(chalk.gray(topLeft + topLeftPadding + '┬' + topRight + topRightPadding + '┐'));
-
-      // Lignes de contenu
-      const maxLines = Math.max(leftContent.length, rightContent.length);
-      for (let i = 0; i < maxLines; i++) {
-        const left = leftContent[i] || '';
-        const right = rightContent[i] || '';
-
-        // Nettoyer les codes ANSI pour calculer la vraie longueur
-        const leftClean = left.replace(/\u001b\[[0-9;]*m/g, '');
-        const rightClean = right.replace(/\u001b\[[0-9;]*m/g, '');
-
-        const leftPadding = ' '.repeat(Math.max(0, columnWidth - leftClean.length));
-        const rightPadding = ' '.repeat(Math.max(0, columnWidth - rightClean.length));
-
-        const leftColored = chalk.cyan(left.includes('cd ') || left.includes('npm') ? left : '') || left;
-        const rightColored = chalk.cyan(right.includes('npm') ? right : '') || right;
-
-        console.log(chalk.gray('│') + leftColored + leftPadding + chalk.gray('│') + rightColored + rightPadding + chalk.gray('│'));
-      }
-
-      // Ligne du bas
-      console.log(chalk.gray('└' + '─'.repeat(columnWidth) + '┴' + '─'.repeat(columnWidth) + '┘'));
-      console.log('');
-    } else {
-      // Si pas de Docker, affichage simple sans l'astuce
-      console.log(chalk.bold('🚀 Démarrer le projet pour la première fois :'));
-      console.log('');
-      console.log(chalk.cyan(`  cd ${config.projectName}`));
-      console.log(chalk.cyan('  npm run db:push      ') + chalk.gray('# Crée les tables'));
-      console.log(chalk.cyan('  npm run dev          ') + chalk.gray('# Lance le serveur'));
+      p.note(tipsLignes.join('\n'), '💡 TIPS pour les prochaines fois :');
       console.log('');
     }
 
