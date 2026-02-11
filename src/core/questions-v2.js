@@ -302,6 +302,10 @@ export async function askQuestions() {
       message: 'Mot de passe PostgreSQL (défaut: postgres)',
       initialValue: 'postgres',
       validate: (value) => {
+        // Si vide, utiliser "postgres" par défaut
+        if (!value || value.trim().length === 0) {
+          return undefined; // Accepter vide, on mettra "postgres" après
+        }
         const result = validatePassword(value);
         return result === true ? undefined : result;
       }
@@ -311,7 +315,8 @@ export async function askQuestions() {
       p.cancel('Installation annulée.');
       process.exit(0);
     }
-    answers.databasePassword = databasePassword;
+    // Si vide, utiliser "postgres" par défaut
+    answers.databasePassword = databasePassword || 'postgres';
 
     showHeader(answers);
     const databaseName = await p.text({
