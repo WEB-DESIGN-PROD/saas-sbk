@@ -165,46 +165,6 @@ Si vous avez Claude Code CLI installé, le projet sera automatiquement initialis
 
 Pour installer Claude Code : https://claude.ai/docs/cli
 
-## Développement du CLI
-
-### Cloner le repo
-```bash
-git clone <repo-url>
-cd saas-sbk
-npm install
-```
-
-### Tester en local
-```bash
-npm run dev
-```
-
-### Structure du CLI
-```
-src/
-├── index.js                    # Orchestrateur principal
-├── core/
-│   ├── questions.js            # Questions interactives
-│   ├── validation.js           # Validations sécurisées
-│   ├── config-builder.js       # Construction config
-│   └── summary.js              # Récapitulatif
-├── generators/
-│   ├── env-generator.js        # Génère .env
-│   ├── docker-generator.js     # Génère docker-compose.yml
-│   ├── claude-generator.js     # Génère .claude/README.md
-│   ├── package-generator.js    # Génère package.json
-│   └── nextjs-generator.js     # Génère projet Next.js
-├── installers/
-│   ├── dependencies.js         # npm install
-│   ├── skills.js               # Installation skills
-│   └── claude-init.js          # Lance /init
-└── utils/
-    ├── logger.js               # Messages colorés
-    ├── spinner.js              # Spinners
-    ├── command-runner.js       # Exécution commandes
-    └── file-utils.js           # Manipulation fichiers
-```
-
 ## Roadmap
 
 📍 **Version actuelle : v0.4.5** (11 février 2026)
@@ -243,7 +203,15 @@ src/
 
 ## Contribution
 
-Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou une PR.
+Les contributions sont les bienvenues ! Consultez [CONTRIBUTING.md](./CONTRIBUTING.md) pour :
+
+- Structure du projet et architecture
+- Guide de développement local
+- Conventions de code et commits
+- Types de contributions acceptées
+- Workflow de Pull Request
+
+Pour contribuer rapidement : fork le repo, créez une branche, développez, testez et ouvrez une PR !
 
 ## Support
 
