@@ -25,21 +25,42 @@ const packageJson = JSON.parse(readFileSync(join(__dirname, '../../package.json'
 const version = packageJson.version;
 
 /**
+ * Centre une ligne de texte dans le terminal
+ */
+function centerText(text, stripAnsi = false) {
+  const terminalWidth = process.stdout.columns || 80;
+  const textLength = stripAnsi ? text.replace(/\u001b\[[0-9;]*m/g, '').length : text.length;
+  const padding = Math.max(0, Math.floor((terminalWidth - textLength) / 2));
+  return ' '.repeat(padding) + text;
+}
+
+/**
  * Affiche le logo et les réponses validées de façon compacte
  */
 function showHeader(answers = {}) {
   console.clear();
 
-  // Logo ASCII
-  console.log(chalk.cyan(`
- _____________________________    _____________________ __
-__  ___/__    |__    |_  ___/    __  ___/__  __ )__  //_/
-_____ \\__  /| |_  /| |____ \\     _____ \\__  __  |_  ,<
-____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
-/____/ /_/  |_/_/  |_/____/      /____/ /_____/ /_/ |_|
-  `));
-  console.log(chalk.gray(`       Générateur de SaaS Next.js • v${version}`));
-  console.log('       ' + chalk.gray('Signaler un problème sur ') + chalk.blue('GitHub ') + chalk.blue('https://github.com/WEB-DESIGN-PROD/saas-sbk/issues'));
+  // Logo ASCII centré
+  const logoLines = [
+    ' _____________________________    _____________________ __',
+    '__  ___/__    |__    |_  ___/    __  ___/__  __ )__  //_/',
+    '_____ \\__  /| |_  /| |____ \\     _____ \\__  __  |_  ,<',
+    '____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |',
+    '/____/ /_/  |_/_/  |_/____/      /____/ /_____/ /_/ |_|'
+  ];
+
+  console.log('');
+  logoLines.forEach(line => {
+    console.log(centerText(chalk.cyan(line), true));
+  });
+  console.log('');
+
+  // Baselines centrées
+  const baseline1 = chalk.gray(`Générateur de SaaS Next.js • v${version}`);
+  const baseline2 = chalk.gray('Signaler un problème sur ') + chalk.blue('GitHub ') + chalk.blue('https://github.com/WEB-DESIGN-PROD/saas-sbk/issues');
+
+  console.log(centerText(baseline1, true));
+  console.log(centerText(baseline2, true));
   console.log('');
 
   // Afficher les réponses validées de façon compacte
