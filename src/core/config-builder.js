@@ -21,7 +21,9 @@ export function buildConfig(answers) {
     auth: {
       methods: answers.authMethods || ['email'],
       githubClientId: answers.githubClientId || '',
-      githubClientSecret: answers.githubClientSecret || ''
+      githubClientSecret: answers.githubClientSecret || '',
+      googleClientId: answers.googleClientId || '',
+      googleClientSecret: answers.googleClientSecret || ''
     },
 
     // Storage

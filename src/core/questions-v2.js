@@ -136,6 +136,7 @@ ${chalk.gray('Générateur de SaaS Next.js 16')}`));
 
     const databasePassword = await p.password({
       message: 'Mot de passe PostgreSQL',
+      placeholder: 'postgres',
       validate: (value) => {
         const result = validatePassword(value);
         return result === true ? undefined : result;
@@ -165,6 +166,12 @@ ${chalk.gray('Générateur de SaaS Next.js 16')}`));
     answers.databaseName = databaseName;
 
   } else if (answers.databaseType === 'remote') {
+    p.note(
+      chalk.cyan('🔗 Neon:') + ' https://console.neon.tech/\n' +
+      chalk.cyan('🔗 Supabase:') + ' https://supabase.com/dashboard/project/_/settings/database',
+      'Liens utiles pour PostgreSQL distant'
+    );
+
     const databaseUrl = await p.text({
       message: 'URL de connexion PostgreSQL',
       placeholder: 'postgresql://user:password@host:5432/database',
@@ -182,16 +189,23 @@ ${chalk.gray('Générateur de SaaS Next.js 16')}`));
       process.exit(0);
     }
     answers.databaseUrl = databaseUrl;
+  } else if (answers.databaseType === 'mongodb-remote') {
+    p.note(
+      chalk.cyan('🔗 MongoDB Atlas:') + ' https://cloud.mongodb.com/',
+      'Lien utile pour MongoDB distant'
+    );
   }
 
   // 4. Authentification (sauf si base de données ignorée)
   if (!answers.skipAuth) {
+    p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout • Entrée = valider'), 'Astuce');
+
     const authMethods = await p.multiselect({
       message: 'Méthodes d\'authentification',
       options: [
         { value: 'email', label: 'Email/Mot de passe', hint: 'Recommandé' },
         { value: 'github', label: 'OAuth GitHub' },
-        { value: 'magiclink', label: 'Magic Link', hint: 'Lien par email' }
+        { value: 'google', label: 'OAuth Google' }
       ],
       required: true,
       initialValues: ['email']
@@ -205,6 +219,12 @@ ${chalk.gray('Générateur de SaaS Next.js 16')}`));
 
     // Questions GitHub OAuth si sélectionné
     if (authMethods.includes('github')) {
+      p.note(
+        chalk.cyan('🔗 Créer une OAuth App:') + ' https://github.com/settings/developers\n' +
+        chalk.gray('Callback URL: http://localhost:3000/api/auth/callback/github'),
+        'Configuration GitHub OAuth'
+      );
+
       const githubClientId = await p.text({
         message: 'GitHub OAuth Client ID',
         validate: (value) => {
@@ -232,6 +252,43 @@ ${chalk.gray('Générateur de SaaS Next.js 16')}`));
         process.exit(0);
       }
       answers.githubClientSecret = githubClientSecret;
+    }
+
+    // Questions Google OAuth si sélectionné
+    if (authMethods.includes('google')) {
+      p.note(
+        chalk.cyan('🔗 Console Google Cloud:') + ' https://console.cloud.google.com/apis/credentials\n' +
+        chalk.gray('Callback URL: http://localhost:3000/api/auth/callback/google'),
+        'Configuration Google OAuth'
+      );
+
+      const googleClientId = await p.text({
+        message: 'Google OAuth Client ID',
+        validate: (value) => {
+          const result = validateClientId(value);
+          return result === true ? undefined : result;
+        }
+      });
+
+      if (p.isCancel(googleClientId)) {
+        p.cancel('Installation annulée.');
+        process.exit(0);
+      }
+      answers.googleClientId = googleClientId;
+
+      const googleClientSecret = await p.password({
+        message: 'Google OAuth Client Secret',
+        validate: (value) => {
+          const result = validateClientSecret(value);
+          return result === true ? undefined : result;
+        }
+      });
+
+      if (p.isCancel(googleClientSecret)) {
+        p.cancel('Installation annulée.');
+        process.exit(0);
+      }
+      answers.googleClientSecret = googleClientSecret;
     }
   } else {
     answers.authMethods = [];
@@ -341,6 +398,11 @@ ${chalk.gray('Générateur de SaaS Next.js 16')}`));
   answers.emailProvider = emailProvider;
 
   if (emailProvider === 'resend') {
+    p.note(
+      chalk.cyan('🔗 Récupérer votre clé API:') + ' https://resend.com/api-keys',
+      'Configuration Resend'
+    );
+
     const resendApiKey = await p.password({
       message: 'Clé API Resend',
       validate: (value) => {
@@ -354,6 +416,40 @@ ${chalk.gray('Générateur de SaaS Next.js 16')}`));
       process.exit(0);
     }
     answers.resendApiKey = resendApiKey;
+
+    // Proposer Magic Link ou OTP si Resend est choisi
+    if (!answers.skipAuth) {
+      const additionalAuth = await p.confirm({
+        message: 'Ajouter une méthode d\'authentification par email (Magic Link ou OTP) ?',
+        initialValue: false
+      });
+
+      if (p.isCancel(additionalAuth)) {
+        p.cancel('Installation annulée.');
+        process.exit(0);
+      }
+
+      if (additionalAuth) {
+        const emailAuthType = await p.select({
+          message: 'Type d\'authentification par email',
+          options: [
+            { value: 'magiclink', label: 'Magic Link', hint: 'Lien de connexion par email' },
+            { value: 'otp', label: 'OTP', hint: 'Code à usage unique' }
+          ],
+          initialValue: 'magiclink'
+        });
+
+        if (p.isCancel(emailAuthType)) {
+          p.cancel('Installation annulée.');
+          process.exit(0);
+        }
+
+        // Ajouter la méthode au tableau authMethods si elle n'existe pas déjà
+        if (!answers.authMethods.includes(emailAuthType)) {
+          answers.authMethods.push(emailAuthType);
+        }
+      }
+    }
 
   } else if (emailProvider === 'smtp') {
     const smtpHost = await p.text({
@@ -432,6 +528,12 @@ ${chalk.gray('Générateur de SaaS Next.js 16')}`));
   answers.paymentsEnabled = paymentsEnabled;
 
   if (paymentsEnabled) {
+    p.note(
+      chalk.cyan('🔗 Récupérer vos clés API:') + ' https://dashboard.stripe.com/test/apikeys\n' +
+      chalk.gray('Utiliser les clés de test pour le développement'),
+      'Configuration Stripe'
+    );
+
     const stripePublicKey = await p.password({
       message: 'Clé publique Stripe (pk_test_...)',
       validate: (input) => {
@@ -491,39 +593,82 @@ ${chalk.gray('Générateur de SaaS Next.js 16')}`));
 
   const availableLanguages = allLanguages.filter(lang => lang.value !== i18nDefaultLanguage);
 
+  // Ajouter une option "Aucune" en premier
+  const languageOptions = [
+    { value: 'none', label: `Aucune (uniquement ${i18nDefaultLanguage})` },
+    ...availableLanguages
+  ];
+
+  p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout • Entrée = valider'), 'Astuce');
+
   const i18nLanguages = await p.multiselect({
     message: `Langues supplémentaires (langue par défaut : ${i18nDefaultLanguage})`,
-    options: availableLanguages,
-    required: false
+    options: languageOptions,
+    required: false,
+    initialValues: ['none']
   });
 
   if (p.isCancel(i18nLanguages)) {
     p.cancel('Installation annulée.');
     process.exit(0);
   }
-  answers.i18nLanguages = i18nLanguages;
+
+  // Si "none" est sélectionné, vider le tableau
+  if (i18nLanguages.includes('none')) {
+    answers.i18nLanguages = [];
+  } else {
+    answers.i18nLanguages = i18nLanguages;
+  }
 
   // 10. IA pour utilisateurs finaux
+  p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout • Entrée = valider'), 'Astuce');
+
   const aiProviders = await p.multiselect({
-    message: 'Quelles IA souhaitez-vous proposer à vos utilisateurs finaux ?',
+    message: 'Souhaitez-vous proposer aux utilisateurs finaux de votre SAAS des fonctionnalités IA ?',
     options: [
+      { value: 'none', label: 'Ignorer pour le moment' },
       { value: 'claude', label: 'Claude', hint: 'Anthropic' },
-      { value: 'openai', label: 'ChatGPT', hint: 'OpenAI' },
-      { value: 'gemini', label: 'Gemini', hint: 'Google' }
+      { value: 'gemini', label: 'Gemini', hint: 'Google' },
+      { value: 'openai', label: 'ChatGPT', hint: 'OpenAI' }
     ],
-    required: false
+    required: false,
+    initialValues: ['none']
   });
 
   if (p.isCancel(aiProviders)) {
     p.cancel('Installation annulée.');
     process.exit(0);
   }
-  answers.aiProviders = aiProviders;
+
+  // Si "none" est sélectionné, vider le tableau
+  if (aiProviders.includes('none')) {
+    answers.aiProviders = [];
+  } else {
+    answers.aiProviders = aiProviders;
+  }
 
   // Demander les clés API pour chaque IA sélectionnée
-  if (aiProviders.length > 0) {
-    for (const provider of aiProviders) {
+  if (answers.aiProviders.length > 0) {
+    for (const provider of answers.aiProviders) {
       const providerName = provider === 'claude' ? 'Anthropic' : provider === 'openai' ? 'OpenAI' : 'Google';
+
+      // Afficher le lien pour récupérer la clé API
+      if (provider === 'claude') {
+        p.note(
+          chalk.cyan('🔗 Récupérer votre clé API:') + ' https://console.anthropic.com/settings/keys',
+          'Configuration Claude (Anthropic)'
+        );
+      } else if (provider === 'openai') {
+        p.note(
+          chalk.cyan('🔗 Récupérer votre clé API:') + ' https://platform.openai.com/api-keys',
+          'Configuration ChatGPT (OpenAI)'
+        );
+      } else if (provider === 'gemini') {
+        p.note(
+          chalk.cyan('🔗 Récupérer votre clé API:') + ' https://aistudio.google.com/app/apikey',
+          'Configuration Gemini (Google)'
+        );
+      }
 
       const apiKey = await p.password({
         message: `Clé API ${providerName}`,

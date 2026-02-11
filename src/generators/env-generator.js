@@ -30,6 +30,12 @@ export function generateEnvFile(config) {
     lines.push(`GITHUB_CLIENT_SECRET="${sanitizeForEnv(config.auth.githubClientSecret)}"`);
     lines.push(`NEXT_PUBLIC_GITHUB_CLIENT_ID="${sanitizeForEnv(config.auth.githubClientId)}"`);
   }
+
+  if (config.auth.methods.includes('google')) {
+    lines.push(`GOOGLE_CLIENT_ID="${sanitizeForEnv(config.auth.googleClientId)}"`);
+    lines.push(`GOOGLE_CLIENT_SECRET="${sanitizeForEnv(config.auth.googleClientSecret)}"`);
+    lines.push(`NEXT_PUBLIC_GOOGLE_CLIENT_ID="${sanitizeForEnv(config.auth.googleClientId)}"`);
+  }
   lines.push('');
 
   // Storage
