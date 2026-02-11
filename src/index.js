@@ -190,28 +190,58 @@ ____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
     console.log('Un problème ? ' + chalk.cyan.underline(githubUrl));
     console.log('');
 
-    // 3. Première fois - Démarrer le projet
-    console.log(chalk.bold('🚀 Démarrer le projet pour la première fois :'));
-    console.log('');
-    console.log(chalk.cyan(`  cd ${config.projectName}`));
+    // 3. Première fois et Astuce en 2 colonnes
+    const terminalWidth = process.stdout.columns || 120;
+    const columnWidth = Math.floor((terminalWidth - 10) / 2); // 10 pour les marges
+
+    // Colonne gauche : Première fois
+    const leftLines = [
+      chalk.bold('🚀 Démarrer le projet pour la première fois :'),
+      '',
+      chalk.cyan(`  cd ${config.projectName}`)
+    ];
 
     if (config.database.type === 'docker' || (config.storage.enabled && config.storage.type === 'minio')) {
-      console.log(chalk.cyan('  npm run docker:up    ') + chalk.gray('# Démarre PostgreSQL'));
+      leftLines.push(chalk.cyan('  npm run docker:up    ') + chalk.gray('# Démarre PostgreSQL'));
     }
 
-    console.log(chalk.cyan('  npm run db:push      ') + chalk.gray('# Crée les tables'));
-    console.log(chalk.cyan('  npm run dev          ') + chalk.gray('# Lance le serveur'));
-    console.log('');
+    leftLines.push(chalk.cyan('  npm run db:push      ') + chalk.gray('# Crée les tables'));
+    leftLines.push(chalk.cyan('  npm run dev          ') + chalk.gray('# Lance le serveur'));
 
-    // 4. Astuce : Prochaines fois dans un bloc
+    // Colonne droite : Astuce (seulement si Docker)
+    const rightLines = [];
     if (config.database.type === 'docker') {
-      const astuceLignes = [
+      // Créer le bloc d'astuce manuellement avec bordures
+      const astuceTitle = '💡 Astuce pour les prochaines fois (après redémarrage) :';
+      const astuceContent = [
         chalk.cyan('  npm run docker:up    ') + chalk.gray('# Redémarre PostgreSQL (données conservées ✅)'),
         chalk.cyan('  npm run dev          ') + chalk.gray('# Lance le serveur (pas besoin de db:push)')
       ];
-      p.note(astuceLignes.join('\n'), '💡 Astuce pour les prochaines fois (après redémarrage) :');
-      console.log('');
+
+      const astuceWidth = columnWidth - 4;
+      rightLines.push('┌─ ' + astuceTitle + ' ' + '─'.repeat(Math.max(0, astuceWidth - astuceTitle.length - 3)));
+      rightLines.push('│');
+      astuceContent.forEach(line => {
+        rightLines.push('│  ' + line);
+      });
+      rightLines.push('│');
+      rightLines.push('└' + '─'.repeat(astuceWidth + 2));
     }
+
+    // Afficher les deux colonnes côte à côte
+    const maxLines = Math.max(leftLines.length, rightLines.length);
+    for (let i = 0; i < maxLines; i++) {
+      const left = leftLines[i] || '';
+      const right = rightLines[i] || '';
+
+      // Calculer la longueur visible (sans codes ANSI)
+      const leftVisible = left.replace(/\u001b\[[0-9;]*m/g, '');
+      const padding = ' '.repeat(Math.max(0, columnWidth - leftVisible.length + 5));
+
+      console.log(left + padding + right);
+    }
+
+    console.log('');
 
     console.log(chalk.green('✨ Bon développement ! 🚀'));
     console.log('');
