@@ -130,18 +130,18 @@ ____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
     // 2. Générer package.json
     const packageJsonContent = generatePackageJson(config);
     writeFile(path.join(projectPath, 'package.json'), packageJsonContent);
-    logger.success('package.json créé');
+    logger.success('package.json créé' + chalk.gray('                       # Liste des dépendances'));
 
     // 3. Générer .env
     const envContent = generateEnvFile(config);
     writeFile(path.join(projectPath, '.env'), envContent);
-    logger.success('.env créé');
+    logger.success('.env créé' + chalk.gray('                               # Variables secrètes (mots de passe, clés API)'));
 
     // 4. Générer docker-compose.yml (si nécessaire)
     const dockerContent = generateDockerCompose(config);
     if (dockerContent) {
       writeFile(path.join(projectPath, 'docker-compose.yml'), dockerContent);
-      logger.success('docker-compose.yml créé');
+      logger.success('docker-compose.yml créé' + chalk.gray('                 # Configuration PostgreSQL'));
     }
 
     // 5. Générer .claude/README.md et créer les dossiers skills/agents
@@ -152,11 +152,11 @@ ____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
     fs.mkdirSync(path.join(projectPath, '.claude/skills'), { recursive: true });
     fs.mkdirSync(path.join(projectPath, '.claude/agents'), { recursive: true });
 
-    logger.success('.claude/README.md créé');
+    logger.success('.claude/README.md créé' + chalk.gray('                  # Documentation pour Claude Code'));
 
     // 6. Récupérer la liste des skills (déjà copiés avec les templates)
     const installedSkills = await installSkills(projectPath, config);
-    logger.success('Skills Claude Code générés');
+    logger.success('Skills Claude Code générés' + chalk.gray('              # Guides de développement IA'));
 
     // 7. Installer les dépendances
     logger.newline();

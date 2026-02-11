@@ -3,6 +3,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { copyDirectory, writeFile } from '../utils/file-utils.js';
 import { logger } from '../utils/logger.js';
+import chalk from 'chalk';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -80,7 +81,7 @@ export function generateNextjsProject(projectPath, config) {
   // Copier les variantes conditionnelles
   copyConditionalVariants(projectPath, config);
 
-  logger.success('Structure du projet Next.js créée');
+  logger.success('Structure du projet Next.js créée' + chalk.gray('     # Votre application web'));
 }
 
 /**
