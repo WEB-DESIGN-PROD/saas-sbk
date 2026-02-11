@@ -37,8 +37,9 @@ function centerText(text, stripAnsi = false) {
 /**
  * Crée un lien cliquable dans le terminal (OSC 8)
  */
-function createLink(url, text) {
-  return `\x1b]8;;${url}\x1b\\${text}\x1b]8;;\x1b\\`;
+function createLink(url, text, color = chalk.blue) {
+  // Format: OSC 8 ; ; URL ST TEXT OSC 8 ; ; ST
+  return `\x1b]8;;${url}\x1b\\${color(text)}\x1b]8;;\x1b\\`;
 }
 
 /**
@@ -65,11 +66,16 @@ function showHeader(answers = {}) {
   // Baselines centrées
   const baseline1 = chalk.gray(`Générateur de SaaS Next.js • v${version}`);
   const githubIcon = ''; // Logo GitHub (Nerd Font)
-  const githubLink = createLink('https://github.com/WEB-DESIGN-PROD/saas-sbk/issues', chalk.blue(`${githubIcon} GitHub`));
-  const baseline2 = chalk.gray('Signaler un problème sur ') + githubLink;
+  const githubLink = createLink('https://github.com/WEB-DESIGN-PROD/saas-sbk/issues', `${githubIcon} GitHub`, chalk.blue);
+
+  // Pour le centrage de la baseline2, on calcule manuellement
+  const baseline2VisibleText = `Signaler un problème sur ${githubIcon} GitHub`;
+  const terminalWidth = process.stdout.columns || 80;
+  const padding = Math.max(0, Math.floor((terminalWidth - baseline2VisibleText.length) / 2));
+  const baseline2 = ' '.repeat(padding) + chalk.gray('Signaler un problème sur ') + githubLink;
 
   console.log(centerText(baseline1, true));
-  console.log(centerText(baseline2, true));
+  console.log(baseline2);
   console.log('');
 
   // Afficher les réponses validées de façon compacte
