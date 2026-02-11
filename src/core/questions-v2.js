@@ -222,24 +222,7 @@ export async function askQuestions() {
   }
   answers.projectName = projectName;
 
-  // 2. Thème
-  showHeader(answers);
-  const theme = await p.select({
-    message: 'Thème par défaut',
-    options: [
-      { value: 'dark', label: '🌙 Sombre' },
-      { value: 'light', label: '☀️  Clair' }
-    ],
-    initialValue: 'dark'
-  });
-
-  if (p.isCancel(theme)) {
-    p.cancel('Installation annulée.');
-    process.exit(0);
-  }
-  answers.theme = theme;
-
-  // 3. Base de données avec boucle pour confirmation si "skip"
+  // 2. Base de données avec boucle pour confirmation si "skip"
   let databaseConfigured = false;
   while (!databaseConfigured) {
     showHeader(answers);
@@ -915,7 +898,24 @@ export async function askQuestions() {
     answers.aiProviders = [];
   }
 
-  // 11. Claude Code
+  // 11. Thème
+  showHeader(answers);
+  const theme = await p.select({
+    message: 'Thème par défaut',
+    options: [
+      { value: 'dark', label: '🌙 Sombre' },
+      { value: 'light', label: '☀️  Clair' }
+    ],
+    initialValue: 'dark'
+  });
+
+  if (p.isCancel(theme)) {
+    p.cancel('Installation annulée.');
+    process.exit(0);
+  }
+  answers.theme = theme;
+
+  // 12. Claude Code
   showHeader(answers);
   const claudeCodeInstalled = await p.confirm({
     message: 'Avez-vous Claude Code CLI installé ?',
