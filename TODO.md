@@ -1,59 +1,28 @@
 # TODO - create-saas-sbk
 
-## ⚠️ URGENT - Gestion du cas "Ignorer base de données"
-
-### Contexte
-Lorsque l'utilisateur choisit "Ignorer pour l'instant" pour la base de données :
-- Le flag `skipAuth` est activé
-- La question d'authentification est passée
-- `authMethods` est un tableau vide
-
-### À faire
-Gérer ce cas dans la génération des templates :
-
-**Fichiers à modifier :**
-- `src/generators/nextjs-generator.js`
-- `src/templates/nextjs-base/`
-
-**Actions requises :**
-1. Détecter si `config.database.type === 'skip'`
-2. Générer un template **sans** Better Auth si skip
-3. Ne pas générer les fichiers d'authentification
-4. Ne pas installer les dépendances liées à l'auth (better-auth, prisma)
-5. Afficher un message dans le README du projet généré expliquant :
-   - Que l'auth n'est pas configurée
-   - Comment la configurer plus tard
-6. Créer un dashboard simple sans gestion de session
-
-**Alternative :**
-- Générer quand même les fichiers d'auth mais avec des commentaires TODO
-- Créer un guide `.claude/AUTH_SETUP.md` pour aider à configurer plus tard
-
----
-
-## ✅ UX - Migration vers @clack/prompts (TERMINÉ)
+## ✅ UX - Migration vers @clack/prompts (TERMINÉ et FUSIONNÉ)
 
 ### Problème résolu
 Inquirer affichait des messages d'aide en anglais qui ne pouvaient pas être supprimés sans casser le rendu du CLI.
 
 ### Solution implémentée ✅
 
-**Migration complétée le 2026-02-11**
+**Migration complétée le 2026-02-11 et fusionnée dans `main`**
 - ✅ Remplacement complet d'inquirer par @clack/prompts
 - ✅ Interface visuelle moderne sans messages anglais
-- ✅ Meilleure UX avec hints et labels clairs
+- ✅ Logo persistant avec version dynamique
+- ✅ Liens cliquables vers services externes
+- ✅ Récapitulatif en colonnes
+- ✅ OAuth GitHub + Google
+- ✅ Magic Link / OTP avec Resend
+- ✅ Alignement automatique des commentaires explicatifs
 - ✅ Gestion native des annulations (Ctrl+C)
-- ✅ Spinner élégant pour l'animation finale
 - ✅ Tests fonctionnels réussis
 
-**Fichiers migrés :**
-- ✅ `src/core/questions-v2.js` - Réécriture complète avec API @clack/prompts
-- ✅ `src/core/summary.js` - Conversion vers @clack/prompts
-- ✅ `package.json` - Dépendances mises à jour
-
-**Commit :** `b9030dd` sur la branche `ux/migration-clack-prompts`
-
-**Prochaine étape :** Tester en conditions réelles et fusionner dans `main` si approuvé
+**Améliorations supplémentaires :**
+- ✅ 45 commits sur la branche `ux/migration-clack-prompts`
+- ✅ Fusionné dans `main` le 11 février 2026
+- ✅ Branche supprimée après fusion
 
 ---
 
@@ -75,9 +44,17 @@ Inquirer affichait des messages d'aide en anglais qui ne pouvaient pas être sup
   - Générer le schema.prisma adapté
   - Pas besoin de Docker ni credentials
 
+### Authentification
+
+- [x] **OAuth GitHub** - Implémenté
+- [x] **OAuth Google** - Implémenté
+- [x] **Magic Link / OTP** - Implémenté avec Resend
+- [ ] **Forgot password** - À implémenter
+- [ ] **Email verification** - À implémenter
+
 ### Templates Next.js
 
-- [ ] **Template sans système de connexion** (quand base de données = "Aucune")
+- [ ] **Template sans système de connexion** (pour futurs cas sans DB)
   - Dashboard simple sans Better Auth
   - Pas de pages login/register
   - Pas de gestion de session

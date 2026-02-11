@@ -1,6 +1,6 @@
 # 🗺️ Roadmap - create-saas-sbk
 
-## ✅ v0.4.5 - 9 février 2026 (ACTUELLE)
+## ✅ v0.4.5 - 11 février 2026 (ACTUELLE)
 
 ### 🚀 Migration Next.js 16
 - ✅ Migration de Next.js 15 vers Next.js 16.1.6
@@ -11,37 +11,32 @@
 - ✅ Corrections CSS (webkit-scrollbar)
 
 ### 🎨 Amélioration UX du CLI
-- ✅ Questions interactives v2 avec interface moderne
+- ✅ **Migration vers @clack/prompts** - Interface moderne sans messages anglais
+- ✅ Questions interactives avec interface élégante
 - ✅ Instructions en français pour chaque question
   - "💡 Flèches ↑↓ = naviguer • Entrée = valider"
-  - "💡 Espace = cocher/décocher • a = tout cocher • i = inverser • Entrée = valider"
-- ✅ Affichage des choix en temps réel dans le header
-- ✅ Animation discrète avant le récapitulatif
-- ✅ Logo persistant pendant toute la configuration
-- ✅ Curseur caché pendant les animations
-- ✅ Récapitulatif renommé : "📋 Récap' de votre SAAS"
+  - "💡 Espace = cocher/décocher • a = tout sélectionner • Entrée = valider"
+- ✅ Logo persistant avec version dynamique et lien GitHub cliquable
+- ✅ Liens cliquables vers services externes (Resend, Stripe, APIs IA)
+- ✅ Récapitulatif en colonnes : "📋 Récap' de votre SAAS"
+- ✅ Alignement automatique des commentaires explicatifs
+- ✅ OAuth GitHub + Google
+- ✅ Magic Link / OTP avec Resend
 
-### 🗄️ Nouvelles options de base de données
-- ✅ PostgreSQL local Docker (existant)
-- ✅ PostgreSQL distant (existant)
-- ✅ **MongoDB local avec Docker** (nouveau)
-- ✅ **MongoDB distant (Atlas, etc.)** (nouveau)
-- ✅ **SQLite (fichier local)** (nouveau)
-- ✅ **Ignorer pour l'instant** (nouveau)
-  - Message d'avertissement clair
-  - Confirmation obligatoire
-  - Skip automatique de l'authentification
-  - Possibilité de revenir en arrière
+### 🗄️ Options de base de données
+- ✅ PostgreSQL local Docker
+- ✅ PostgreSQL distant (Neon, Supabase)
+- 📅 **MongoDB local avec Docker** (planifié)
+- 📅 **MongoDB distant (Atlas, etc.)** (planifié)
+- 📅 **SQLite (fichier local)** (planifié)
 
 ### ⚙️ Améliorations de configuration
-- ✅ Email : option "Ignorer pour le moment" par défaut
-- ✅ Langues supplémentaires : "Aucune" par défaut et en premier
+- ✅ Langues supplémentaires : confirmation puis sélection avec US pré-coché
+- ✅ IA : confirmation puis sélection avec Claude pré-coché
 - ✅ IA : Choix multiples possibles (plusieurs providers en même temps)
-- ✅ IA : "Aucune" par défaut et en premier
-- ✅ Base de données : "Ignorer" par défaut
-- ✅ Alignement visuel des options sans emoji
-- ✅ Emojis 🐳 pour Docker (PostgreSQL et MongoDB)
-- ✅ Mot de passe PostgreSQL : valeur par défaut masquée
+- ✅ Thème : déplacé à la fin (avant Claude Code)
+- ✅ Emojis : uniquement Docker 🐳 conservé
+- ✅ Mot de passe PostgreSQL : valeur par défaut masquée avec initialValue
 
 ### 🐛 Corrections de bugs
 - ✅ Correction compteur [11/10] → [11/11]
@@ -109,11 +104,11 @@
 - [ ] **Authentification complète**
   - [x] Login avec Better Auth
   - [x] Register
+  - [x] OAuth GitHub
+  - [x] OAuth Google
+  - [x] Magic Link / OTP avec Resend
   - [ ] Forgot password
   - [ ] Email verification
-  - [ ] Magic Link fonctionnel
-  - [ ] OAuth GitHub complet
-  - [ ] OAuth Google (à ajouter)
 
 ### 🌍 Internationalisation
 - [ ] Fichiers de traduction complets (fr, en, es, de)
@@ -179,8 +174,8 @@
 
 ## 📊 Métriques de progression
 
-**Phase 1 :** 100% ✅ (CLI fonctionnel)
-**Phase 2 :** 30% 🚧 (Templates de base + dashboard)
+**Phase 1 :** 100% ✅ (CLI fonctionnel avec @clack/prompts)
+**Phase 2 :** 40% 🚧 (Templates de base + dashboard + OAuth complet)
 **Phase 3 :** 0% 📅 (Planifié)
 **Phase 4 :** 0% 💭 (Vision)
 
@@ -189,14 +184,15 @@
 ## 🎯 Priorités immédiates
 
 1. ✅ Migration Next.js 16 - **FAIT**
-2. ✅ UX du CLI améliorée - **FAIT**
-3. 🚧 Templates sans base de données
-4. 🚧 Templates multilingues complets
-5. 🚧 Configuration MongoDB/SQLite complète
-6. 📅 Migration vers @clack/prompts
-7. 📅 Landing page moderne
-8. 📅 Dashboard analytics
+2. ✅ Migration vers @clack/prompts - **FAIT**
+3. ✅ UX du CLI améliorée - **FAIT**
+4. ✅ OAuth Google - **FAIT**
+5. ✅ Magic Link / OTP - **FAIT**
+6. 🚧 Templates multilingues complets
+7. 📅 Configuration MongoDB/SQLite
+8. 📅 Landing page moderne
+9. 📅 Dashboard analytics
 
 ---
 
-Dernière mise à jour : 9 février 2026
+Dernière mise à jour : 11 février 2026
