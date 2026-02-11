@@ -822,80 +822,84 @@ export async function askQuestions() {
     answers.i18nLanguages = [];
   }
 
-  // 10. IA pour utilisateurs finaux
+  // 10. IA pour utilisateurs finaux - d'abord demander si l'utilisateur en veut
   showHeader(answers);
-  p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout • Entrée = valider'), 'Astuce');
 
-  const aiProviders = await p.multiselect({
+  const wantsAI = await p.confirm({
     message: 'Souhaitez-vous proposer aux utilisateurs finaux de votre SAAS des fonctionnalités IA ?',
-    options: [
-      { value: 'none', label: 'Ignorer pour le moment' },
-      { value: 'claude', label: 'Claude', hint: 'Anthropic' },
-      { value: 'gemini', label: 'Gemini', hint: 'Google' },
-      { value: 'openai', label: 'ChatGPT', hint: 'OpenAI' }
-    ],
-    required: false,
-    initialValues: ['none']
+    initialValue: false
   });
 
-  if (p.isCancel(aiProviders)) {
+  if (p.isCancel(wantsAI)) {
     p.cancel('Installation annulée.');
     process.exit(0);
   }
 
-  // Si "none" est sélectionné avec d'autres IA, retirer "none"
-  // Si seulement "none", vider le tableau
-  if (aiProviders.includes('none')) {
-    if (aiProviders.length > 1) {
-      // Retirer "none" et garder les autres IA
-      answers.aiProviders = aiProviders.filter(provider => provider !== 'none');
-    } else {
-      // Seulement "none" sélectionné = aucune IA
-      answers.aiProviders = [];
+  if (wantsAI) {
+    // Proposer le choix des providers IA
+    showHeader(answers);
+    p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout • Entrée = valider'), 'Astuce');
+
+    const aiProviders = await p.multiselect({
+      message: 'Sélectionnez les providers IA à intégrer',
+      options: [
+        { value: 'claude', label: 'Claude', hint: 'Anthropic' },
+        { value: 'openai', label: 'ChatGPT', hint: 'OpenAI' },
+        { value: 'gemini', label: 'Gemini', hint: 'Google' }
+      ],
+      required: false
+    });
+
+    if (p.isCancel(aiProviders)) {
+      p.cancel('Installation annulée.');
+      process.exit(0);
+    }
+
+    answers.aiProviders = aiProviders;
+
+    // Demander les clés API pour chaque IA sélectionnée
+    if (answers.aiProviders.length > 0) {
+      for (const provider of answers.aiProviders) {
+        const providerName = provider === 'claude' ? 'Anthropic' : provider === 'openai' ? 'OpenAI' : 'Google';
+
+        showHeader(answers);
+
+        // Afficher le lien pour récupérer la clé API
+        if (provider === 'claude') {
+          p.note(
+            chalk.cyan('🔗 Récupérer votre clé API:') + ' https://console.anthropic.com/settings/keys',
+            'Configuration Claude (Anthropic)'
+          );
+        } else if (provider === 'openai') {
+          p.note(
+            chalk.cyan('🔗 Récupérer votre clé API:') + ' https://platform.openai.com/api-keys',
+            'Configuration ChatGPT (OpenAI)'
+          );
+        } else if (provider === 'gemini') {
+          p.note(
+            chalk.cyan('🔗 Récupérer votre clé API:') + ' https://aistudio.google.com/app/apikey',
+            'Configuration Gemini (Google)'
+          );
+        }
+
+        const apiKey = await p.password({
+          message: `Clé API ${providerName}`,
+          validate: (value) => {
+            const result = validateApiKey(value);
+            return result === true ? undefined : result;
+          }
+        });
+
+        if (p.isCancel(apiKey)) {
+          p.cancel('Installation annulée.');
+          process.exit(0);
+        }
+        answers[`${provider}ApiKey`] = apiKey;
+      }
     }
   } else {
-    answers.aiProviders = aiProviders;
-  }
-
-  // Demander les clés API pour chaque IA sélectionnée
-  if (answers.aiProviders.length > 0) {
-    for (const provider of answers.aiProviders) {
-      const providerName = provider === 'claude' ? 'Anthropic' : provider === 'openai' ? 'OpenAI' : 'Google';
-
-      showHeader(answers);
-
-      // Afficher le lien pour récupérer la clé API
-      if (provider === 'claude') {
-        p.note(
-          chalk.cyan('🔗 Récupérer votre clé API:') + ' https://console.anthropic.com/settings/keys',
-          'Configuration Claude (Anthropic)'
-        );
-      } else if (provider === 'openai') {
-        p.note(
-          chalk.cyan('🔗 Récupérer votre clé API:') + ' https://platform.openai.com/api-keys',
-          'Configuration ChatGPT (OpenAI)'
-        );
-      } else if (provider === 'gemini') {
-        p.note(
-          chalk.cyan('🔗 Récupérer votre clé API:') + ' https://aistudio.google.com/app/apikey',
-          'Configuration Gemini (Google)'
-        );
-      }
-
-      const apiKey = await p.password({
-        message: `Clé API ${providerName}`,
-        validate: (value) => {
-          const result = validateApiKey(value);
-          return result === true ? undefined : result;
-        }
-      });
-
-      if (p.isCancel(apiKey)) {
-        p.cancel('Installation annulée.');
-        process.exit(0);
-      }
-      answers[`${provider}ApiKey`] = apiKey;
-    }
+    // Pas de fonctionnalités IA
+    answers.aiProviders = [];
   }
 
   // 11. Claude Code
