@@ -846,7 +846,7 @@ export async function askQuestions() {
         { value: 'openai', label: 'ChatGPT', hint: 'OpenAI' },
         { value: 'gemini', label: 'Gemini', hint: 'Google' }
       ],
-      required: false
+      required: true
     });
 
     if (p.isCancel(aiProviders)) {
@@ -854,7 +854,7 @@ export async function askQuestions() {
       process.exit(0);
     }
 
-    answers.aiProviders = aiProviders;
+    answers.aiProviders = Array.isArray(aiProviders) ? aiProviders : [];
 
     // Demander les clés API pour chaque IA sélectionnée
     if (answers.aiProviders.length > 0) {
