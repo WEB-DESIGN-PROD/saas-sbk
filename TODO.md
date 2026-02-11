@@ -31,54 +31,29 @@ Gérer ce cas dans la génération des templates :
 
 ---
 
-## 🎨 UX - Migration vers @clack/prompts
+## ✅ UX - Migration vers @clack/prompts (TERMINÉ)
 
-### Problème actuel
-Inquirer affiche des messages d'aide en anglais qui ne peuvent pas être supprimés sans casser le rendu du CLI :
-- `(Use arrow keys)`
-- `(Press <space> to select, <a> to toggle all, <i> to invert selection, and <enter> to proceed)`
+### Problème résolu
+Inquirer affichait des messages d'aide en anglais qui ne pouvaient pas être supprimés sans casser le rendu du CLI.
 
-Toute tentative de filtrage/remplacement via stdout casse le système de mise à jour dynamique des checkboxes.
+### Solution implémentée ✅
 
-### Solution : Migrer vers @clack/prompts
+**Migration complétée le 2026-02-11**
+- ✅ Remplacement complet d'inquirer par @clack/prompts
+- ✅ Interface visuelle moderne sans messages anglais
+- ✅ Meilleure UX avec hints et labels clairs
+- ✅ Gestion native des annulations (Ctrl+C)
+- ✅ Spinner élégant pour l'animation finale
+- ✅ Tests fonctionnels réussis
 
-**Pourquoi @clack/prompts ?**
-- ✅ Pas de messages d'aide anglais par défaut
-- ✅ Interface visuelle plus moderne et belle
-- ✅ Meilleure UX (spinners, multi-select élégants, etc.)
-- ✅ Package activement maintenu (créé par l'équipe Vercel/Astro)
-- ✅ API similaire à inquirer
+**Fichiers migrés :**
+- ✅ `src/core/questions-v2.js` - Réécriture complète avec API @clack/prompts
+- ✅ `src/core/summary.js` - Conversion vers @clack/prompts
+- ✅ `package.json` - Dépendances mises à jour
 
-**Estimation :** 2-3 heures de travail
+**Commit :** `b9030dd` sur la branche `ux/migration-clack-prompts`
 
-**Fichiers à migrer :**
-- `src/core/questions-v2.js` - Réécrire toutes les questions avec l'API de @clack/prompts
-
-**Exemple de migration :**
-```javascript
-// Avant (inquirer)
-const { authMethods } = await inquirer.prompt([{
-  type: 'checkbox',
-  name: 'authMethods',
-  message: 'Méthodes d\'authentification :',
-  choices: [...]
-}]);
-
-// Après (@clack/prompts)
-const authMethods = await p.multiselect({
-  message: 'Méthodes d\'authentification :',
-  options: [
-    { value: 'email', label: 'Email/Mot de passe' },
-    { value: 'github', label: 'OAuth GitHub' }
-  ]
-});
-```
-
-**Packages à ajouter :**
-```bash
-npm install @clack/prompts
-npm uninstall inquirer
-```
+**Prochaine étape :** Tester en conditions réelles et fusionner dans `main` si approuvé
 
 ---
 
