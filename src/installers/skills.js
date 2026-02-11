@@ -44,14 +44,10 @@ function getSkillsForConfig(config) {
 export async function installSkills(projectPath, config) {
   const skillFiles = getSkillsForConfig(config);
 
-  logger.step(`${skillFiles.length} skills inclus dans le projet`);
-
   const installedSkills = skillFiles.map(fileName => ({
     name: fileName.replace('.md', '').split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
     fileName: fileName
   }));
-
-  logger.success(`Skills disponibles dans .claude/skills/`);
 
   return installedSkills;
 }

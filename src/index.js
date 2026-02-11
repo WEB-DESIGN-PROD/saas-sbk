@@ -154,14 +154,13 @@ ____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
 
     logger.success('.claude/README.md créé');
 
-    // 6. Installer les dépendances
-    logger.newline();
-    await installDependencies(projectPath);
-
-    // 7. Récupérer la liste des skills (déjà copiés avec les templates)
-    logger.newline();
+    // 6. Récupérer la liste des skills (déjà copiés avec les templates)
     const installedSkills = await installSkills(projectPath, config);
     logger.success('Skills Claude Code générés');
+
+    // 7. Installer les dépendances
+    logger.newline();
+    await installDependencies(projectPath);
 
     // 8. Générer CLAUDE.md avec les skills installés
     logger.newline();

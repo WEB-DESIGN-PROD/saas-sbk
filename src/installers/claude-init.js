@@ -77,16 +77,10 @@ function generateClaudeMd(config, installedSkills) {
  * Génère le fichier CLAUDE.md automatiquement
  */
 export function initClaude(projectPath, config, installedSkills = []) {
-  logger.step('Génération du fichier CLAUDE.md...');
-
   try {
     const claudeMdContent = generateClaudeMd(config, installedSkills);
     writeFile(path.join(projectPath, 'CLAUDE.md'), claudeMdContent);
-
-    logger.success('CLAUDE.md créé avec la liste des skills');
-    logger.info('');
-    logger.info('💡 Votre projet est prêt pour Claude Code !');
-    logger.info('   Lancez "claude" dans le répertoire du projet pour démarrer.');
+    logger.success('CLAUDE.md créé');
   } catch (error) {
     logger.warn('Échec de la génération de CLAUDE.md (non bloquant)');
   }
