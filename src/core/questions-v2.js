@@ -1,5 +1,8 @@
 import * as p from '@clack/prompts';
 import chalk from 'chalk';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import {
   validateProjectName,
   validatePassword,
@@ -13,6 +16,12 @@ import {
   validateClientSecret,
   validateHostname
 } from './validation.js';
+
+// Récupérer la version depuis package.json
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(readFileSync(join(__dirname, '../../package.json'), 'utf-8'));
+const version = packageJson.version;
 
 /**
  * Pose toutes les questions avec l'interface moderne de @clack/prompts
@@ -28,7 +37,8 @@ _____ \\__  /| |_  /| |____ \\     _____ \\__  __  |_  ,<
 ____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
 /____/ /_/  |_/_/  |_/____/      /____/ /_____/ /_/ |_|
 
-${chalk.gray('Générateur de SaaS Next.js 16')}`));
+${chalk.gray('Générateur de SaaS Next.js 16')}
+${chalk.gray(`v${version}`)} • ${chalk.blue('https://github.com/WEB-DESIGN-PROD/saas-sbk/issues')}`));
 
   const answers = {};
 
