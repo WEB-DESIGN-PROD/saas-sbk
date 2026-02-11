@@ -15,81 +15,134 @@ function maskSensitive(value) {
 }
 
 /**
+ * Crée une ligne en deux colonnes
+ */
+function twoColumns(left, right, columnWidth = 45) {
+  const leftStripped = left.replace(/\u001b\[[0-9;]*m/g, ''); // Retirer codes ANSI pour calculer longueur
+  const padding = ' '.repeat(Math.max(0, columnWidth - leftStripped.length));
+  return left + padding + right;
+}
+
+/**
  * Affiche un récapitulatif de la configuration et demande confirmation
  */
 export async function showSummaryAndConfirm(config) {
   logger.newline();
   logger.title('📋 Récap\' de votre SAAS');
 
-  console.log(chalk.bold('Projet:'));
-  console.log(`  Nom: ${chalk.cyan(config.projectName)}`);
-  console.log(`  Thème: ${chalk.cyan(config.theme)}`);
-  logger.newline();
+  // Préparer les lignes pour chaque colonne
+  const leftColumn = [];
+  const rightColumn = [];
 
-  console.log(chalk.bold('Base de données:'));
-  console.log(`  Type: ${chalk.cyan(config.database.type === 'docker' ? 'PostgreSQL Docker' : 'PostgreSQL distant')}`);
-  if (config.database.type === 'docker') {
-    console.log(`  Utilisateur: ${chalk.cyan(config.database.user)}`);
-    console.log(`  Base: ${chalk.cyan(config.database.name)}`);
-    console.log(`  Mot de passe: ${chalk.yellow(maskSensitive(config.database.password))}`);
+  // ===== COLONNE GAUCHE =====
+
+  // Projet
+  leftColumn.push(chalk.bold('Projet'));
+  leftColumn.push(`  Nom: ${chalk.cyan(config.projectName)}`);
+  leftColumn.push(`  Thème: ${chalk.cyan(config.theme)}`);
+  leftColumn.push('');
+
+  // Base de données
+  leftColumn.push(chalk.bold('Base de données'));
+  if (config.database.type === 'skip') {
+    leftColumn.push(`  ${chalk.yellow('Aucune (à configurer)')}`);
+  } else if (config.database.type === 'docker') {
+    leftColumn.push(`  Type: ${chalk.cyan('PostgreSQL Docker 🐳')}`);
+    leftColumn.push(`  User: ${chalk.cyan(config.database.user)}`);
+    leftColumn.push(`  DB: ${chalk.cyan(config.database.name)}`);
+  } else if (config.database.type === 'remote') {
+    leftColumn.push(`  Type: ${chalk.cyan('PostgreSQL distant ☁️')}`);
+    leftColumn.push(`  URL: ${chalk.yellow(maskSensitive(config.database.url))}`);
+  } else if (config.database.type === 'mongodb-local') {
+    leftColumn.push(`  Type: ${chalk.cyan('MongoDB Docker 🐳')}`);
+  } else if (config.database.type === 'mongodb-remote') {
+    leftColumn.push(`  Type: ${chalk.cyan('MongoDB distant ☁️')}`);
+  } else if (config.database.type === 'sqlite') {
+    leftColumn.push(`  Type: ${chalk.cyan('SQLite')}`);
+  }
+  leftColumn.push('');
+
+  // Authentification
+  leftColumn.push(chalk.bold('Authentification'));
+  if (config.auth.methods.length === 0) {
+    leftColumn.push(`  ${chalk.yellow('Aucune (à configurer)')}`);
   } else {
-    console.log(`  URL: ${chalk.yellow(maskSensitive(config.database.url))}`);
-  }
-  logger.newline();
-
-  console.log(chalk.bold('Authentification:'));
-  console.log(`  Méthodes: ${chalk.cyan(config.auth.methods.join(', '))}`);
-  if (config.auth.methods.includes('github')) {
-    console.log(`  GitHub Client ID: ${chalk.yellow(maskSensitive(config.auth.githubClientId))}`);
-  }
-  logger.newline();
-
-  if (config.storage.enabled) {
-    console.log(chalk.bold('Stockage médias:'));
-    console.log(`  Type: ${chalk.cyan(config.storage.type === 'minio' ? 'MinIO Docker' : 'AWS S3')}`);
-    if (config.storage.type === 's3') {
-      console.log(`  Région: ${chalk.cyan(config.storage.s3Region)}`);
-      console.log(`  Bucket: ${chalk.cyan(config.storage.s3Bucket)}`);
+    leftColumn.push(`  ${chalk.cyan(config.auth.methods.join(', '))}`);
+    if (config.auth.methods.includes('github')) {
+      leftColumn.push(`  GitHub: ${chalk.yellow(maskSensitive(config.auth.githubClientId))}`);
     }
-    logger.newline();
+    if (config.auth.methods.includes('google')) {
+      leftColumn.push(`  Google: ${chalk.yellow(maskSensitive(config.auth.googleClientId))}`);
+    }
   }
 
-  console.log(chalk.bold('Emails:'));
+  // ===== COLONNE DROITE =====
+
+  // Emails
+  rightColumn.push(chalk.bold('Emails'));
   if (config.email.provider === 'skip') {
-    console.log(`  Provider: ${chalk.yellow('À configurer plus tard ⏭️')}`);
-  } else {
-    console.log(`  Provider: ${chalk.cyan(config.email.provider === 'resend' ? 'Resend 📮' : 'SMTP 📧')}`);
-    if (config.email.provider === 'smtp') {
-      console.log(`  Hôte: ${chalk.cyan(config.email.smtpHost)}`);
-      console.log(`  Port: ${chalk.cyan(config.email.smtpPort)}`);
-    }
+    rightColumn.push(`  ${chalk.yellow('À configurer ⏭️')}`);
+  } else if (config.email.provider === 'resend') {
+    rightColumn.push(`  ${chalk.cyan('Resend 📮')}`);
+  } else if (config.email.provider === 'smtp') {
+    rightColumn.push(`  ${chalk.cyan('SMTP 📧')}`);
+    rightColumn.push(`  ${chalk.cyan(config.email.smtpHost)}:${chalk.cyan(config.email.smtpPort)}`);
   }
-  logger.newline();
+  rightColumn.push('');
 
+  // Paiements
+  rightColumn.push(chalk.bold('Paiements'));
   if (config.payments.enabled) {
-    console.log(chalk.bold('Paiements:'));
-    console.log(`  Stripe: ${chalk.green('activé')}`);
-    logger.newline();
-  }
-
-  console.log(chalk.bold('Internationalisation:'));
-  console.log(`  Langue par défaut: ${chalk.cyan(config.i18n.defaultLanguage)}`);
-  console.log(`  Toutes les langues: ${chalk.cyan(config.i18n.languages.join(', '))}`);
-  if (config.i18n.languages.length > 1) {
-    console.log(`  ${chalk.green('✓')} next-intl sera installé (${config.i18n.languages.length} langues configurées)`);
+    rightColumn.push(`  ${chalk.green('Stripe activé 💳')}`);
   } else {
-    console.log(`  ${chalk.yellow('⚠')} next-intl ne sera pas installé (une seule langue)`);
+    rightColumn.push(`  ${chalk.gray('Non configuré')}`);
   }
-  logger.newline();
+  rightColumn.push('');
 
+  // Stockage
+  rightColumn.push(chalk.bold('Stockage médias'));
+  if (config.storage.enabled) {
+    if (config.storage.type === 'minio') {
+      rightColumn.push(`  ${chalk.cyan('MinIO Docker 🐳')}`);
+    } else {
+      rightColumn.push(`  ${chalk.cyan('AWS S3 ☁️')}`);
+      rightColumn.push(`  ${chalk.cyan(config.storage.s3Region)} / ${chalk.cyan(config.storage.s3Bucket)}`);
+    }
+  } else {
+    rightColumn.push(`  ${chalk.gray('Non configuré')}`);
+  }
+  rightColumn.push('');
+
+  // Internationalisation
+  rightColumn.push(chalk.bold('i18n'));
+  rightColumn.push(`  ${chalk.cyan(config.i18n.languages.join(', '))}`);
+  if (config.i18n.languages.length > 1) {
+    rightColumn.push(`  ${chalk.green('✓')} next-intl (${config.i18n.languages.length} langues)`);
+  }
+  rightColumn.push('');
+
+  // IA
+  rightColumn.push(chalk.bold('Intelligence Artificielle'));
   if (config.ai.providers.length > 0) {
-    console.log(chalk.bold('Intelligence Artificielle pour utilisateurs finaux:'));
-    console.log(`  Providers: ${chalk.cyan(config.ai.providers.join(', '))}`);
-    logger.newline();
+    rightColumn.push(`  ${chalk.cyan(config.ai.providers.join(', '))}`);
+  } else {
+    rightColumn.push(`  ${chalk.gray('Non configurée')}`);
+  }
+  rightColumn.push('');
+
+  // Claude Code
+  rightColumn.push(chalk.bold('Claude Code CLI'));
+  rightColumn.push(`  ${config.claude.cliInstalled ? chalk.green('Installé ✓') : chalk.yellow('Non installé')}`);
+
+  // Afficher les colonnes côte à côte
+  const maxLines = Math.max(leftColumn.length, rightColumn.length);
+
+  for (let i = 0; i < maxLines; i++) {
+    const left = leftColumn[i] || '';
+    const right = rightColumn[i] || '';
+    console.log(twoColumns(left, right));
   }
 
-  console.log(chalk.bold('Claude Code:'));
-  console.log(`  CLI installé: ${config.claude.cliInstalled ? chalk.green('oui') : chalk.yellow('non')}`);
   logger.newline();
 
   // Demander confirmation
