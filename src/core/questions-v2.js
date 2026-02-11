@@ -295,10 +295,10 @@ export async function askQuestions() {
     answers.databaseUser = databaseUser;
 
     showHeader(answers);
-    p.note(chalk.gray('💡 Le mot de passe "postgres" est déjà saisi, appuyez sur Entrée pour le valider'), 'Astuce');
+    p.note(chalk.gray('💡 Le mot de passe "postgres" (8 caractères) est déjà saisi masqué, appuyez sur Entrée pour le valider'), 'Astuce');
 
     const databasePassword = await p.password({
-      message: 'Mot de passe PostgreSQL',
+      message: 'Mot de passe PostgreSQL (défaut: ******** déjà saisi)',
       initialValue: 'postgres',
       validate: (value) => {
         // Si vide, utiliser "postgres" par défaut
