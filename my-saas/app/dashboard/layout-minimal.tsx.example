@@ -1,0 +1,29 @@
+// Version minimale pour debug - renommer en layout.tsx pour tester
+import { redirect } from "next/navigation"
+import { cookies } from "next/headers"
+import { auth } from "@/lib/auth/config"
+
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  // Vérifier la session
+  const cookieStore = await cookies()
+  const sessionToken = cookieStore.get('better-auth.session_token')
+
+  if (!sessionToken) {
+    redirect("/login")
+  }
+
+  // Simple layout sans sidebar pour tester
+  return (
+    <div className="min-h-screen p-8">
+      <h1 className="text-2xl font-bold mb-4">Dashboard (Version Debug)</h1>
+      <div className="bg-yellow-100 p-4 mb-4 rounded">
+        ⚠️ Si cette version ne boucle pas, le problème vient des composants Sidebar
+      </div>
+      {children}
+    </div>
+  )
+}

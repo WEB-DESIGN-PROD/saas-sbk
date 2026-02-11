@@ -75,19 +75,10 @@ function showHeader(answers = {}) {
   });
   console.log('');
 
-  // Baselines centrées
+  // Baseline centrée
   const baseline1 = chalk.gray(`Générateur de SAAS Next.js • v${version}`);
-  const githubIcon = ''; // Logo GitHub (Nerd Font)
-  const githubLink = createLink('https://github.com/WEB-DESIGN-PROD/saas-sbk/issues', `${githubIcon} GitHub`, chalk.blue);
-
-  // Pour le centrage de la baseline2, on calcule manuellement
-  const baseline2VisibleText = `Signaler un problème sur ${githubIcon} GitHub`;
-  const terminalWidth = process.stdout.columns || 80;
-  const padding = Math.max(0, Math.floor((terminalWidth - baseline2VisibleText.length) / 2));
-  const baseline2 = ' '.repeat(padding) + chalk.gray('Signaler un problème sur ') + githubLink;
 
   console.log(centerText(baseline1));
-  console.log(baseline2);
   console.log('');
 
   // Afficher les réponses validées sur 2 colonnes

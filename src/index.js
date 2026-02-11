@@ -201,6 +201,13 @@ ____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
       console.log('  • Générer des fonctionnalités : ' + chalk.cyan('/generate-features'));
     }
 
+    // Lien GitHub avec OSC 8 pour lien cliquable
+    const githubUrl = 'https://github.com/WEB-DESIGN-PROD/saas-sbk/issues';
+    const githubIcon = ''; // Logo GitHub (Nerd Font)
+    const githubLinkText = `${githubIcon} Signaler un problème`;
+    const githubLink = `\x1b]8;;${githubUrl}\x1b\\${githubLinkText}\x1b]8;;\x1b\\`;
+    console.log('  • ' + chalk.blue(githubLink));
+
     console.log('');
     console.log(chalk.green('✨ Bon développement ! 🚀'));
     console.log('');
