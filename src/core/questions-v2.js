@@ -846,7 +846,8 @@ export async function askQuestions() {
         { value: 'openai', label: 'ChatGPT', hint: 'OpenAI' },
         { value: 'gemini', label: 'Gemini', hint: 'Google' }
       ],
-      required: true
+      required: true,
+      initialValues: ['claude']
     });
 
     if (p.isCancel(aiProviders)) {
