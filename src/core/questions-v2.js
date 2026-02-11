@@ -233,14 +233,14 @@ export async function askQuestions() {
     const databaseType = await p.select({
       message: 'Configuration de la base de données',
       options: [
-        { value: 'skip', label: 'Ignorer pour l\'instant', hint: 'À configurer plus tard' },
         { value: 'docker', label: '🐳 PostgreSQL local avec Docker', hint: 'Recommandé' },
         { value: 'remote', label: '   PostgreSQL distant', hint: 'Neon, Supabase, etc.' },
         { value: 'mongodb-local', label: '🐳 MongoDB local avec Docker' },
         { value: 'mongodb-remote', label: '   MongoDB distant', hint: 'Atlas, etc.' },
-        { value: 'sqlite', label: '   SQLite', hint: 'Fichier local' }
+        { value: 'sqlite', label: '   SQLite', hint: 'Fichier local' },
+        { value: 'skip', label: '   Ignorer pour l\'instant', hint: 'À configurer plus tard' }
       ],
-      initialValue: 'skip'
+      initialValue: 'docker'
     });
 
     if (p.isCancel(databaseType)) {
@@ -778,49 +778,48 @@ export async function askQuestions() {
   }
   answers.i18nDefaultLanguage = i18nDefaultLanguage;
 
-  // 9. Langues supplémentaires
-  const allLanguages = [
-    { value: 'fr', label: '🇫🇷 Français' },
-    { value: 'en', label: '🇺🇸 Anglais' },
-    { value: 'es', label: '🇪🇸 Espagnol' },
-    { value: 'de', label: '🇩🇪 Allemand' }
-  ];
-
-  const availableLanguages = allLanguages.filter(lang => lang.value !== i18nDefaultLanguage);
-
-  // Ajouter une option "Aucune" en premier
-  const languageOptions = [
-    { value: 'none', label: `Aucune (uniquement ${i18nDefaultLanguage})` },
-    ...availableLanguages
-  ];
-
+  // 9. Langues supplémentaires - d'abord demander si l'utilisateur en veut
   showHeader(answers);
-  p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout • Entrée = valider'), 'Astuce');
 
-  const i18nLanguages = await p.multiselect({
-    message: `Langues supplémentaires (langue par défaut : ${i18nDefaultLanguage})`,
-    options: languageOptions,
-    required: false,
-    initialValues: ['none']
+  const wantsMoreLanguages = await p.confirm({
+    message: 'Voulez-vous ajouter d\'autres langues ?',
+    initialValue: false
   });
 
-  if (p.isCancel(i18nLanguages)) {
+  if (p.isCancel(wantsMoreLanguages)) {
     p.cancel('Installation annulée.');
     process.exit(0);
   }
 
-  // Si "none" est sélectionné avec d'autres langues, retirer "none"
-  // Si seulement "none", vider le tableau
-  if (i18nLanguages.includes('none')) {
-    if (i18nLanguages.length > 1) {
-      // Retirer "none" et garder les autres langues
-      answers.i18nLanguages = i18nLanguages.filter(lang => lang !== 'none');
-    } else {
-      // Seulement "none" sélectionné = aucune langue supplémentaire
-      answers.i18nLanguages = [];
+  if (wantsMoreLanguages) {
+    // Proposer les langues disponibles (sans la langue par défaut, sans option "Aucune")
+    const allLanguages = [
+      { value: 'en', label: '🇺🇸 Anglais' },
+      { value: 'es', label: '🇪🇸 Espagnol' },
+      { value: 'de', label: '🇩🇪 Allemand' },
+      { value: 'fr', label: '🇫🇷 Français' }
+    ];
+
+    const availableLanguages = allLanguages.filter(lang => lang.value !== i18nDefaultLanguage);
+
+    showHeader(answers);
+    p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout • Entrée = valider'), 'Astuce');
+
+    const i18nLanguages = await p.multiselect({
+      message: `Sélectionnez les langues supplémentaires (langue par défaut : ${i18nDefaultLanguage})`,
+      options: availableLanguages,
+      required: false
+    });
+
+    if (p.isCancel(i18nLanguages)) {
+      p.cancel('Installation annulée.');
+      process.exit(0);
     }
-  } else {
+
     answers.i18nLanguages = i18nLanguages;
+  } else {
+    // Pas de langues supplémentaires
+    answers.i18nLanguages = [];
   }
 
   // 10. IA pour utilisateurs finaux
