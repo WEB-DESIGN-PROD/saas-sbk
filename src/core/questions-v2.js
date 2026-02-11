@@ -102,7 +102,7 @@ function showHeader(answers = {}) {
       leftChoices.push(chalk.green(figures.tick) + ' Projet : ' + chalk.cyan(answers.projectName));
     }
     if (answers.theme) {
-      leftChoices.push(chalk.green(figures.tick) + ' Thème : ' + chalk.cyan(answers.theme === 'dark' ? 'Sombre 🌙' : 'Clair ☀️'));
+      leftChoices.push(chalk.green(figures.tick) + ' Thème : ' + chalk.cyan(answers.theme === 'dark' ? 'Sombre' : 'Clair'));
     }
     if (answers.databaseType) {
       let dbDisplay = 'Distant ☁️';
@@ -139,22 +139,22 @@ function showHeader(answers = {}) {
     if (answers.emailProvider !== undefined) {
       let provider = 'Plus tard';
       if (answers.emailProvider === 'resend') {
-        provider = 'Resend 📮';
+        provider = 'Resend';
         // Ajouter Magic Link ou OTP si présent
         if (answers.authMethods?.includes('magiclink')) provider += ' + Magic Link';
         else if (answers.authMethods?.includes('otp')) provider += ' + OTP';
       } else if (answers.emailProvider === 'smtp') {
-        provider = 'SMTP 📧';
+        provider = 'SMTP';
       }
       rightChoices.push(chalk.green(figures.tick) + ' Email : ' + chalk.cyan(provider));
     }
     if (answers.paymentsEnabled !== undefined) {
-      const paymentsDisplay = answers.paymentsEnabled ? 'Stripe 💳' : 'Désactivé';
+      const paymentsDisplay = answers.paymentsEnabled ? 'Stripe' : 'Désactivé';
       rightChoices.push(chalk.green(figures.tick) + ' Paiements : ' + chalk.cyan(paymentsDisplay));
     }
     if (answers.i18nDefaultLanguage) {
       const allLangs = [answers.i18nDefaultLanguage.toUpperCase(), ...(answers.i18nLanguages?.map(l => l.toUpperCase()) || [])];
-      rightChoices.push(chalk.green(figures.tick) + ' I18n : ' + chalk.cyan(allLangs.join(', ') + ' 🌍'));
+      rightChoices.push(chalk.green(figures.tick) + ' I18n : ' + chalk.cyan(allLangs.join(', ')));
     }
     if (answers.aiProviders !== undefined) {
       const aiDisplay = answers.aiProviders.length === 0 ? 'Aucune' :
@@ -162,12 +162,12 @@ function showHeader(answers = {}) {
       rightChoices.push(chalk.green(figures.tick) + ' IA : ' + chalk.cyan(aiDisplay));
     }
     if (answers.claudeCodeInstalled !== undefined) {
-      rightChoices.push(chalk.green(figures.tick) + ' Claude Code : ' + chalk.cyan(answers.claudeCodeInstalled ? 'Oui ✓' : 'Non'));
+      rightChoices.push(chalk.green(figures.tick) + ' Claude Code : ' + chalk.cyan(answers.claudeCodeInstalled ? 'Oui' : 'Non'));
     }
 
     // Afficher sur 2 colonnes
     const maxLines = Math.max(leftChoices.length, rightChoices.length);
-    const columnWidth = 45;
+    const columnWidth = 55;
 
     for (let i = 0; i < maxLines; i++) {
       const left = leftChoices[i] || '';
