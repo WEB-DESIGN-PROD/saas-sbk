@@ -76,7 +76,7 @@ function showHeader(answers = {}) {
   console.log('');
 
   // Baselines centrées
-  const baseline1 = chalk.gray(`Générateur de SaaS Next.js • v${version}`);
+  const baseline1 = chalk.gray(`Générateur de SAAS Next.js • v${version}`);
   const githubIcon = ''; // Logo GitHub (Nerd Font)
   const githubLink = createLink('https://github.com/WEB-DESIGN-PROD/saas-sbk/issues', `${githubIcon} GitHub`, chalk.blue);
 
