@@ -35,6 +35,13 @@ function centerText(text, stripAnsi = false) {
 }
 
 /**
+ * Crée un lien cliquable dans le terminal (OSC 8)
+ */
+function createLink(url, text) {
+  return `\x1b]8;;${url}\x1b\\${text}\x1b]8;;\x1b\\`;
+}
+
+/**
  * Affiche le logo et les réponses validées de façon compacte
  */
 function showHeader(answers = {}) {
@@ -57,7 +64,8 @@ function showHeader(answers = {}) {
 
   // Baselines centrées
   const baseline1 = chalk.gray(`Générateur de SaaS Next.js • v${version}`);
-  const baseline2 = chalk.gray('Signaler un problème sur ') + chalk.blue('GitHub ') + chalk.blue('https://github.com/WEB-DESIGN-PROD/saas-sbk/issues');
+  const githubLink = createLink('https://github.com/WEB-DESIGN-PROD/saas-sbk/issues', chalk.blue('GitHub'));
+  const baseline2 = chalk.gray('Signaler un problème sur ') + githubLink;
 
   console.log(centerText(baseline1, true));
   console.log(centerText(baseline2, true));
