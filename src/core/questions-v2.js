@@ -92,7 +92,14 @@ function showHeader(answers = {}) {
 
   // Afficher les réponses validées sur 2 colonnes
   if (Object.keys(answers).length > 0) {
-    console.log(chalk.gray('━━━ Récap\' de votre SAAS ━━━'));
+    // Bordure du haut pleine largeur
+    const terminalWidth = process.stdout.columns || 80;
+    const topBorder = '━'.repeat(terminalWidth);
+    console.log(chalk.gray(topBorder));
+
+    // Titre centré
+    const title = 'Récap\' de votre SAAS';
+    console.log(centerText(chalk.gray(title)));
 
     const leftChoices = [];
     const rightChoices = [];
@@ -180,7 +187,9 @@ function showHeader(answers = {}) {
       console.log(left + padding + right);
     }
 
-    console.log(chalk.gray('━━━━━━━━━━━━━━━━━━━'));
+    // Bordure du bas pleine largeur
+    const bottomBorder = '━'.repeat(terminalWidth);
+    console.log(chalk.gray(bottomBorder));
     console.log('');
   }
 }
