@@ -92,14 +92,17 @@ function showHeader(answers = {}) {
 
   // Afficher les réponses validées sur 2 colonnes
   if (Object.keys(answers).length > 0) {
-    // Bordure du haut pleine largeur
+    // Bordure avec titre centré sur la même ligne
     const terminalWidth = process.stdout.columns || 80;
-    const topBorder = '━'.repeat(terminalWidth);
-    console.log(chalk.gray(topBorder));
+    const title = ' Récap\' de votre SAAS ';
+    const titleLength = title.length;
+    const remainingSpace = Math.max(0, terminalWidth - titleLength);
+    const leftBorder = '━'.repeat(Math.floor(remainingSpace / 2));
+    const rightBorder = '━'.repeat(Math.ceil(remainingSpace / 2));
+    const headerLine = chalk.gray(leftBorder) + chalk.gray(title) + chalk.gray(rightBorder);
 
-    // Titre centré
-    const title = 'Récap\' de votre SAAS';
-    console.log(centerText(chalk.gray(title)));
+    console.log(headerLine);
+    console.log(''); // Padding du haut
 
     const leftChoices = [];
     const rightChoices = [];
@@ -187,6 +190,7 @@ function showHeader(answers = {}) {
       console.log(left + padding + right);
     }
 
+    console.log(''); // Padding du bas
     // Bordure du bas pleine largeur
     const bottomBorder = '━'.repeat(terminalWidth);
     console.log(chalk.gray(bottomBorder));
