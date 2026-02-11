@@ -196,7 +196,7 @@ export async function askQuestions() {
   const projectName = await p.text({
     message: 'Nom du projet',
     placeholder: 'my-saas',
-    defaultValue: 'my-saas',
+    initialValue: 'my-saas',
     validate: (value) => {
       const result = validateProjectName(value);
       return result === true ? undefined : result;
@@ -284,7 +284,7 @@ export async function askQuestions() {
     const databaseUser = await p.text({
       message: 'Nom d\'utilisateur PostgreSQL',
       placeholder: 'postgres',
-      defaultValue: 'postgres',
+      initialValue: 'postgres',
       validate: (value) => {
         const result = validateDatabaseUser(value);
         return result === true ? undefined : result;
@@ -317,7 +317,7 @@ export async function askQuestions() {
     const databaseName = await p.text({
       message: 'Nom de la base de données',
       placeholder: answers.projectName.replace(/-/g, '_'),
-      defaultValue: answers.projectName.replace(/-/g, '_'),
+      initialValue: answers.projectName.replace(/-/g, '_'),
       validate: (value) => {
         const result = validateDatabaseName(value);
         return result === true ? undefined : result;
@@ -535,7 +535,7 @@ export async function askQuestions() {
       const s3Region = await p.text({
         message: 'AWS Region',
         placeholder: 'us-east-1',
-        defaultValue: 'us-east-1'
+        initialValue: 'us-east-1'
       });
 
       if (p.isCancel(s3Region)) {
@@ -653,7 +653,7 @@ export async function askQuestions() {
     const smtpPort = await p.text({
       message: 'Port SMTP',
       placeholder: '587',
-      defaultValue: '587',
+      initialValue: '587',
       validate: (value) => {
         const result = validatePort(value);
         return result === true ? undefined : result;
