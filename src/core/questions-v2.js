@@ -38,8 +38,8 @@ _____ \\__  /| |_  /| |____ \\     _____ \\__  __  |_  ,<
 ____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
 /____/ /_/  |_/_/  |_/____/      /____/ /_____/ /_/ |_|
   `));
-  console.log(chalk.gray('       Générateur de SaaS Next.js 16'));
-  console.log(chalk.gray(`       v${version}`) + ' • ' + chalk.blue('https://github.com/WEB-DESIGN-PROD/saas-sbk/issues'));
+  console.log(chalk.gray(`       Générateur de SaaS Next.js • v${version}`));
+  console.log('       ' + chalk.gray('Signaler un problème sur ') + chalk.blue('GitHub ') + chalk.blue('https://github.com/WEB-DESIGN-PROD/saas-sbk/issues'));
   console.log('');
 
   // Afficher les réponses validées de façon compacte
