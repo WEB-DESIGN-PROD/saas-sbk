@@ -77,15 +77,39 @@ export async function main() {
 
   console.clear();
 
-  // Bannière ASCII art
-  console.log(chalk.cyan(`
- _____________________________    _____________________ __
-__  ___/__    |__    |_  ___/    __  ___/__  __ )__  //_/
-_____ \\__  /| |_  /| |____ \\     _____ \\__  __  |_  ,<
-____/ /_  ___ |  ___ |___/ /     ____/ /_  /_/ /_  /| |
-/____/ /_/  |_/_/  |_/____/      /____/ /_____/ /_/ |_|
-  `));
-  console.log(chalk.gray('       Générateur de SAAS Next.js'));
+  const logoLines = [
+    '███████╗ █████╗  █████╗ ███████╗    ███████╗██████╗ ██╗  ██╗',
+    '██╔════╝██╔══██╗██╔══██╗██╔════╝    ██╔════╝██╔══██╗██║ ██╔╝',
+    '███████╗███████║███████║███████╗    ███████╗██████╔╝█████╔╝',
+    '╚════██║██╔══██║██╔══██║╚════██║    ╚════██║██╔══██╗██╔═██╗',
+    '███████║██║  ██║██║  ██║███████║    ███████║██████╔╝██║  ██╗',
+    '╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝    ╚══════╝╚═════╝ ╚═╝  ╚═╝'
+  ];
+  const grad = [
+    [6, 182, 212],
+    [99, 102, 241],
+    [139, 92, 246],
+  ];
+  const maxLen = Math.max(...logoLines.map(l => l.length));
+  const toHex = (r, g, b) => `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+  const gradColor = (t) => {
+    const scaled = t * (grad.length - 1);
+    const idx = Math.min(Math.floor(scaled), grad.length - 2);
+    const localT = scaled - idx;
+    const [r, g, b] = grad[idx].map((v, i) => Math.round(v + (grad[idx + 1][i] - v) * localT));
+    return [r, g, b];
+  };
+  const styleLine = (line) => line.split('').map((char, i) => {
+    const t = maxLen > 1 ? i / (maxLen - 1) : 0;
+    const [r, g, b] = gradColor(t);
+    if (char === '█') return chalk.hex(toHex(r, g, b))(char);
+    if ('╗╝╔╚╦╩╣╠╬═║╓╖╜╙╒╕╘╛╟╞'.includes(char)) return chalk.hex(toHex(Math.round(r*0.4), Math.round(g*0.4), Math.round(b*0.4)))(char);
+    return char;
+  }).join('');
+
+  console.log('');
+  logoLines.forEach(line => console.log(styleLine(line)));
+  console.log(chalk.gray('  Générateur de SAAS Next.js'));
   console.log('');
 
   try {
