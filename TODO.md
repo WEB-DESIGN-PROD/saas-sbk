@@ -69,6 +69,20 @@ Inquirer affichait des messages d'aide en anglais qui ne pouvaient pas être sup
 - [x] **Padding unifié** - Settings et Account pages corrigées
 - [x] **cursor-pointer global** - globals.css
 
+### Page Médias (MinIO)
+
+- [x] **Page `/dashboard/media`** - Grille médias avec preview images/icônes
+- [x] **Upload drag-and-drop** - Dialog multi-fichiers avec zone de dépôt
+- [x] **Modèle Prisma Media** - `key`, `name`, `size`, `mimeType`, `description?`, `tags String[]`
+- [x] **Clé MinIO en DB** - URLs presignées 24h générées depuis la clé (jamais expirées)
+- [x] **Renommage** - Base seul + badge extension non-éditable
+- [x] **Description + Tags** - Textarea + chips (Entrée/virgule), affichés sur la carte
+- [x] **Recherche temps réel** - Filtre nom + description + tags, visible ≥ 2 fichiers
+- [x] **Lightbox** - Plein écran, navigation prev/next, clavier `←` `→`, compteur
+- [x] **Responsive mobile** - Recherche sous titre, bouton upload fixe en bas
+- [x] **Fix reset dialog** - useEffect reset on open
+- [x] **Fix tags null** - Fallback `?? []` pour anciens enregistrements
+
 ### Templates Next.js
 
 - [ ] **Template sans système de connexion** (pour futurs cas sans DB)

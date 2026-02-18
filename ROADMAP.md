@@ -1,6 +1,25 @@
 # 🗺️ Roadmap - create-saas-sbk
 
-## ✅ v0.5.0 - 18 février 2026 (ACTUELLE)
+## ✅ v0.6.0 - 18 février 2026 (ACTUELLE)
+
+### 🗂️ Page Médias Dashboard MinIO
+- ✅ Page `/dashboard/media` - Grille médias avec preview images/icônes selon type MIME
+- ✅ Upload drag-and-drop multi-fichiers via dialog
+- ✅ Modèle Prisma `Media` (`key`, `name`, `size`, `mimeType`, `description?`, `tags String[]`)
+- ✅ Clé MinIO stockée en DB → URLs presignées 24h fraîches à chaque chargement
+- ✅ API REST complète (GET liste, DELETE, PATCH rename+meta)
+- ✅ Dialog d'édition : nom (base + badge extension), description, tags chips
+- ✅ Affichage carte : `line-clamp-2` description + `#TAG1 #TAG2` tags
+- ✅ Barre de recherche temps réel (nom + description + tags), visible ≥ 2 fichiers
+- ✅ Lightbox plein écran avec navigation prev/next (flèches + clavier), compteur
+- ✅ Confirmation avant suppression
+- ✅ Responsive mobile : recherche sous titre, bouton upload fixe en bas (`z-40`)
+- ✅ Fix : reset dialog upload à chaque réouverture
+- ✅ Fix : fallback `tags ?? []` pour anciens enregistrements
+
+---
+
+## ✅ v0.5.0 - 18 février 2026
 
 ### 🏗️ Refonte architecture templates
 - ✅ Nouvelle couche `shadcn-base/` - Template statique versionné (plus d'appel npx shadcn)
@@ -117,6 +136,7 @@
   - [x] nav-user dropdown complet
   - [x] Page settings (padding corrigé)
   - [x] Page account (padding corrigé)
+  - [x] **Page médias** (upload MinIO, liste, édition, lightbox, recherche)
   - [ ] Page analytics/stats
   - [ ] Page billing Stripe fonctionnelle
   - [ ] Page team/users
@@ -196,7 +216,7 @@
 ## 📊 Métriques de progression
 
 **Phase 1 :** 100% ✅ (CLI fonctionnel avec @clack/prompts)
-**Phase 2 :** 60% 🚧 (Templates complets + dashboard UX finalisé + architecture statique)
+**Phase 2 :** 70% 🚧 (Templates complets + dashboard UX + architecture statique + page Médias)
 **Phase 3 :** 0% 📅 (Planifié)
 **Phase 4 :** 0% 💭 (Vision)
 
@@ -211,7 +231,8 @@
 5. ✅ Magic Link / OTP - **FAIT**
 6. ✅ Architecture templates statique (shadcn-base) - **FAIT**
 7. ✅ Navbar + Dashboard UX finalisés - **FAIT**
-8. 🚧 Templates multilingues complets
+8. ✅ Page Médias MinIO complète - **FAIT**
+9. 🚧 Templates multilingues complets
 9. 📅 Configuration MongoDB/SQLite
 10. 📅 Dashboard analytics
 

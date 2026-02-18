@@ -1,6 +1,6 @@
 # Status du Projet create-saas-sbk
 
-Version: **0.5.0**
+Version: **0.6.0**
 
 ## ✅ Fonctionnalités Implémentées
 
@@ -38,49 +38,28 @@ Version: **0.5.0**
 - [x] Support IA (Claude/OpenAI/Gemini)
 - [x] Support i18n (next-intl)
 - [x] Docker Compose (Postgres + MinIO)
+- [x] Page Médias dashboard (upload, liste, suppression, édition, lightbox, recherche)
 
 ### Installation
 - [x] Installation automatique des dépendances
 - [x] Installation automatique des skills Claude Code
 - [x] Lancement automatique de /init
 
-## 🎯 Dernières Mises à Jour (v0.5.0)
+## 🎯 Dernières Mises à Jour (v0.6.0)
 
-### Architecture Templates Statique ✅
-- Nouvelle couche `src/templates/shadcn-base/` (template statique versionné)
-- `fs.cpSync()` remplace `npx shadcn@latest` → fiable, rapide, offline
-- `package-generator.js` fusionne avec le package.json shadcn-base (Tailwind v4 préservé)
-- Variable `{{AVAILABLE_LANGUAGES}}` pour le toggle langue conditionnel
-
-### Navbar Landing Page Redesignée ✅
-- Logo gauche | liens centrés (À propos | Tarifs) | actions droite
-- Bouton User icon (remplace "Connexion")
-- Bouton Dashboard dynamique si connecté (`useSession`)
-- Toggle langue conditionnel (seulement si multilangue)
-- Theme toggle tout à droite
-
-### Dashboard SiteHeader Redesigné ✅
-- Toggle langue conditionnel
-- Theme toggle
-- Bouton Logout (icône LogOut) avec `signOut()` + toast + redirect
-- Remplace l'ancien bouton GitHub
-
-### Sidebar Dashboard Simplifiée ✅
-- navMain : seulement "Dashboard" (supprimé Paramètres + Compte)
-- navSecondary supprimé (plus de liens Accueil/Tarifs/À propos)
-- En-tête avec `{{PROJECT_NAME}}`
-
-### nav-user Dropdown Complet ✅
-- Compte → /dashboard/account
-- Paramètres → /dashboard/settings (nouveau)
-- Facturation → /dashboard/billing
-- Notifications → /dashboard/settings#notifications
-- Déconnexion
-
-### Corrections UX Dashboard ✅
-- `settings/page.tsx` : padding corrigé (`@container/main` + `px-4 py-4 md:gap-6 md:py-6 lg:px-6`)
-- `account/page.tsx` : même structure de padding
-- `globals.css` : `cursor: pointer` global sur tous les éléments interactifs
+### Page Médias Dashboard ✅
+- Page `/dashboard/media` avec grille de médias (images + icônes selon type MIME)
+- Upload drag-and-drop multi-fichiers via dialog
+- Modèle Prisma `Media` avec `key`, `name`, `size`, `mimeType`, `description?`, `tags String[]`
+- Clé MinIO stockée en DB → URLs presignées 24h générées à chaque chargement (jamais expirées)
+- Dialog d'édition : renommage (base seul + badge extension), description, tags chips
+- Affichage carte : description `line-clamp-2`, tags `#TAG1 #TAG2`
+- Barre de recherche temps réel (nom + description + tags), visible ≥ 2 fichiers
+- Lightbox plein écran avec navigation prev/next (flèches + clavier `←` `→`), compteur
+- Confirmation avant suppression
+- Responsive mobile : recherche sous le titre, bouton upload fixe en bas (`z-40`)
+- Fix : reset dialog upload à chaque réouverture
+- Fix : fallback `tags ?? []` pour anciens enregistrements sans tags
 
 ## 📊 Statistiques
 
@@ -149,6 +128,9 @@ Version: **0.5.0**
 7. ✅ `npx shadcn@latest create` → `fs.cpSync` (shadcn-base statique)
 8. ✅ package-generator.js écrasait Tailwind v4 → fusion avec package.json existant
 9. ✅ Padding incohérent entre pages dashboard → unifié
+10. ✅ URLs MinIO expirées → clé stockée en DB, URL fraîche générée à chaque render
+11. ✅ Dialog upload non réinitialisé → useEffect reset on open
+12. ✅ `tags` null sur anciens enregistrements → fallback `?? []`
 
 ---
 
