@@ -27,6 +27,7 @@ import {
   X,
   Download,
   Loader2,
+  Search,
 } from "lucide-react"
 import { UploadDialog } from "@/components/media/upload-dialog"
 
@@ -165,6 +166,11 @@ export default function MediaPage() {
   const [media, setMedia] = useState<MediaItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [uploadOpen, setUploadOpen] = useState(false)
+  const [search, setSearch] = useState("")
+
+  const filteredMedia = search.trim()
+    ? media.filter((m) => m.name.toLowerCase().includes(search.toLowerCase()))
+    : media
 
   // Lightbox
   const [lightboxItem, setLightboxItem] = useState<MediaItem | null>(null)
@@ -259,19 +265,32 @@ export default function MediaPage() {
         <div className="flex flex-col gap-4 px-4 py-4 md:gap-6 md:py-6 lg:px-6">
 
           {/* En-tête */}
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex items-center justify-between gap-4">
+            <div className="shrink-0">
               <h1 className="text-2xl font-semibold">Médias</h1>
               <p className="text-muted-foreground text-sm">
                 {isLoading
                   ? "Chargement…"
-                  : `${media.length} fichier${media.length !== 1 ? "s" : ""} dans votre bibliothèque`}
+                  : `${filteredMedia.length} fichier${filteredMedia.length !== 1 ? "s" : ""}${search ? " trouvé" + (filteredMedia.length !== 1 ? "s" : "") : " dans votre bibliothèque"}`}
               </p>
             </div>
-            <Button onClick={() => setUploadOpen(true)}>
-              <Upload className="mr-2 size-4" />
-              Ajouter un média
-            </Button>
+            <div className="flex items-center gap-3 flex-1 justify-end">
+              {media.length >= 2 && (
+                <div className="relative w-64">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+                  <Input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Rechercher un fichier…"
+                    className="pl-8"
+                  />
+                </div>
+              )}
+              <Button onClick={() => setUploadOpen(true)}>
+                <Upload className="mr-2 size-4" />
+                Ajouter un média
+              </Button>
+            </div>
           </div>
 
           {/* Squelette */}
@@ -308,10 +327,19 @@ export default function MediaPage() {
             </Card>
           )}
 
+          {/* Aucun résultat de recherche */}
+          {!isLoading && media.length > 0 && filteredMedia.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-20 gap-2 text-center">
+              <Search className="size-10 text-muted-foreground" />
+              <p className="font-medium">Aucun fichier ne correspond à &ldquo;{search}&rdquo;</p>
+              <p className="text-sm text-muted-foreground">Essayez un autre terme de recherche</p>
+            </div>
+          )}
+
           {/* Grille des médias */}
-          {!isLoading && media.length > 0 && (
+          {!isLoading && filteredMedia.length > 0 && (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-              {media.map((item) => {
+              {filteredMedia.map((item) => {
                 const type = getFileType(item.name)
 
                 return (
