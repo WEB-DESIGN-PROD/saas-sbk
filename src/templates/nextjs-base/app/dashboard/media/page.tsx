@@ -44,6 +44,12 @@ function formatSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+function getNameParts(filename: string): { base: string; ext: string } {
+  const dotIndex = filename.lastIndexOf(".")
+  if (dotIndex <= 0) return { base: filename, ext: "" }
+  return { base: filename.slice(0, dotIndex), ext: filename.slice(dotIndex) }
+}
+
 function getFileType(
   name: string
 ): "image" | "video" | "audio" | "pdf" | "other" {
@@ -169,7 +175,7 @@ export default function MediaPage() {
 
   // Renommage
   const [renameTarget, setRenameTarget] = useState<MediaItem | null>(null)
-  const [newName, setNewName] = useState("")
+  const [newBaseName, setNewBaseName] = useState("")
   const [isRenaming, setIsRenaming] = useState(false)
   const renameInputRef = useRef<HTMLInputElement>(null)
 
@@ -219,20 +225,22 @@ export default function MediaPage() {
 
   // ── Renommage ─────────────────────────────────────────────────────────────
   const confirmRename = async () => {
-    if (!renameTarget || !newName.trim() || isRenaming) return
+    if (!renameTarget || !newBaseName.trim() || isRenaming) return
     setIsRenaming(true)
+    const { ext } = getNameParts(renameTarget.name)
+    const fullName = `${newBaseName.trim()}${ext}`
     try {
       const res = await fetch("/api/media", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key: renameTarget.key, newName: newName.trim() }),
+        body: JSON.stringify({ key: renameTarget.key, newName: fullName }),
       })
       if (!res.ok) throw new Error()
       const { key, url } = await res.json()
       setMedia((prev) =>
         prev.map((m) =>
           m.key === renameTarget.key
-            ? { ...m, key, name: newName.trim(), url }
+            ? { ...m, key, name: fullName, url }
             : m
         )
       )
@@ -331,7 +339,7 @@ export default function MediaPage() {
                           className="w-28 h-7 text-xs gap-1.5"
                           onClick={() => {
                             setRenameTarget(item)
-                            setNewName(item.name)
+                            setNewBaseName(getNameParts(item.name).base)
                           }}
                         >
                           <Pencil className="size-3" />
@@ -438,18 +446,26 @@ export default function MediaPage() {
           </DialogHeader>
           <div className="space-y-2">
             <Label htmlFor="rename-input">Nouveau nom</Label>
-            <Input
-              id="rename-input"
-              ref={renameInputRef}
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") confirmRename()
-                if (e.key === "Escape") setRenameTarget(null)
-              }}
-              disabled={isRenaming}
-              placeholder={renameTarget?.name}
-            />
+            <div className="flex items-center gap-1.5">
+              <Input
+                id="rename-input"
+                ref={renameInputRef}
+                value={newBaseName}
+                onChange={(e) => setNewBaseName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") confirmRename()
+                  if (e.key === "Escape") setRenameTarget(null)
+                }}
+                disabled={isRenaming}
+                placeholder={renameTarget ? getNameParts(renameTarget.name).base : ""}
+                className="flex-1"
+              />
+              {renameTarget && getNameParts(renameTarget.name).ext && (
+                <span className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded border select-none shrink-0">
+                  {getNameParts(renameTarget.name).ext}
+                </span>
+              )}
+            </div>
           </div>
           <DialogFooter>
             <Button
@@ -461,7 +477,7 @@ export default function MediaPage() {
             </Button>
             <Button
               onClick={confirmRename}
-              disabled={!newName.trim() || isRenaming}
+              disabled={!newBaseName.trim() || isRenaming}
             >
               {isRenaming ? (
                 <>

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { auth } from '@/lib/auth/config'
+import { prisma } from '@/lib/db/client'
 import {
-  listMedia,
   deleteMedia,
   renameMedia,
   getPresignedUrl,
@@ -28,7 +28,20 @@ export async function GET() {
   }
 
   try {
-    const media = await listMedia()
+    const records = await prisma.media.findMany({
+      orderBy: { createdAt: 'desc' },
+    })
+
+    const media = await Promise.all(
+      records.map(async (record) => ({
+        key: record.key,
+        name: record.name,
+        size: record.size,
+        lastModified: record.createdAt.toISOString(),
+        url: await getPresignedUrl(record.key),
+      }))
+    )
+
     return NextResponse.json(media)
   } catch (error) {
     console.error('[GET /api/media]', error)
@@ -54,6 +67,7 @@ export async function DELETE(request: NextRequest) {
 
   try {
     await deleteMedia(key)
+    await prisma.media.delete({ where: { key } })
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('[DELETE /api/media]', error)
@@ -101,8 +115,12 @@ export async function PATCH(request: NextRequest) {
     }
 
     await renameMedia(key, newKey)
-    const url = await getPresignedUrl(newKey)
+    await prisma.media.update({
+      where: { key },
+      data: { key: newKey, name: newName.trim() },
+    })
 
+    const url = await getPresignedUrl(newKey)
     return NextResponse.json({ key: newKey, url })
   } catch (error) {
     console.error('[PATCH /api/media]', error)

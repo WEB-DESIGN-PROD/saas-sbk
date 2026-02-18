@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { auth } from '@/lib/auth/config'
 import { uploadMedia } from '@/lib/storage/minio-client'
+import { prisma } from '@/lib/db/client'
 
 const MAX_SIZE = 50 * 1024 * 1024 // 50 MB
 
@@ -45,8 +46,13 @@ export async function POST(request: NextRequest) {
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
     const key = `${timestamp}-${uniqueId}-${safeName}`
 
+    const mimeType = file.type || 'application/octet-stream'
     const buffer = Buffer.from(await file.arrayBuffer())
-    await uploadMedia(key, buffer, file.type || 'application/octet-stream')
+    await uploadMedia(key, buffer, mimeType)
+
+    await prisma.media.create({
+      data: { key, name: file.name, size: file.size, mimeType },
+    })
 
     return NextResponse.json({ key, name: file.name, size: file.size })
   } catch (error) {

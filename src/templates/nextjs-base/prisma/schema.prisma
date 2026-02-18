@@ -71,3 +71,15 @@ model Verification {
   @@unique([identifier, value])
   @@map("verification")
 }
+
+model Media {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  name      String
+  size      Int
+  mimeType  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("media")
+}
