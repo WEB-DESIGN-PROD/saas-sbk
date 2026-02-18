@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useRef } from "react"
+import { useState, useCallback, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -35,6 +35,11 @@ export function UploadDialog({ open, onOpenChange, onSuccess }: UploadDialogProp
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // Reset à chaque ouverture du dialog
+  useEffect(() => {
+    if (open) setFiles([])
+  }, [open])
 
   const addFiles = useCallback((newFiles: FileList | File[]) => {
     const fileArray = Array.from(newFiles)
