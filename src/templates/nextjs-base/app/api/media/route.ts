@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { auth } from '@/lib/auth/config'
-import { listMedia, deleteMedia } from '@/lib/storage/minio-client'
+import {
+  listMedia,
+  deleteMedia,
+  renameMedia,
+  getPresignedUrl,
+} from '@/lib/storage/minio-client'
 
 async function getSession() {
   const cookieStore = await cookies()
@@ -54,6 +59,55 @@ export async function DELETE(request: NextRequest) {
     console.error('[DELETE /api/media]', error)
     return NextResponse.json(
       { error: 'Erreur lors de la suppression' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  const session = await getSession()
+  if (!session?.user) {
+    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+  }
+
+  try {
+    const { key, newName } = await request.json()
+
+    if (!key || !newName?.trim()) {
+      return NextResponse.json(
+        { error: 'Paramètres manquants' },
+        { status: 400 }
+      )
+    }
+
+    // Conserver le préfixe timestamp-uuid, remplacer seulement le nom du fichier
+    const match = key.match(/^(\d+-[a-zA-Z0-9]+-).+$/)
+    if (!match) {
+      return NextResponse.json(
+        { error: 'Format de clé invalide' },
+        { status: 400 }
+      )
+    }
+
+    const prefix = match[1]
+    const safeName = newName
+      .trim()
+      .replace(/[^a-zA-Z0-9._\-\s]/g, '_')
+      .replace(/\s+/g, '_')
+    const newKey = `${prefix}${safeName}`
+
+    if (newKey === key) {
+      return NextResponse.json({ key, url: await getPresignedUrl(key) })
+    }
+
+    await renameMedia(key, newKey)
+    const url = await getPresignedUrl(newKey)
+
+    return NextResponse.json({ key: newKey, url })
+  } catch (error) {
+    console.error('[PATCH /api/media]', error)
+    return NextResponse.json(
+      { error: 'Erreur lors du renommage' },
       { status: 500 }
     )
   }

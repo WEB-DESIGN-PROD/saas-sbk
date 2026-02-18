@@ -110,3 +110,44 @@ export async function deleteMedia(key: string): Promise<void> {
   const bucket = getBucketName()
   await client.removeObject(bucket, key)
 }
+
+export async function getPresignedUrl(key: string, expiresIn = 86400): Promise<string> {
+  const client = getClient()
+  const bucket = getBucketName()
+  return client.presignedGetObject(bucket, key, expiresIn)
+}
+
+export async function renameMedia(oldKey: string, newKey: string): Promise<void> {
+  const client = getClient()
+  const bucket = getBucketName()
+
+  // Télécharger l'objet original
+  const stream = await client.getObject(bucket, oldKey)
+  const chunks: Buffer[] = []
+  await new Promise<void>((resolve, reject) => {
+    stream.on('data', (chunk: Buffer) => chunks.push(chunk))
+    stream.on('end', resolve)
+    stream.on('error', reject)
+  })
+  const data = Buffer.concat(chunks)
+
+  // Détecter le content-type depuis l'extension du nouveau nom
+  const ext = newKey.split('.').pop()?.toLowerCase() || ''
+  const contentTypes: Record<string, string> = {
+    jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+    gif: 'image/gif', webp: 'image/webp', svg: 'image/svg+xml',
+    avif: 'image/avif', bmp: 'image/bmp',
+    pdf: 'application/pdf',
+    mp4: 'video/mp4', webm: 'video/webm', mov: 'video/quicktime',
+    mp3: 'audio/mpeg', wav: 'audio/wav', ogg: 'audio/ogg',
+  }
+  const contentType = contentTypes[ext] || 'application/octet-stream'
+
+  // Uploader avec le nouveau nom
+  await client.putObject(bucket, newKey, data, data.length, {
+    'Content-Type': contentType,
+  })
+
+  // Supprimer l'original
+  await client.removeObject(bucket, oldKey)
+}
