@@ -28,6 +28,8 @@ import {
   Download,
   Loader2,
   Search,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
 import { UploadDialog } from "@/components/media/upload-dialog"
 
@@ -86,21 +88,29 @@ function MediaPreview({ type, url, name }: { type: string; url: string; name: st
 
 // ─── Lightbox ────────────────────────────────────────────────────────────────
 function Lightbox({
-  item,
+  items,
+  initialIndex,
   onClose,
 }: {
-  item: MediaItem
+  items: MediaItem[]
+  initialIndex: number
   onClose: () => void
 }) {
+  const [currentIndex, setCurrentIndex] = useState(initialIndex)
+  const item = items[currentIndex]
   const type = getFileType(item.name)
+  const hasPrev = currentIndex > 0
+  const hasNext = currentIndex < items.length - 1
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose()
+      if (e.key === "ArrowLeft" && currentIndex > 0) setCurrentIndex((i) => i - 1)
+      if (e.key === "ArrowRight" && currentIndex < items.length - 1) setCurrentIndex((i) => i + 1)
     }
     window.addEventListener("keydown", handler)
     return () => window.removeEventListener("keydown", handler)
-  }, [onClose])
+  }, [onClose, currentIndex, items.length])
 
   // Bloquer le scroll du body
   useEffect(() => {
@@ -121,10 +131,33 @@ function Lightbox({
         <X className="size-8" />
       </button>
 
-      {/* Nom du fichier + taille */}
+      {/* Flèche gauche */}
+      {hasPrev && (
+        <button
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/10 hover:bg-white/20 p-3 text-white transition-colors cursor-pointer"
+          onClick={(e) => { e.stopPropagation(); setCurrentIndex((i) => i - 1) }}
+        >
+          <ChevronLeft className="size-7" />
+        </button>
+      )}
+
+      {/* Flèche droite */}
+      {hasNext && (
+        <button
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/10 hover:bg-white/20 p-3 text-white transition-colors cursor-pointer"
+          onClick={(e) => { e.stopPropagation(); setCurrentIndex((i) => i + 1) }}
+        >
+          <ChevronRight className="size-7" />
+        </button>
+      )}
+
+      {/* Nom du fichier + taille + position */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-10">
         <p className="text-white/80 text-sm font-medium">{item.name}</p>
-        <p className="text-white/40 text-xs">{formatSize(item.size)}</p>
+        <p className="text-white/40 text-xs">
+          {formatSize(item.size)}
+          {items.length > 1 && ` · ${currentIndex + 1} / ${items.length}`}
+        </p>
       </div>
 
       {type === "image" ? (
@@ -132,7 +165,7 @@ function Lightbox({
         <img
           src={item.url}
           alt={item.name}
-          className="max-h-[88vh] max-w-[92vw] object-contain rounded-lg shadow-2xl"
+          className="max-h-[88vh] max-w-[80vw] object-contain rounded-lg shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         />
       ) : (
@@ -173,7 +206,7 @@ export default function MediaPage() {
     : media
 
   // Lightbox
-  const [lightboxItem, setLightboxItem] = useState<MediaItem | null>(null)
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   // Suppression avec confirmation
   const [deleteTarget, setDeleteTarget] = useState<MediaItem | null>(null)
@@ -339,7 +372,7 @@ export default function MediaPage() {
           {/* Grille des médias */}
           {!isLoading && filteredMedia.length > 0 && (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-              {filteredMedia.map((item) => {
+              {filteredMedia.map((item, index) => {
                 const type = getFileType(item.name)
 
                 return (
@@ -354,7 +387,7 @@ export default function MediaPage() {
                           size="sm"
                           variant="secondary"
                           className="w-28 h-7 text-xs gap-1.5"
-                          onClick={() => setLightboxItem(item)}
+                          onClick={() => setLightboxIndex(index)}
                         >
                           <Eye className="size-3" />
                           Voir
@@ -412,8 +445,12 @@ export default function MediaPage() {
       />
 
       {/* ── Lightbox ──────────────────────────────────────────────────────── */}
-      {lightboxItem && (
-        <Lightbox item={lightboxItem} onClose={() => setLightboxItem(null)} />
+      {lightboxIndex !== null && (
+        <Lightbox
+          items={filteredMedia}
+          initialIndex={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+        />
       )}
 
       {/* ── Dialog confirmation suppression ───────────────────────────────── */}
