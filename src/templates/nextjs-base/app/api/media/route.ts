@@ -40,7 +40,7 @@ export async function GET() {
         lastModified: record.createdAt.toISOString(),
         url: await getPresignedUrl(record.key),
         description: record.description ?? undefined,
-        tags: record.tags,
+        tags: record.tags ?? [],
       }))
     )
 

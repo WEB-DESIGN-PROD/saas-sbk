@@ -210,7 +210,7 @@ export default function MediaPage() {
         return (
           m.name.toLowerCase().includes(q) ||
           m.description?.toLowerCase().includes(q) ||
-          m.tags.some((t) => t.toLowerCase().includes(q))
+          (m.tags ?? []).some((t) => t.toLowerCase().includes(q))
         )
       })
     : media
@@ -436,7 +436,7 @@ export default function MediaPage() {
                             setRenameTarget(item)
                             setNewBaseName(getNameParts(item.name).base)
                             setNewDescription(item.description ?? "")
-                            setNewTags(item.tags ?? [])
+                            setNewTags(Array.isArray(item.tags) ? item.tags : [])
                             setTagInput("")
                           }}
                         >
@@ -465,9 +465,9 @@ export default function MediaPage() {
                         {item.description}
                       </p>
                     )}
-                    {item.tags.length > 0 && (
+                    {(item.tags ?? []).length > 0 && (
                       <p className="text-xs text-muted-foreground/60 px-0.5 truncate">
-                        {item.tags.map((t) => `#${t}`).join(" ")}
+                        {(item.tags ?? []).map((t) => `#${t}`).join(" ")}
                       </p>
                     )}
                     <p className="text-xs text-muted-foreground px-0.5">
