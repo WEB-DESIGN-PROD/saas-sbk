@@ -23,7 +23,7 @@ export function generateNextjsProject(projectPath, config) {
   copyConfigFiles(projectPath, config, templatesDir);
 
   // 3. Copier les variantes conditionnelles (OAuth, Stripe, etc.)
-  copyConditionalVariants(projectPath, config);
+  copyConditionalVariants(projectPath, config, replacementsForVariants(config));
 
   // 4. Générer .gitignore
   generateGitignore(projectPath);
@@ -92,7 +92,15 @@ function copyConfigFiles(projectPath, config, templatesDir) {
     conditionalCopy.push('lib/email/client.ts', 'lib/email/templates.ts');
   }
   if (config.storage && config.storage.enabled) {
-    conditionalCopy.push('lib/storage/client.ts');
+    conditionalCopy.push(
+      'lib/storage/client.ts',
+      'lib/storage/minio-client.ts',
+      'app/api/media/route.ts',
+      'app/api/media/upload/route.ts',
+      'app/dashboard/media/page.tsx',
+      'components/media/upload-dialog.tsx',
+      'components/ui/dialog.tsx',
+    );
   }
   if (config.ai && config.ai.providers && config.ai.providers.length > 0) {
     conditionalCopy.push('lib/ai/client.ts');
@@ -115,19 +123,56 @@ function copyConfigFiles(projectPath, config, templatesDir) {
 }
 
 /**
+ * Retourne les variables de remplacement communes pour les variantes
+ */
+function replacementsForVariants(config) {
+  const allLanguages = [
+    ...(config.i18n?.defaultLanguage ? [config.i18n.defaultLanguage] : ['fr']),
+    ...(config.i18n?.languages || []).filter(l => l !== config.i18n?.defaultLanguage),
+  ];
+  return {
+    '{{PROJECT_NAME}}': config.projectName,
+    '{{THEME}}': config.theme || 'system',
+    '{{DEFAULT_LANGUAGE}}': config.i18n?.defaultLanguage || 'fr',
+    '{{AVAILABLE_LANGUAGES}}': allLanguages.join(','),
+  };
+}
+
+/**
+ * Copie un fichier variant avec remplacement de variables
+ */
+function copyVariantFile(src, dest, replacements) {
+  if (!fs.existsSync(src)) return;
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  let content = fs.readFileSync(src, 'utf-8');
+  for (const [key, value] of Object.entries(replacements)) {
+    content = content.replaceAll(key, value);
+  }
+  fs.writeFileSync(dest, content, 'utf-8');
+}
+
+/**
  * Copie les variantes conditionnelles selon la configuration
  */
-function copyConditionalVariants(projectPath, config) {
+function copyConditionalVariants(projectPath, config, replacements) {
   const variantsDir = path.join(__dirname, '../templates/variants');
 
   // Billing page si Stripe activé
   if (config.payments.enabled) {
-    const src = path.join(variantsDir, 'billing/billing-page.tsx');
-    const dest = path.join(projectPath, 'app/dashboard/billing/page.tsx');
-    if (fs.existsSync(src)) {
-      fs.mkdirSync(path.dirname(dest), { recursive: true });
-      fs.copyFileSync(src, dest);
-    }
+    copyVariantFile(
+      path.join(variantsDir, 'billing/billing-page.tsx'),
+      path.join(projectPath, 'app/dashboard/billing/page.tsx'),
+      replacements
+    );
+  }
+
+  // Sidebar avec lien Médias si storage activé
+  if (config.storage && config.storage.enabled) {
+    copyVariantFile(
+      path.join(variantsDir, 'storage/app-sidebar-with-media.tsx'),
+      path.join(projectPath, 'components/app-sidebar.tsx'),
+      replacements
+    );
   }
 }
 

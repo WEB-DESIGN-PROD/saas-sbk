@@ -12,6 +12,54 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 - Mode debug/verbose pour le CLI
 - Publication npm
 
+## [0.6.0] - 2026-02-18
+
+### Page Médias Dashboard - MinIO complet 🗂️
+
+#### Nouvelle page `/dashboard/media`
+- ✅ **Page Médias dans la sidebar** - Entrée de navigation dédiée dans le dashboard
+- ✅ **Grille de médias responsive** - Preview images / icônes selon le type MIME
+- ✅ **Upload drag-and-drop multi-fichiers** - Dialog avec zone de dépôt
+- ✅ **Stockage MinIO Docker** - Volume persistant `minio_data:/data`
+
+#### Gestion des médias en base de données
+- ✅ **Modèle Prisma `Media`** - `key`, `name`, `size`, `mimeType`, `description?`, `tags String[]`
+- ✅ **Clé MinIO stockée en DB** - Récupération permanente même après expiration URL
+- ✅ **URLs presignées 24h** - Générées à chaque chargement de page depuis la clé DB
+- ✅ **Routes API** - GET (liste + URLs), DELETE (MinIO + DB), PATCH (renommage + métadonnées)
+- ✅ **Upload** - `prisma.media.create()` après `uploadMedia()` dans MinIO
+
+#### Dialog d'édition enrichi
+- ✅ **Renommage** - Input sur le nom de base uniquement, extension affichée en badge non-éditable
+- ✅ **Description** - Textarea 3 lignes, sauvegardée en DB
+- ✅ **Tags** - Chips interactifs (Entrée ou virgule pour valider, × pour supprimer), stockés en DB
+- ✅ **Affichage carte** - Description tronquée `line-clamp-2`, tags sous forme `#TAG1 #TAG2`
+
+#### Recherche et navigation
+- ✅ **Barre de recherche** - Visible à partir de 2 fichiers, filtre nom + description + tags
+- ✅ **Lightbox plein écran** - Clic sur une image → aperçu grand format
+- ✅ **Navigation lightbox** - Flèches prev/next centrées verticalement, raccourcis clavier `←` `→`
+- ✅ **Compteur lightbox** - Format "2 / 5" dans le pied de la lightbox
+- ✅ **Confirmation suppression** - Dialog de confirmation avant suppression définitive
+
+#### Responsive mobile
+- ✅ **Barre de recherche** - Passe sous le titre sur mobile (full width)
+- ✅ **Bouton upload fixe** - `fixed bottom-4 inset-x-4 z-40` sur mobile, visible dans la sidebar sur desktop
+- ✅ **Padding bas** - `pb-24 sm:pb-4` pour éviter que le contenu passe sous le bouton fixe
+
+#### Corrections
+- ✅ **Reset dialog upload** - `useEffect(() => { if (open) setFiles([]) }, [open])` — dialog réinitialisé à chaque ouverture
+- ✅ **Tags null** - Fallback `record.tags ?? []` pour les enregistrements créés avant la migration
+
+### Ajouté
+- `src/templates/nextjs-base/app/dashboard/media/page.tsx` - Page Médias complète
+- `src/templates/nextjs-base/app/api/media/route.ts` - API GET/DELETE/PATCH avec Prisma
+- `src/templates/nextjs-base/app/api/media/upload/route.ts` - Upload MinIO + DB
+
+### Modifié
+- `src/templates/nextjs-base/prisma/schema.prisma` - Ajout modèle `Media` (description, tags)
+- `src/templates/nextjs-base/components/media/upload-dialog.tsx` - Reset on open
+
 ## [0.5.0] - 2026-02-18
 
 ### Refonte majeure - Architecture templates statique + UX Dashboard 🏗️
