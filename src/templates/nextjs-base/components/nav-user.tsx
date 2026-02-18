@@ -6,6 +6,7 @@ import {
   LogOut,
   Bell,
   UserCircle,
+  Settings,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -49,13 +50,11 @@ export function NavUser({
       await signOut()
       toast.success("Déconnexion réussie")
       router.push("/")
-    } catch (error) {
-      console.error("Erreur de déconnexion:", error)
+    } catch {
       toast.error("Échec de la déconnexion")
     }
   }
 
-  // Générer les initiales depuis le nom ou l'email
   const getInitials = () => {
     if (user.name) {
       return user.name
@@ -116,11 +115,15 @@ export function NavUser({
                 <UserCircle />
                 Compte
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/dashboard/settings")}>
+                <Settings />
+                Paramètres
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => router.push("/dashboard/billing")}>
                 <CreditCard />
                 Facturation
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/dashboard/settings")}>
+              <DropdownMenuItem onClick={() => router.push("/dashboard/settings#notifications")}>
                 <Bell />
                 Notifications
               </DropdownMenuItem>

@@ -1,6 +1,24 @@
 # 🗺️ Roadmap - create-saas-sbk
 
-## ✅ v0.4.5 - 11 février 2026 (ACTUELLE)
+## ✅ v0.5.0 - 18 février 2026 (ACTUELLE)
+
+### 🏗️ Refonte architecture templates
+- ✅ Nouvelle couche `shadcn-base/` - Template statique versionné (plus d'appel npx shadcn)
+- ✅ `fs.cpSync()` au lieu de `npx shadcn@latest` - Fiable, rapide, offline
+- ✅ `package-generator.js` fusionne avec package.json shadcn-base (Tailwind v4 préservé)
+- ✅ Nouvelle variable template `{{AVAILABLE_LANGUAGES}}`
+
+### 🎨 Refonte UX complète
+- ✅ **Navbar landing** - Logo gauche | liens centrés | actions droite + user icon + lang conditionnel
+- ✅ **SiteHeader dashboard** - Lang toggle + Theme toggle + Logout (remplace bouton GitHub)
+- ✅ **Sidebar** - Simplifiée (seulement Dashboard), plus de liens publics, {{PROJECT_NAME}}
+- ✅ **nav-user dropdown** - Compte + Paramètres + Facturation + Notifications + Déconnexion
+- ✅ **Padding** - Settings et Account pages corrigées (cohérence dashboard)
+- ✅ **cursor-pointer** - Règle CSS globale pour tous les éléments interactifs
+
+---
+
+## ✅ v0.4.5 - 11 février 2026
 
 ### 🚀 Migration Next.js 16
 - ✅ Migration de Next.js 15 vers Next.js 16.1.6
@@ -86,17 +104,20 @@
 
 ### 🏗️ Templates Next.js
 - [ ] **Pages publiques complètes**
-  - [ ] Landing page avec sections modernes
-  - [ ] Page pricing avec plans Stripe
-  - [ ] Page about/contact
+  - [x] Landing page avec Navbar moderne
+  - [x] Page pricing
+  - [x] Page about/contact
   - [ ] Page features
   - [ ] Footer complet avec liens
 
-- [ ] **Dashboard complet**
-  - [x] Layout avec sidebar moderne
+- [x] **Dashboard complet**
+  - [x] Layout avec sidebar moderne (simplifiée)
   - [x] Page d'accueil dashboard
+  - [x] SiteHeader avec lang/theme/logout
+  - [x] nav-user dropdown complet
+  - [x] Page settings (padding corrigé)
+  - [x] Page account (padding corrigé)
   - [ ] Page analytics/stats
-  - [ ] Page settings avancée
   - [ ] Page billing Stripe fonctionnelle
   - [ ] Page team/users
   - [ ] Page API keys
@@ -175,7 +196,7 @@
 ## 📊 Métriques de progression
 
 **Phase 1 :** 100% ✅ (CLI fonctionnel avec @clack/prompts)
-**Phase 2 :** 40% 🚧 (Templates de base + dashboard + OAuth complet)
+**Phase 2 :** 60% 🚧 (Templates complets + dashboard UX finalisé + architecture statique)
 **Phase 3 :** 0% 📅 (Planifié)
 **Phase 4 :** 0% 💭 (Vision)
 
@@ -188,11 +209,12 @@
 3. ✅ UX du CLI améliorée - **FAIT**
 4. ✅ OAuth Google - **FAIT**
 5. ✅ Magic Link / OTP - **FAIT**
-6. 🚧 Templates multilingues complets
-7. 📅 Configuration MongoDB/SQLite
-8. 📅 Landing page moderne
-9. 📅 Dashboard analytics
+6. ✅ Architecture templates statique (shadcn-base) - **FAIT**
+7. ✅ Navbar + Dashboard UX finalisés - **FAIT**
+8. 🚧 Templates multilingues complets
+9. 📅 Configuration MongoDB/SQLite
+10. 📅 Dashboard analytics
 
 ---
 
-Dernière mise à jour : 11 février 2026
+Dernière mise à jour : 18 février 2026

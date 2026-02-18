@@ -151,8 +151,8 @@ export async function main() {
     // 1. Générer le projet Next.js
     generateNextjsProject(projectPath, config);
 
-    // 2. Générer package.json
-    const packageJsonContent = generatePackageJson(config);
+    // 2. Générer package.json (fusion avec celui créé par shadcn)
+    const packageJsonContent = generatePackageJson(config, projectPath);
     writeFile(path.join(projectPath, 'package.json'), packageJsonContent);
     logger.successWithComment('package.json créé', 'Liste des dépendances');
 

@@ -1,6 +1,6 @@
 # Status du Projet create-saas-sbk
 
-Version: **0.4.5**
+Version: **0.5.0**
 
 ## ✅ Fonctionnalités Implémentées
 
@@ -44,36 +44,43 @@ Version: **0.4.5**
 - [x] Installation automatique des skills Claude Code
 - [x] Lancement automatique de /init
 
-## 🎯 Dernières Mises à Jour (v0.4.5)
+## 🎯 Dernières Mises à Jour (v0.5.0)
 
-### Migration Next.js 16.1.0 ✅
-- Mise à jour de Next.js 15.1.0 → 16.1.0
-- Mise à jour eslint-config-next 15.1.0 → 16.1.0
-- Création next.config.js avec headers de sécurité
-- Documentation de migration (NEXTJS16-MIGRATION.md)
-- Code déjà compatible (async cookies, remotePatterns)
+### Architecture Templates Statique ✅
+- Nouvelle couche `src/templates/shadcn-base/` (template statique versionné)
+- `fs.cpSync()` remplace `npx shadcn@latest` → fiable, rapide, offline
+- `package-generator.js` fusionne avec le package.json shadcn-base (Tailwind v4 préservé)
+- Variable `{{AVAILABLE_LANGUAGES}}` pour le toggle langue conditionnel
 
-### Migration Icônes Lucide ✅
-- Remplacement complet des icônes Tabler → Lucide
-- Suppression duplication lucide-react dans package.json
-- Fichiers corrigés :
-  - data-table.tsx (12 icônes)
-  - nav-documents.tsx (4 icônes)
-  - section-cards.tsx (2 icônes)
+### Navbar Landing Page Redesignée ✅
+- Logo gauche | liens centrés (À propos | Tarifs) | actions droite
+- Bouton User icon (remplace "Connexion")
+- Bouton Dashboard dynamique si connecté (`useSession`)
+- Toggle langue conditionnel (seulement si multilangue)
+- Theme toggle tout à droite
 
-### Dashboard Shadcn UI ✅
-- Installation du block dashboard-01
-- Sidebar avec navigation complète
-- User menu avec avatar et logout
-- Correction de tous les imports Radix UI
-- Ajout de toutes les dépendances Radix UI
+### Dashboard SiteHeader Redesigné ✅
+- Toggle langue conditionnel
+- Theme toggle
+- Bouton Logout (icône LogOut) avec `signOut()` + toast + redirect
+- Remplace l'ancien bouton GitHub
 
-### Better Auth Fonctionnel ✅
-- Authentification email/password opérationnelle
-- OAuth GitHub opérationnel
-- Déconnexion fonctionnelle
-- Schéma Prisma correct et complet
-- Route API avec toNextJsHandler
+### Sidebar Dashboard Simplifiée ✅
+- navMain : seulement "Dashboard" (supprimé Paramètres + Compte)
+- navSecondary supprimé (plus de liens Accueil/Tarifs/À propos)
+- En-tête avec `{{PROJECT_NAME}}`
+
+### nav-user Dropdown Complet ✅
+- Compte → /dashboard/account
+- Paramètres → /dashboard/settings (nouveau)
+- Facturation → /dashboard/billing
+- Notifications → /dashboard/settings#notifications
+- Déconnexion
+
+### Corrections UX Dashboard ✅
+- `settings/page.tsx` : padding corrigé (`@container/main` + `px-4 py-4 md:gap-6 md:py-6 lg:px-6`)
+- `account/page.tsx` : même structure de padding
+- `globals.css` : `cursor: pointer` global sur tous les éléments interactifs
 
 ## 📊 Statistiques
 
@@ -139,9 +146,12 @@ Version: **0.4.5**
 4. ✅ Icônes Tabler → Lucide (migration complète)
 5. ✅ Dashboard simple → Dashboard professionnel avec sidebar
 6. ✅ Next.js 15 → Next.js 16 (dernière version)
+7. ✅ `npx shadcn@latest create` → `fs.cpSync` (shadcn-base statique)
+8. ✅ package-generator.js écrasait Tailwind v4 → fusion avec package.json existant
+9. ✅ Padding incohérent entre pages dashboard → unifié
 
 ---
 
-**Dernière mise à jour**: 8 février 2026
+**Dernière mise à jour**: 18 février 2026
 **Mainteneur**: Jerome
 **License**: MIT

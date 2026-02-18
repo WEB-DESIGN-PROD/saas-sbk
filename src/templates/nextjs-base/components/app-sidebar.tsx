@@ -2,18 +2,9 @@
 
 import * as React from "react"
 import Link from "next/link"
-import {
-  LayoutDashboard,
-  Settings,
-  User,
-  CreditCard,
-  DollarSign,
-  Info,
-  Home,
-} from "lucide-react"
+import { LayoutDashboard, Home } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
@@ -31,38 +22,6 @@ const data = {
       title: "Dashboard",
       url: "/dashboard",
       icon: LayoutDashboard,
-    },
-    {
-      title: "Paramètres",
-      url: "/dashboard/settings",
-      icon: Settings,
-    },
-    {
-      title: "Compte",
-      url: "/dashboard/account",
-      icon: User,
-    },
-    // {
-    //   title: "Facturation",
-    //   url: "/dashboard/billing",
-    //   icon: CreditCard,
-    // },
-  ],
-  navSecondary: [
-    {
-      title: "Accueil",
-      url: "/",
-      icon: Home,
-    },
-    {
-      title: "Tarifs",
-      url: "/pricing",
-      icon: DollarSign,
-    },
-    {
-      title: "À propos",
-      url: "/about",
-      icon: Info,
     },
   ],
 }
@@ -88,7 +47,7 @@ export function AppSidebar({
             >
               <Link href="/dashboard">
                 <Home className="!size-5" />
-                <span className="text-base font-semibold">Mon SAAS</span>
+                <span className="text-base font-semibold">{{PROJECT_NAME}}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -96,7 +55,6 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />

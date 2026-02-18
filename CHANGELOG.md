@@ -12,6 +12,64 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 - Mode debug/verbose pour le CLI
 - Publication npm
 
+## [0.5.0] - 2026-02-18
+
+### Refonte majeure - Architecture templates statique + UX Dashboard 🏗️
+
+#### Nouvelle architecture templates (shadcn-base + nextjs-base)
+- ✅ **Couche `shadcn-base/`** - Template statique issu de shadcn CLI (copié une fois, versionné)
+- ✅ **Overlay `nextjs-base/`** - Fichiers projet spécifiques (Better Auth, Prisma, pages, composants)
+- ✅ **`fs.cpSync()` au lieu de `npx shadcn@latest`** - Plus fiable, plus rapide, fonctionne offline
+- ✅ **`package-generator.js`** - Fusionne avec le package.json shadcn-base au lieu de l'écraser (Tailwind v4 préservé)
+- ✅ **Variable `{{AVAILABLE_LANGUAGES}}`** - Nouvelle variable template pour le toggle langue conditionnel
+
+#### Redesign Navbar (landing page)
+- ✅ **Trois sections** - Logo gauche | liens centrés | actions droite
+- ✅ **Bouton User icon** - Remplace le bouton texte "Connexion"
+- ✅ **Toggle langue conditionnel** - Affiché seulement si multilangue configuré
+- ✅ **Bouton Dashboard** - Affiché dynamiquement si utilisateur connecté (via `useSession`)
+- ✅ **Theme toggle** - Tout à droite
+
+#### Redesign Dashboard SiteHeader
+- ✅ **Toggle langue** - Conditionnel (si multilangue)
+- ✅ **Theme toggle** - Bouton icône
+- ✅ **Bouton Logout** - Icône LogOut avec `signOut()` + toast + redirect
+- ✅ Remplace l'ancien bouton GitHub
+
+#### Sidebar Dashboard simplifiée
+- ✅ **navMain** - Seulement "Dashboard" (supprimé Paramètres et Compte)
+- ✅ **Pas de navSecondary** - Supprimé liens Accueil/Tarifs/À propos
+- ✅ **`{{PROJECT_NAME}}`** - Dans l'en-tête de la sidebar
+
+#### nav-user dropdown amélioré
+- ✅ **Compte** → `/dashboard/account`
+- ✅ **Paramètres** → `/dashboard/settings` (nouveau)
+- ✅ **Facturation** → `/dashboard/billing`
+- ✅ **Notifications** → `/dashboard/settings#notifications`
+- ✅ **Déconnexion** - `signOut()` + toast + redirect
+
+#### Corrections padding Dashboard
+- ✅ **`settings/page.tsx`** - Structure `@container/main` + `px-4 py-4 md:gap-6 md:py-6 lg:px-6`
+- ✅ **`account/page.tsx`** - Même structure de padding que le dashboard principal
+
+#### cursor-pointer global
+- ✅ **`globals.css`** - Règle CSS globale pour `cursor: pointer` sur tous les éléments interactifs
+
+### Modifié
+- `src/generators/nextjs-generator.js` - Utilise `fs.cpSync` depuis `shadcn-base`, nouvelle variable `{{AVAILABLE_LANGUAGES}}`
+- `src/generators/package-generator.js` - Merge avec package.json existant au lieu d'écraser
+- `src/index.js` - Passe `projectPath` à `generatePackageJson`
+- `src/templates/nextjs-base/components/navbar.tsx` - Redesign complet
+- `src/templates/nextjs-base/components/site-header.tsx` - Lang/Theme/Logout
+- `src/templates/nextjs-base/components/app-sidebar.tsx` - Simplifié
+- `src/templates/nextjs-base/components/nav-user.tsx` - Dropdown amélioré
+- `src/templates/nextjs-base/app/dashboard/settings/page.tsx` - Padding corrigé
+- `src/templates/nextjs-base/app/dashboard/account/page.tsx` - Padding corrigé
+- `src/templates/shadcn-base/app/globals.css` - cursor-pointer global
+
+### Ajouté
+- `src/templates/shadcn-base/` - Nouveau dossier template statique (base shadcn)
+
 ## [0.4.5] - 2026-02-07
 
 ### Correctif - Bouton de déconnexion fonctionnel 🚪

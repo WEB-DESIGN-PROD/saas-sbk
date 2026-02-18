@@ -52,6 +52,23 @@ Inquirer affichait des messages d'aide en anglais qui ne pouvaient pas être sup
 - [ ] **Forgot password** - À implémenter
 - [ ] **Email verification** - À implémenter
 
+### Architecture Templates
+
+- [x] **shadcn-base/** - Template statique versionné (copié depuis shadcn CLI une seule fois)
+- [x] **nextjs-base/** overlay - Better Auth, Prisma, pages, composants custom
+- [x] **`fs.cpSync()` au lieu de `npx shadcn@latest`** - Fiable, rapide, offline
+- [x] **package-generator.js** - Fusionne avec package.json existant (Tailwind v4 préservé)
+
+### Dashboard UX
+
+- [x] **Navbar landing** - Logo | liens centrés | actions droite + user icon
+- [x] **Toggle langue conditionnel** - `{{AVAILABLE_LANGUAGES}}` variable template
+- [x] **SiteHeader dashboard** - Lang + Theme + Logout
+- [x] **Sidebar simplifiée** - Seulement Dashboard, {{PROJECT_NAME}}
+- [x] **nav-user dropdown** - Compte + Paramètres + Facturation + Notifications
+- [x] **Padding unifié** - Settings et Account pages corrigées
+- [x] **cursor-pointer global** - globals.css
+
 ### Templates Next.js
 
 - [ ] **Template sans système de connexion** (pour futurs cas sans DB)

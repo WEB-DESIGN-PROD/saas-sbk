@@ -36,3 +36,6 @@ temp/
 # Projets de test générés
 my-saas/
 test-*/
+
+# tester les templates
+test-template/

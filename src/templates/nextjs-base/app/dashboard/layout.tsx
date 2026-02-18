@@ -1,36 +1,33 @@
 import { AppSidebar } from "@/components/app-sidebar"
+import { SiteHeader } from "@/components/site-header"
 import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar"
+import { verifySession } from "@/lib/dal"
 
-// Layout minimal SANS vérification auth
-// L'auth est gérée par le proxy.ts
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  // Données utilisateur en dur pour le moment (pour test)
-  const user = {
-    name: "Utilisateur",
-    email: "user@example.com",
-    image: null,
-  }
+  const { user } = await verifySession()
 
   return (
     <SidebarProvider
       style={
         {
-          "--sidebar-width": "16rem",
+          "--sidebar-width": "calc(var(--spacing) * 72)",
+          "--header-height": "calc(var(--spacing) * 12)",
         } as React.CSSProperties
       }
     >
-      <AppSidebar user={user} />
+      <AppSidebar variant="inset" user={user} />
       <SidebarInset>
-        <main className="flex flex-1 flex-col gap-4 p-4">
+        <SiteHeader />
+        <div className="flex flex-1 flex-col">
           {children}
-        </main>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   )

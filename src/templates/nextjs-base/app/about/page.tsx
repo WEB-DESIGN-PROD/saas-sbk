@@ -1,36 +1,12 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Navbar } from "@/components/navbar"
 
 export default function AboutPage() {
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Header */}
-      <header className="border-b">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/" className="text-xl font-bold">
-            {{PROJECT_NAME}}
-          </Link>
-          <nav className="flex items-center gap-4">
-            <Link href="/pricing" className="text-sm font-medium hover:underline">
-              Tarifs
-            </Link>
-            <Link href="/about" className="text-sm font-medium hover:underline">
-              À propos
-            </Link>
-            <Link href="/login">
-              <Button variant="ghost" size="sm">
-                Connexion
-              </Button>
-            </Link>
-            <Link href="/register">
-              <Button size="sm">
-                Créer un compte
-              </Button>
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Main Content */}
       <main className="flex-1">
@@ -113,90 +89,22 @@ export default function AboutPage() {
               </CardHeader>
               <CardContent>
                 <ul className="grid gap-2 md:grid-cols-2">
-                  <li className="flex items-center gap-2">
-                    <svg
-                      className="h-5 w-5 text-primary"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span className="text-sm">Next.js 16+</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <svg
-                      className="h-5 w-5 text-primary"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span className="text-sm">React 19</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <svg
-                      className="h-5 w-5 text-primary"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span className="text-sm">TypeScript</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <svg
-                      className="h-5 w-5 text-primary"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span className="text-sm">Prisma + PostgreSQL</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <svg
-                      className="h-5 w-5 text-primary"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span className="text-sm">Better Auth</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <svg
-                      className="h-5 w-5 text-primary"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span className="text-sm">Tailwind CSS</span>
-                  </li>
+                  {["Next.js 16+", "React 19", "TypeScript", "Prisma + PostgreSQL", "Better Auth", "Tailwind CSS"].map((tech) => (
+                    <li key={tech} className="flex items-center gap-2">
+                      <svg
+                        className="h-5 w-5 text-primary"
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path d="M5 13l4 4L19 7"></path>
+                      </svg>
+                      <span className="text-sm">{tech}</span>
+                    </li>
+                  ))}
                 </ul>
               </CardContent>
             </Card>

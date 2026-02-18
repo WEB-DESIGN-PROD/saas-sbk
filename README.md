@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-0.4.5-blue.svg)
+![Version](https://img.shields.io/badge/version-0.5.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-16+-black.svg)
@@ -167,7 +167,7 @@ Pour installer Claude Code : https://claude.ai/docs/cli
 
 ## Roadmap
 
-📍 **Version actuelle : v0.4.5** (11 février 2026)
+📍 **Version actuelle : v0.5.0** (18 février 2026)
 
 ### ✅ Phase 1 - CLI Interactif (TERMINÉE)
 - ✅ CLI interactif avec @clack/prompts en français
@@ -178,10 +178,11 @@ Pour installer Claude Code : https://claude.ai/docs/cli
 - ✅ OAuth GitHub + Google
 - ✅ Magic Link / OTP avec Resend
 - ✅ Docker Compose pour services locaux
-- ✅ Nouveau dashboard template moderne
 - ✅ Interface UX optimisée avec récapitulatif en colonnes
 
-### 🚧 Phase 2 - Templates Complets (EN COURS - 40%)
+### 🚧 Phase 2 - Templates Complets (EN COURS - 60%)
+- ✅ Architecture templates statique (`shadcn-base` + overlay `nextjs-base`)
+- ✅ Dashboard UX finalisé (Navbar, SiteHeader, Sidebar, padding)
 - ✅ Templates Next.js complets (landing, dashboard, auth)
 - 🚧 Templates multilingues (FR, EN, ES, DE)
 - 📅 Configuration MongoDB et SQLite
