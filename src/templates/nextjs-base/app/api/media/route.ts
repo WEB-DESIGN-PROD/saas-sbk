@@ -39,6 +39,8 @@ export async function GET() {
         size: record.size,
         lastModified: record.createdAt.toISOString(),
         url: await getPresignedUrl(record.key),
+        description: record.description ?? undefined,
+        tags: record.tags,
       }))
     )
 
@@ -85,7 +87,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   try {
-    const { key, newName } = await request.json()
+    const { key, newName, description, tags } = await request.json()
 
     if (!key || !newName?.trim()) {
       return NextResponse.json(
@@ -110,14 +112,21 @@ export async function PATCH(request: NextRequest) {
       .replace(/\s+/g, '_')
     const newKey = `${prefix}${safeName}`
 
+    const dbData = {
+      name: newName.trim(),
+      description: description?.trim() || null,
+      tags: Array.isArray(tags) ? tags : [],
+    }
+
     if (newKey === key) {
+      await prisma.media.update({ where: { key }, data: dbData })
       return NextResponse.json({ key, url: await getPresignedUrl(key) })
     }
 
     await renameMedia(key, newKey)
     await prisma.media.update({
       where: { key },
-      data: { key: newKey, name: newName.trim() },
+      data: { key: newKey, ...dbData },
     })
 
     const url = await getPresignedUrl(newKey)

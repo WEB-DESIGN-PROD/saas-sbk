@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import {
   Upload,
@@ -39,6 +40,8 @@ type MediaItem = {
   size: number
   lastModified: string
   url: string
+  description?: string
+  tags: string[]
 }
 
 function formatSize(bytes: number): string {
@@ -202,7 +205,14 @@ export default function MediaPage() {
   const [search, setSearch] = useState("")
 
   const filteredMedia = search.trim()
-    ? media.filter((m) => m.name.toLowerCase().includes(search.toLowerCase()))
+    ? media.filter((m) => {
+        const q = search.toLowerCase()
+        return (
+          m.name.toLowerCase().includes(q) ||
+          m.description?.toLowerCase().includes(q) ||
+          m.tags.some((t) => t.toLowerCase().includes(q))
+        )
+      })
     : media
 
   // Lightbox
@@ -212,9 +222,12 @@ export default function MediaPage() {
   const [deleteTarget, setDeleteTarget] = useState<MediaItem | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  // Renommage
+  // Édition (renommage + description + tags)
   const [renameTarget, setRenameTarget] = useState<MediaItem | null>(null)
   const [newBaseName, setNewBaseName] = useState("")
+  const [newDescription, setNewDescription] = useState("")
+  const [newTags, setNewTags] = useState<string[]>([])
+  const [tagInput, setTagInput] = useState("")
   const [isRenaming, setIsRenaming] = useState(false)
   const renameInputRef = useRef<HTMLInputElement>(null)
 
@@ -262,7 +275,7 @@ export default function MediaPage() {
     }
   }
 
-  // ── Renommage ─────────────────────────────────────────────────────────────
+  // ── Édition (renommage + description + tags) ───────────────────────────────
   const confirmRename = async () => {
     if (!renameTarget || !newBaseName.trim() || isRenaming) return
     setIsRenaming(true)
@@ -272,21 +285,26 @@ export default function MediaPage() {
       const res = await fetch("/api/media", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key: renameTarget.key, newName: fullName }),
+        body: JSON.stringify({
+          key: renameTarget.key,
+          newName: fullName,
+          description: newDescription.trim() || null,
+          tags: newTags,
+        }),
       })
       if (!res.ok) throw new Error()
       const { key, url } = await res.json()
       setMedia((prev) =>
         prev.map((m) =>
           m.key === renameTarget.key
-            ? { ...m, key, name: fullName, url }
+            ? { ...m, key, name: fullName, url, description: newDescription.trim() || undefined, tags: newTags }
             : m
         )
       )
-      toast.success("Fichier renommé")
+      toast.success("Fichier modifié")
       setRenameTarget(null)
     } catch {
-      toast.error("Impossible de renommer le fichier")
+      toast.error("Impossible de modifier le fichier")
     } finally {
       setIsRenaming(false)
     }
@@ -295,35 +313,51 @@ export default function MediaPage() {
   return (
     <>
       <div className="@container/main flex flex-1 flex-col gap-2">
-        <div className="flex flex-col gap-4 px-4 py-4 md:gap-6 md:py-6 lg:px-6">
+        <div className="flex flex-col gap-4 px-4 py-4 pb-24 sm:pb-4 md:gap-6 md:py-6 md:pb-6 lg:px-6">
 
           {/* En-tête */}
-          <div className="flex items-center justify-between gap-4">
-            <div className="shrink-0">
-              <h1 className="text-2xl font-semibold">Médias</h1>
-              <p className="text-muted-foreground text-sm">
-                {isLoading
-                  ? "Chargement…"
-                  : `${filteredMedia.length} fichier${filteredMedia.length !== 1 ? "s" : ""}${search ? " trouvé" + (filteredMedia.length !== 1 ? "s" : "") : " dans votre bibliothèque"}`}
-              </p>
+          <div className="flex flex-col gap-3">
+            {/* Ligne titre + bouton desktop */}
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h1 className="text-2xl font-semibold">Médias</h1>
+                <p className="text-muted-foreground text-sm">
+                  {isLoading
+                    ? "Chargement…"
+                    : `${filteredMedia.length} fichier${filteredMedia.length !== 1 ? "s" : ""}${search ? " trouvé" + (filteredMedia.length !== 1 ? "s" : "") : " dans votre bibliothèque"}`}
+                </p>
+              </div>
+              {/* Bouton + recherche desktop uniquement */}
+              <div className="hidden sm:flex items-center gap-3 shrink-0">
+                {media.length >= 2 && (
+                  <div className="relative w-64">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+                    <Input
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Rechercher un fichier…"
+                      className="pl-8"
+                    />
+                  </div>
+                )}
+                <Button onClick={() => setUploadOpen(true)}>
+                  <Upload className="mr-2 size-4" />
+                  Ajouter un média
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center gap-3 flex-1 justify-end">
-              {media.length >= 2 && (
-                <div className="relative w-64">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
-                  <Input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Rechercher un fichier…"
-                    className="pl-8"
-                  />
-                </div>
-              )}
-              <Button onClick={() => setUploadOpen(true)}>
-                <Upload className="mr-2 size-4" />
-                Ajouter un média
-              </Button>
-            </div>
+            {/* Recherche mobile (sous le titre) */}
+            {media.length >= 2 && (
+              <div className="relative sm:hidden">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Rechercher un fichier…"
+                  className="pl-8 w-full"
+                />
+              </div>
+            )}
           </div>
 
           {/* Squelette */}
@@ -401,6 +435,9 @@ export default function MediaPage() {
                           onClick={() => {
                             setRenameTarget(item)
                             setNewBaseName(getNameParts(item.name).base)
+                            setNewDescription(item.description ?? "")
+                            setNewTags(item.tags ?? [])
+                            setTagInput("")
                           }}
                         >
                           <Pencil className="size-3" />
@@ -423,6 +460,16 @@ export default function MediaPage() {
                     <p className="truncate text-xs font-medium leading-tight px-0.5">
                       {item.name}
                     </p>
+                    {item.description && (
+                      <p className="text-xs text-muted-foreground px-0.5 line-clamp-2 leading-tight">
+                        {item.description}
+                      </p>
+                    )}
+                    {item.tags.length > 0 && (
+                      <p className="text-xs text-muted-foreground/60 px-0.5 truncate">
+                        {item.tags.map((t) => `#${t}`).join(" ")}
+                      </p>
+                    )}
                     <p className="text-xs text-muted-foreground px-0.5">
                       {formatSize(item.size)}
                     </p>
@@ -432,6 +479,14 @@ export default function MediaPage() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* ── Bouton fixe mobile ────────────────────────────────────────────── */}
+      <div className="fixed bottom-4 inset-x-4 z-40 sm:hidden">
+        <Button className="w-full shadow-lg" onClick={() => setUploadOpen(true)}>
+          <Upload className="mr-2 size-4" />
+          Ajouter un média
+        </Button>
       </div>
 
       {/* ── Upload dialog ─────────────────────────────────────────────────── */}
@@ -497,41 +552,101 @@ export default function MediaPage() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Dialog renommage ──────────────────────────────────────────────── */}
+      {/* ── Dialog édition (nom + description + tags) ─────────────────────── */}
       <Dialog
         open={!!renameTarget}
         onOpenChange={(open) => !open && !isRenaming && setRenameTarget(null)}
       >
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Renommer le fichier</DialogTitle>
+            <DialogTitle>Modifier le fichier</DialogTitle>
             <DialogDescription>
-              Entrez le nouveau nom pour ce fichier.
+              Modifiez le nom, la description ou les tags de ce fichier.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-2">
-            <Label htmlFor="rename-input">Nouveau nom</Label>
-            <div className="flex items-center gap-1.5">
+
+          <div className="space-y-4">
+            {/* Nom */}
+            <div className="space-y-2">
+              <Label htmlFor="rename-input">Nom du fichier</Label>
+              <div className="flex items-center gap-1.5">
+                <Input
+                  id="rename-input"
+                  ref={renameInputRef}
+                  value={newBaseName}
+                  onChange={(e) => setNewBaseName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") setRenameTarget(null)
+                  }}
+                  disabled={isRenaming}
+                  placeholder={renameTarget ? getNameParts(renameTarget.name).base : ""}
+                  className="flex-1"
+                />
+                {renameTarget && getNameParts(renameTarget.name).ext && (
+                  <span className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded border select-none shrink-0">
+                    {getNameParts(renameTarget.name).ext}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="description-input">Description</Label>
+              <Textarea
+                id="description-input"
+                value={newDescription}
+                onChange={(e) => setNewDescription(e.target.value)}
+                disabled={isRenaming}
+                placeholder="Description du fichier (optionnel)…"
+                rows={3}
+              />
+            </div>
+
+            {/* Tags */}
+            <div className="space-y-2">
+              <Label htmlFor="tag-input">Tags</Label>
+              {newTags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {newTags.map((tag, i) => (
+                    <span
+                      key={i}
+                      className="flex items-center gap-1 text-xs bg-muted px-2 py-0.5 rounded-full border"
+                    >
+                      #{tag}
+                      <button
+                        type="button"
+                        onClick={() => setNewTags((prev) => prev.filter((_, j) => j !== i))}
+                        disabled={isRenaming}
+                        className="text-muted-foreground hover:text-foreground cursor-pointer"
+                      >
+                        <X className="size-2.5" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
               <Input
-                id="rename-input"
-                ref={renameInputRef}
-                value={newBaseName}
-                onChange={(e) => setNewBaseName(e.target.value)}
+                id="tag-input"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") confirmRename()
+                  if ((e.key === "Enter" || e.key === ",") && tagInput.trim()) {
+                    e.preventDefault()
+                    const tag = tagInput.trim().replace(/,/g, "").toUpperCase()
+                    if (tag && !newTags.includes(tag)) {
+                      setNewTags((prev) => [...prev, tag])
+                    }
+                    setTagInput("")
+                  }
                   if (e.key === "Escape") setRenameTarget(null)
                 }}
                 disabled={isRenaming}
-                placeholder={renameTarget ? getNameParts(renameTarget.name).base : ""}
-                className="flex-1"
+                placeholder="Ajouter un tag (Entrée ou virgule pour valider)…"
               />
-              {renameTarget && getNameParts(renameTarget.name).ext && (
-                <span className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded border select-none shrink-0">
-                  {getNameParts(renameTarget.name).ext}
-                </span>
-              )}
             </div>
           </div>
+
           <DialogFooter>
             <Button
               variant="outline"
@@ -547,10 +662,10 @@ export default function MediaPage() {
               {isRenaming ? (
                 <>
                   <Loader2 className="mr-2 size-4 animate-spin" />
-                  Renommage…
+                  Enregistrement…
                 </>
               ) : (
-                "Renommer"
+                "Enregistrer"
               )}
             </Button>
           </DialogFooter>
