@@ -165,24 +165,65 @@ npm test
 
 ## Workflow de contribution
 
-1. **Fork** le repository
-2. **Créer** une branche : `git checkout -b feature/ma-feature`
-3. **Développer** avec commits atomiques
-4. **Tester** localement
+> ⚠️ **La branche `main` est protégée. Tout push direct est interdit. Une Pull Request est obligatoire.**
+
+### Règles de protection de `main`
+
+- **Aucun push direct** sur `main` n'est autorisé pour les contributeurs externes
+- **Une PR est requise** et doit être approuvée par [@WEB-DESIGN-PROD](https://github.com/WEB-DESIGN-PROD) (CODEOWNERS) avant tout merge
+- **Le CI doit passer** — le workflow `ci.yml` vérifie l'installation des dépendances et le build à chaque PR
+- **Assignation automatique** — @WEB-DESIGN-PROD est automatiquement demandé en reviewer sur chaque PR via CODEOWNERS
+
+### Étapes
+
+1. **Fork** le repository (contributeurs externes) ou **créer une branche** (collaborateurs)
+2. **Nommer la branche** selon la convention :
+   - `feature/nom-de-la-feature`
+   - `fix/description-du-bug`
+   - `docs/mise-a-jour-docs`
+   - `refactor/nom-du-refactor`
+3. **Développer** avec des commits atomiques suivant les conventions
+4. **Tester** localement (`npm run dev`, génération d'un projet test)
 5. **Push** : `git push origin feature/ma-feature`
-6. **Ouvrir** une Pull Request
+6. **Ouvrir une Pull Request** vers `main` en utilisant le template fourni
+7. **Attendre la review** de @WEB-DESIGN-PROD et que le CI soit vert
+8. **Adresser les retours** si des modifications sont demandées
+
+### CI GitHub Actions
+
+À chaque PR vers `main`, le workflow `.github/workflows/ci.yml` s'exécute automatiquement :
+
+- Installation des dépendances (`npm ci`)
+- Vérification du build (`npm run build`)
+
+La PR ne peut pas être mergée si le CI échoue.
+
+### Templates disponibles
+
+Pour créer une issue, plusieurs templates sont à disposition :
+
+| Template | Usage |
+|---|---|
+| `Bug Report` | Bug dans le CLI lui-même |
+| `SaaS Bug Report` | Bug dans un projet généré par saas-sbk |
+| `Feature Request` | Proposition de nouvelle fonctionnalité |
+| `Docker Issue` | Problème lié au Docker Compose généré |
+| `Integration Request` | Demande d'intégration d'un nouveau service |
+| `Support Request` | Question ou aide à l'utilisation |
+| `Security` | Vulnérabilité de sécurité (traitement prioritaire) |
 
 ## Checklist PR
 
-Avant de soumettre une PR :
+Avant de soumettre une PR, vérifier que le template est bien rempli et que :
 
-- [ ] Le code compile sans erreur
+- [ ] Le code compile sans erreur (`npm run build`)
+- [ ] Le CLI a été testé localement
 - [ ] Les tests passent (si applicables)
-- [ ] La documentation est à jour
-- [ ] Les messages de commit suivent les conventions
+- [ ] La documentation est à jour (CHANGELOG, README si besoin)
+- [ ] Les messages de commit suivent les conventions Conventional Commits
 - [ ] Le code suit les règles de style
 - [ ] Les validations de sécurité sont en place
-- [ ] L'UX est testée manuellement
+- [ ] Aucun secret ou credential ajouté dans le code
 
 ## Roadmap & Priorités
 
