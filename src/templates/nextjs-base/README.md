@@ -144,6 +144,12 @@ Consultez `.claude/README.md` pour la documentation complète de la stack techni
 - Vérifiez `.claude/README.md` pour la configuration complète
 - Ouvrez Prisma Studio : `npm run db:studio`
 
+## ⚖️ Licence & Responsabilité
+
+Ce projet a été généré par [create-saas-sbk](https://github.com/WEB-DESIGN-PROD/saas-sbk) et est distribué sous licence **MIT** — voir [LICENSE](./LICENSE).
+
+> **Important** : Le code généré est fourni "tel quel" ("AS IS"). Vous êtes seul responsable de la sécurité, de la conformité réglementaire (RGPD, etc.) et de la gestion des credentials de votre application en production. L'auteur de `create-saas-sbk` décline toute responsabilité pour les dommages liés à l'utilisation de ce projet généré.
+
 ---
 
-Généré avec ❤️ par [create-saas-sbk](https://github.com/jerome/create-saas-sbk)
+Généré avec ❤️ par [create-saas-sbk](https://github.com/WEB-DESIGN-PROD/saas-sbk)

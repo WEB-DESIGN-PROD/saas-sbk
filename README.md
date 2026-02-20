@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-0.5.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.6.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-16+-black.svg)
@@ -220,9 +220,26 @@ Pour contribuer rapidement : fork le repo, créez une branche, développez, test
 - Issues : Ouvrez une issue sur GitHub
 - Discord : [Lien à venir]
 
+## Disclaimer
+
+> **`create-saas-sbk` est un outil de génération de code fourni "tel quel" ("AS IS"), sans garantie d'aucune sorte.**
+
+L'auteur de ce CLI décline toute responsabilité concernant :
+
+- **Le code généré** — Les projets SaaS produits par ce CLI sont fournis à titre de point de départ. Il appartient à l'utilisateur de les auditer, sécuriser et adapter avant toute mise en production.
+- **La sécurité en production** — L'utilisateur est seul responsable de la sécurité de son application, de ses données, et des données de ses propres utilisateurs finaux.
+- **La conformité légale et réglementaire** — L'utilisateur est responsable de la conformité de son SaaS aux lois applicables (RGPD, PCI-DSS, HIPAA, etc.) dans sa juridiction.
+- **Les clés API et credentials** — Toutes les clés API, mots de passe et secrets configurés appartiennent à l'utilisateur. Leur gestion et leur sécurité sont entièrement sous sa responsabilité.
+- **Les dommages directs ou indirects** — L'auteur ne saurait être tenu responsable de toute perte de données, perte financière, interruption de service ou préjudice subi par l'utilisateur ou ses clients, quelle qu'en soit la cause.
+- **Les dépendances tierces** — Ce CLI s'appuie sur des outils tiers (Next.js, Better Auth, Prisma, Stripe, MinIO, etc.) dont les conditions d'utilisation, la sécurité et la disponibilité sont hors du contrôle de l'auteur.
+
+**En utilisant `create-saas-sbk`, l'utilisateur reconnaît et accepte ces conditions.**
+
+Consultez le fichier [LICENSE](./LICENSE) pour les termes complets de la licence MIT.
+
 ## Licence
 
-MIT
+MIT — Voir [LICENSE](./LICENSE)
 
 ---
 
