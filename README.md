@@ -23,7 +23,10 @@ Ou avec npx :
 npx create-saas-sbk@latest
 ```
 
-## Stack technique
+---
+
+<details>
+<summary><strong>🛠️ Stack technique</strong></summary>
 
 ### Frontend & Backend
 - **Next.js 16.1.6+** avec App Router et Turbopack
@@ -65,7 +68,12 @@ npx create-saas-sbk@latest
 - Support multilingue avec next-intl
 - Français, Anglais (US), Espagnol, Allemand
 
-## Structure du projet généré
+</details>
+
+---
+
+<details>
+<summary><strong>📁 Structure du projet généré</strong></summary>
 
 ```
 mon-saas/
@@ -99,7 +107,12 @@ mon-saas/
 └── README.md
 ```
 
-## Commandes du projet généré
+</details>
+
+---
+
+<details>
+<summary><strong>⌨️ Commandes du projet généré</strong></summary>
 
 ```bash
 # Développement
@@ -119,6 +132,10 @@ npm run docker:up    # Démarrer les services
 npm run docker:down  # Arrêter les services
 npm run docker:logs  # Voir les logs
 ```
+
+</details>
+
+---
 
 ## Démarrage rapide après génération
 
@@ -165,9 +182,12 @@ Si vous avez Claude Code CLI installé, le projet sera automatiquement initialis
 
 Pour installer Claude Code : https://claude.ai/docs/cli
 
-## Roadmap
+---
 
-📍 **Version actuelle : v0.5.0** (18 février 2026)
+<details>
+<summary><strong>🗺️ Roadmap</strong></summary>
+
+📍 **Version actuelle : v0.6.0** (20 février 2026)
 
 ### ✅ Phase 1 - CLI Interactif (TERMINÉE)
 - ✅ CLI interactif avec @clack/prompts en français
@@ -180,10 +200,11 @@ Pour installer Claude Code : https://claude.ai/docs/cli
 - ✅ Docker Compose pour services locaux
 - ✅ Interface UX optimisée avec récapitulatif en colonnes
 
-### 🚧 Phase 2 - Templates Complets (EN COURS - 60%)
+### 🚧 Phase 2 - Templates Complets (EN COURS - 70%)
 - ✅ Architecture templates statique (`shadcn-base` + overlay `nextjs-base`)
 - ✅ Dashboard UX finalisé (Navbar, SiteHeader, Sidebar, padding)
 - ✅ Templates Next.js complets (landing, dashboard, auth)
+- ✅ Page Médias MinIO (upload, liste, édition, lightbox, recherche)
 - 🚧 Templates multilingues (FR, EN, ES, DE)
 - 📅 Configuration MongoDB et SQLite
 - 📅 Template sans système de connexion
@@ -202,23 +223,42 @@ Pour installer Claude Code : https://claude.ai/docs/cli
 
 📄 **Voir [ROADMAP.md](./ROADMAP.md) pour les détails complets**
 
-## Contribution
+</details>
 
-Les contributions sont les bienvenues ! Consultez [CONTRIBUTING.md](./CONTRIBUTING.md) pour :
+---
+
+<details>
+<summary><strong>🤝 Contribution</strong></summary>
+
+Les contributions sont les bienvenues !
+
+> ⚠️ **La branche `main` est protégée. Une Pull Request est obligatoire — aucun push direct autorisé.**
+
+Consultez [CONTRIBUTING.md](./CONTRIBUTING.md) pour :
 
 - Structure du projet et architecture
 - Guide de développement local
-- Conventions de code et commits
+- Conventions de code et commits (Conventional Commits)
 - Types de contributions acceptées
-- Workflow de Pull Request
+- Workflow complet de Pull Request
+- Checklist avant soumission
 
-Pour contribuer rapidement : fork le repo, créez une branche, développez, testez et ouvrez une PR !
+Pour contribuer rapidement : fork le repo, créez une branche (`feature/ma-feature`), développez, testez et ouvrez une PR vers `main`. Elle sera automatiquement assignée à [@WEB-DESIGN-PROD](https://github.com/WEB-DESIGN-PROD) pour review.
 
-## Support
+</details>
 
-- Documentation : Consultez `.claude/README.md` dans votre projet généré
-- Issues : Ouvrez une issue sur GitHub
-- Discord : [Lien à venir]
+---
+
+<details>
+<summary><strong>🆘 Support</strong></summary>
+
+- **Documentation** : Consultez `.claude/README.md` dans votre projet généré
+- **Issues** : [Ouvrir une issue sur GitHub](https://github.com/WEB-DESIGN-PROD/saas-sbk/issues) — plusieurs templates disponibles (bug, feature, docker, sécurité…)
+- **Discord** : Lien à venir
+
+</details>
+
+---
 
 ## Disclaimer
 
