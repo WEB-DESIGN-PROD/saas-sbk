@@ -14,6 +14,8 @@ docs/
 # Git
 .git/
 .gitignore
+.github
+PULL_REQUEST_TEMPLATE.md
 
 # Claude
 .claude/

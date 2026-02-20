@@ -1,0 +1,24 @@
+name: Bug report
+description: Signaler un problème dans le CLI
+title: "[BUG]: "
+labels: ["bug"]
+
+body:
+  - type: textarea
+    attributes:
+      label: Description du bug
+      description: Décrivez clairement le problème rencontré
+
+  - type: input
+    attributes:
+      label: Version du CLI
+      description: Quelle version de saas-sbk utilisez-vous ?
+
+  - type: textarea
+    attributes:
+      label: Étapes pour reproduire
+      description: Comment reproduire le bug ?
+
+  - type: textarea
+    attributes:
+      label: Logs / Erreurs

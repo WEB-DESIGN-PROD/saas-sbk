@@ -1,0 +1,14 @@
+name: Feature request
+description: Proposer une nouvelle fonctionnalité
+title: "[FEATURE]: "
+labels: ["enhancement"]
+
+body:
+  - type: textarea
+    attributes:
+      label: Description de la fonctionnalité
+      description: Expliquez ce que vous souhaitez ajouter
+
+  - type: textarea
+    attributes:
+      label: Pourquoi cette fonctionnalité est utile ?

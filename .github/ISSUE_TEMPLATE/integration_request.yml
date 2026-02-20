@@ -1,0 +1,41 @@
+name: Integration Request
+description: Demander l’ajout d’un nouveau service ou outil au CLI
+title: "[INTEGRATION]: "
+labels: ["enhancement"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Utilisez ce template pour proposer l’ajout d’un nouveau provider, service ou fonctionnalité.
+
+  - type: input
+    attributes:
+      label: Nom du service
+      placeholder: ex. LemonSqueezy, Auth0, Mailgun...
+
+  - type: textarea
+    attributes:
+      label: Pourquoi cette intégration ?
+      description: Expliquez le besoin et le cas d’usage
+
+  - type: textarea
+    attributes:
+      label: Alternatives existantes
+      description: Quelles solutions sont déjà supportées ?
+
+  - type: textarea
+    attributes:
+      label: Ressources utiles
+      description: Liens docs, API, SDK, etc.
+
+  - type: dropdown
+    attributes:
+      label: Type d’intégration
+      options:
+        - Paiement
+        - Authentification
+        - Stockage
+        - Email
+        - IA
+        - Autre

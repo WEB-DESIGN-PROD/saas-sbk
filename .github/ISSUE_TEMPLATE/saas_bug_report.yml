@@ -1,0 +1,63 @@
+name: SaaS Bug Report
+description: Signaler un problème dans un projet généré par saas-sbk
+title: "[SAAS BUG]: "
+labels: ["saas-bug"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de prendre le temps de signaler un bug rencontré dans un SaaS généré par **saas-sbk**.
+        Plus vous fournissez d’informations, plus il sera facile de corriger le problème.
+
+  - type: input
+    attributes:
+      label: Version de saas-sbk utilisée
+      description: Quelle version du CLI a été utilisée pour générer le projet ?
+      placeholder: ex. 0.3.1
+
+  - type: input
+    attributes:
+      label: Stack choisie lors de l’installation
+      description: Résumez les options principales choisies (auth, DB, email, etc.)
+      placeholder: ex. Docker Postgres + Auth Email + Stripe + Resend
+
+  - type: textarea
+    attributes:
+      label: Description du bug
+      description: Décrivez clairement ce qui ne fonctionne pas
+
+  - type: textarea
+    attributes:
+      label: Étapes pour reproduire
+      description: Comment reproduire le problème ?
+      placeholder: |
+        1. Générer un projet avec...
+        2. Lancer npm run dev
+        3. Aller sur /dashboard
+        4. Cliquer sur...
+
+  - type: textarea
+    attributes:
+      label: Comportement attendu
+      description: Ce que vous pensiez voir se produire
+
+  - type: textarea
+    attributes:
+      label: Logs ou erreurs affichées
+      description: Copiez ici les erreurs console, terminal, ou navigateur
+
+  - type: dropdown
+    attributes:
+      label: Environnement
+      options:
+        - macOS
+        - Windows
+        - Linux
+        - Docker
+        - Autre
+
+  - type: textarea
+    attributes:
+      label: Informations supplémentaires
+      description: Toute info utile (screenshots, versions Node, etc.)

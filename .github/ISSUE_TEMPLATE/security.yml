@@ -1,0 +1,27 @@
+name: Security Issue
+description: Signaler un problème de sécurité
+title: "[SECURITY]: "
+labels: ["security"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ⚠️ Pour des raisons de sécurité, ne publiez jamais de clés API ou d’informations sensibles dans une issue publique.
+
+        Si le problème est critique, contactez plutôt :
+        security@votre-domaine.com
+
+  - type: textarea
+    attributes:
+      label: Description du problème
+      description: Expliquez la faille ou le risque
+
+  - type: textarea
+    attributes:
+      label: Impact potentiel
+      description: Que pourrait permettre cette faille ?
+
+  - type: textarea
+    attributes:
+      label: Étapes de reproduction

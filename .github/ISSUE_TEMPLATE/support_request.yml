@@ -1,0 +1,36 @@
+name: Support Request
+description: Demander de l’aide pour configurer ou utiliser un projet généré par saas-sbk
+title: "[SUPPORT]: "
+labels: ["support"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ce template sert à demander de l’aide quand ce n’est pas clairement un bug.
+        Merci de fournir un maximum d’informations.
+
+  - type: input
+    attributes:
+      label: Version de saas-sbk
+      placeholder: ex. 0.4.2
+
+  - type: textarea
+    attributes:
+      label: Ce que vous essayez de faire
+      description: Décrivez votre objectif final
+
+  - type: textarea
+    attributes:
+      label: Problème rencontré
+      description: Qu’est-ce qui vous bloque exactement ?
+
+  - type: textarea
+    attributes:
+      label: Ce que vous avez déjà essayé
+      description: Pour éviter de proposer des solutions déjà testées
+
+  - type: textarea
+    attributes:
+      label: Contexte technique
+      description: OS, Node version, Docker installé ou non, etc.

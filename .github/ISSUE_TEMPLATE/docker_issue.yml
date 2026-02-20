@@ -1,0 +1,40 @@
+name: Docker Configuration Issue
+description: Problème lié à Docker, Postgres ou MinIO dans un projet généré
+title: "[DOCKER]: "
+labels: ["docker"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ce template est dédié aux problèmes liés aux containers Docker générés par saas-sbk.
+
+  - type: input
+    attributes:
+      label: OS utilisé
+      placeholder: macOS / Windows / Linux
+
+  - type: input
+    attributes:
+      label: Version Docker
+      placeholder: sortie de docker --version
+
+  - type: textarea
+    attributes:
+      label: Service concerné
+      description: Postgres, MinIO, Mail, etc.
+
+  - type: textarea
+    attributes:
+      label: Commande exécutée
+      description: Quelle commande a provoqué le problème ?
+
+  - type: textarea
+    attributes:
+      label: Logs Docker
+      description: Résultat de docker compose logs
+
+  - type: textarea
+    attributes:
+      label: docker-compose.yml utilisé
+      description: Extrait ou fichier complet
