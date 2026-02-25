@@ -40,7 +40,7 @@ export function generatePackageJson(config, projectPath = null) {
     ...packageJson.dependencies,
     'server-only': '^0.0.1',
     'better-auth': '^1.3.0',
-    '@prisma/client': '^6.4.0',
+    '@prisma/client': '^6.19.0',
     'next-themes': packageJson.dependencies?.['next-themes'] || '^0.4.6',
   };
 
@@ -91,7 +91,7 @@ export function generatePackageJson(config, projectPath = null) {
   // Fusionner les devDependencies (Prisma CLI)
   packageJson.devDependencies = {
     ...packageJson.devDependencies,
-    'prisma': '^6.4.0',
+    'prisma': '^6.19.0',
   };
 
   return JSON.stringify(packageJson, null, 2);

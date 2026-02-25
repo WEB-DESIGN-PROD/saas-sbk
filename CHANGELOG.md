@@ -7,6 +7,12 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Mise à jour dépendances
+- `prisma` `^6.4.0` → `^6.19.0` (dernière version stable 6.x)
+- `@prisma/client` `^6.4.0` → `^6.19.0`
+
+> Note : Prisma 7 non adopté — breaking changes majeurs incompatibles avec l'architecture actuelle des templates (prisma.config.ts obligatoire, datasource block déprécié, nouveau generator provider, nouveau output path PrismaClient).
+
 ### Phase 4 - Futur (optionnel)
 - Tests unitaires et end-to-end
 - Mode debug/verbose pour le CLI
