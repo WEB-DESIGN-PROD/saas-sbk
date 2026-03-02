@@ -22,13 +22,16 @@ export function generateNextjsProject(projectPath, config) {
   // 2. Copier les fichiers de configuration spécifiques par-dessus
   copyConfigFiles(projectPath, config, templatesDir);
 
-  // 3. Copier les variantes conditionnelles (OAuth, Stripe, etc.)
+  // 3. Générer lib/auth/config.ts dynamiquement selon les options
+  generateAuthConfig(projectPath, config);
+
+  // 4. Copier les variantes conditionnelles (OAuth, Stripe, email, etc.)
   copyConditionalVariants(projectPath, config, replacementsForVariants(config));
 
-  // 4. Générer .gitignore
+  // 5. Générer .gitignore
   generateGitignore(projectPath);
 
-  // 5. Générer README.md
+  // 6. Générer README.md
   generateReadme(projectPath, config);
 
   logger.successWithComment('Structure du projet Next.js créée', 'Votre application web');
@@ -39,19 +42,53 @@ export function generateNextjsProject(projectPath, config) {
  * (Better Auth, Prisma, pages auth, layout, etc.)
  */
 function copyConfigFiles(projectPath, config, templatesDir) {
+  const hasEmail = config.email && config.email.provider !== 'none';
+  const hasMagicLink = config.auth?.methods?.includes('magiclink');
+  const hasOtp = config.auth?.methods?.includes('otp');
+
   // Variables de remplacement
   const allLanguages = [
     ...(config.i18n?.defaultLanguage ? [config.i18n.defaultLanguage] : ['fr']),
     ...(config.i18n?.languages || []).filter(l => l !== config.i18n?.defaultLanguage),
   ];
+
+  // Déterminer la redirect après inscription
+  const registerRedirect = hasEmail ? '/verify-email' : '/dashboard';
+
+  // Construire la section de liens passwordless pour la page login
+  const passwordlessLinks = [];
+  if (hasMagicLink) passwordlessLinks.push({ label: 'Se connecter sans mot de passe', href: '/magic-link' });
+  if (hasOtp) passwordlessLinks.push({ label: 'Se connecter par code OTP', href: '/otp' });
+
+  let passwordlessLinkSection = '';
+  if (passwordlessLinks.length > 0) {
+    const links = passwordlessLinks
+      .map(l => `              <Link href="${l.href}" className="text-sm text-muted-foreground hover:underline">\n                ${l.label}\n              </Link>`)
+      .join('\n');
+    passwordlessLinkSection = `<div className="flex flex-col items-center gap-2 w-full">
+              <div className="relative w-full">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">ou</span>
+                </div>
+              </div>
+${links}
+            </div>`;
+  }
+
   const replacements = {
     '{{PROJECT_NAME}}': config.projectName,
     '{{THEME}}': config.theme || 'system',
     '{{DEFAULT_LANGUAGE}}': config.i18n?.defaultLanguage || 'fr',
     '{{AVAILABLE_LANGUAGES}}': allLanguages.join(','),
+    '{{REGISTER_REDIRECT}}': registerRedirect,
+    '{{PASSWORDLESS_LINK_SECTION}}': passwordlessLinkSection,
   };
 
   // Fichiers toujours copiés (écrasent le shadcn-base)
+  // Note: lib/auth/config.ts est généré dynamiquement par generateAuthConfig()
   const alwaysCopy = [
     'app/page.tsx',
     'app/layout.tsx',
@@ -66,7 +103,6 @@ function copyConfigFiles(projectPath, config, templatesDir) {
     'app/dashboard/account/page.tsx',
     'app/dashboard/settings/page.tsx',
     'app/api/auth/[...all]/route.ts',
-    'lib/auth/config.ts',
     'lib/auth/client.ts',
     'lib/db/client.ts',
     'lib/dal.ts',
@@ -88,8 +124,14 @@ function copyConfigFiles(projectPath, config, templatesDir) {
 
   // Fichiers conditionnels
   const conditionalCopy = [];
-  if (config.email && config.email.provider !== 'none') {
-    conditionalCopy.push('lib/email/client.ts', 'lib/email/templates.ts');
+  if (hasEmail) {
+    conditionalCopy.push(
+      'lib/email/client.ts',
+      'lib/email/templates.ts',
+      'app/forgot-password/page.tsx',
+      'app/reset-password/page.tsx',
+      'app/verify-email/page.tsx',
+    );
   }
   if (config.storage && config.storage.enabled) {
     conditionalCopy.push(
@@ -120,6 +162,129 @@ function copyConfigFiles(projectPath, config, templatesDir) {
     }
     fs.writeFileSync(dest, content, 'utf-8');
   }
+}
+
+/**
+ * Génère lib/auth/config.ts dynamiquement selon les options de configuration
+ */
+function generateAuthConfig(projectPath, config) {
+  const hasEmail = config.email && config.email.provider !== 'none';
+  const hasMagicLink = config.auth?.methods?.includes('magiclink');
+  const hasOtp = config.auth?.methods?.includes('otp');
+  const hasGithub = config.auth?.methods?.includes('github');
+  const hasGoogle = config.auth?.methods?.includes('google');
+  const appName = config.projectName;
+
+  // Imports conditionnels
+  const emailImports = [];
+  if (hasEmail) {
+    emailImports.push('sendVerificationEmail', 'sendResetPasswordEmail');
+  }
+  if (hasMagicLink) {
+    emailImports.push('sendMagicLinkEmail');
+  }
+  if (hasOtp) {
+    emailImports.push('sendOtpEmail');
+  }
+
+  const pluginImports = [];
+  if (hasMagicLink) pluginImports.push('magicLink');
+  if (hasOtp) pluginImports.push('emailOtp');
+
+  // Construction du fichier
+  let lines = [];
+
+  lines.push('import { betterAuth } from "better-auth"');
+  lines.push('import { prismaAdapter } from "better-auth/adapters/prisma"');
+  lines.push('import { prisma } from "@/lib/db/client"');
+
+  if (pluginImports.length > 0) {
+    lines.push(`import { ${pluginImports.join(', ')} } from "better-auth/plugins"`);
+  }
+
+  if (emailImports.length > 0) {
+    lines.push(`import { ${emailImports.join(', ')} } from "@/lib/email/templates"`);
+  }
+
+  lines.push('');
+  lines.push('console.log("🔧 Initialisation Better Auth...")');
+  lines.push('console.log("📦 DATABASE_URL:", process.env.DATABASE_URL ? "✅ Définie" : "❌ Manquante")');
+  lines.push('');
+
+  lines.push('export const auth = betterAuth({');
+  lines.push('  database: prismaAdapter(prisma, {');
+  lines.push('    provider: "postgresql",');
+  lines.push('  }),');
+
+  // emailAndPassword
+  if (config.auth?.methods?.includes('email')) {
+    lines.push('  emailAndPassword: {');
+    lines.push('    enabled: true,');
+    if (hasEmail) {
+      lines.push('    sendResetPassword: async ({ user, url }) => {');
+      lines.push(`      void sendResetPasswordEmail(user.email, user.name || user.email, url, "${appName}")`);
+      lines.push('    },');
+    }
+    lines.push('  },');
+  }
+
+  // emailVerification
+  if (hasEmail) {
+    lines.push('  emailVerification: {');
+    lines.push('    sendOnSignUp: true,');
+    lines.push('    sendVerificationEmail: async ({ user, url }) => {');
+    lines.push(`      void sendVerificationEmail(user.email, user.name || user.email, url, "${appName}")`);
+    lines.push('    },');
+    lines.push('  },');
+  }
+
+  // socialProviders
+  lines.push('  socialProviders: {');
+  if (hasGithub) {
+    lines.push('    ...(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET ? {');
+    lines.push('      github: {');
+    lines.push('        clientId: process.env.GITHUB_CLIENT_ID,');
+    lines.push('        clientSecret: process.env.GITHUB_CLIENT_SECRET,');
+    lines.push('      },');
+    lines.push('    } : {}),');
+  }
+  if (hasGoogle) {
+    lines.push('    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? {');
+    lines.push('      google: {');
+    lines.push('        clientId: process.env.GOOGLE_CLIENT_ID,');
+    lines.push('        clientSecret: process.env.GOOGLE_CLIENT_SECRET,');
+    lines.push('      },');
+    lines.push('    } : {}),');
+  }
+  lines.push('  },');
+
+  // plugins
+  if (pluginImports.length > 0) {
+    lines.push('  plugins: [');
+    if (hasMagicLink) {
+      lines.push('    magicLink({');
+      lines.push('      sendMagicLink: async ({ email, url }) => {');
+      lines.push(`        void sendMagicLinkEmail(email, email, url, "${appName}")`);
+      lines.push('      },');
+      lines.push('    }),');
+    }
+    if (hasOtp) {
+      lines.push('    emailOtp({');
+      lines.push('      sendVerificationOTP: async ({ email, otp, type }) => {');
+      lines.push(`        void sendOtpEmail(email, otp, type, "${appName}")`);
+      lines.push('      },');
+      lines.push('    }),');
+    }
+    lines.push('  ],');
+  }
+
+  lines.push('})');
+  lines.push('');
+
+  const content = lines.join('\n');
+  const dest = path.join(projectPath, 'lib/auth/config.ts');
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.writeFileSync(dest, content, 'utf-8');
 }
 
 /**
@@ -171,6 +336,24 @@ function copyConditionalVariants(projectPath, config, replacements) {
     copyVariantFile(
       path.join(variantsDir, 'storage/app-sidebar-with-media.tsx'),
       path.join(projectPath, 'components/app-sidebar.tsx'),
+      replacements
+    );
+  }
+
+  // Page Magic Link si magiclink activé
+  if (config.auth?.methods?.includes('magiclink')) {
+    copyVariantFile(
+      path.join(variantsDir, 'auth/magic-link-page.tsx'),
+      path.join(projectPath, 'app/magic-link/page.tsx'),
+      replacements
+    );
+  }
+
+  // Page OTP si otp activé
+  if (config.auth?.methods?.includes('otp')) {
+    copyVariantFile(
+      path.join(variantsDir, 'auth/otp-page.tsx'),
+      path.join(projectPath, 'app/otp/page.tsx'),
       replacements
     );
   }

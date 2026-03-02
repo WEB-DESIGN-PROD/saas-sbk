@@ -11,6 +11,7 @@ export function generateEnvFile(config) {
     '',
     '# Application',
     `APP_NAME="${sanitizeForEnv(config.projectName)}"`,
+    `NEXT_PUBLIC_APP_NAME="${sanitizeForEnv(config.projectName)}"`,
     `APP_URL="http://localhost:3000"`,
     `NEXT_PUBLIC_APP_URL="http://localhost:3000"`,
     `THEME="${config.theme}"`,

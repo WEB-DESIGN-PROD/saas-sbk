@@ -119,6 +119,44 @@ export const emailTemplates = {
     </html>
   `,
 
+  // Email OTP (code à usage unique)
+  otp: (otp: string, type: string, appName: string) => `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: #000; color: #fff; padding: 20px; text-align: center; }
+          .content { padding: 20px; background: #f9f9f9; }
+          .otp-code { font-size: 48px; font-weight: bold; letter-spacing: 12px; text-align: center; color: #000; background: #fff; border: 2px solid #000; border-radius: 8px; padding: 20px; margin: 20px 0; font-family: monospace; }
+          .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+          .warning { background: #fff3cd; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>${appName}</h1>
+          </div>
+          <div class="content">
+            <h2>Votre code de vérification</h2>
+            <p>Utilisez ce code pour ${type === 'sign-in' ? 'vous connecter' : 'vérifier votre compte'} sur ${appName} :</p>
+            <div class="otp-code">${otp}</div>
+            <div class="warning">
+              <p><strong>Note :</strong> Ce code expire dans 10 minutes. Ne le partagez avec personne.</p>
+            </div>
+            <p>Si vous n'avez pas demandé ce code, vous pouvez ignorer cet email en toute sécurité.</p>
+          </div>
+          <div class="footer">
+            <p>© ${new Date().getFullYear()} ${appName}. Tous droits réservés.</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `,
+
   // Email Magic Link
   magicLink: (name: string, magicLinkUrl: string, appName: string) => `
     <!DOCTYPE html>
@@ -208,5 +246,19 @@ export async function sendMagicLinkEmail(
     to,
     subject: `Votre lien de connexion - ${appName}`,
     html: emailTemplates.magicLink(name, magicLinkUrl, appName),
+  })
+}
+
+export async function sendOtpEmail(
+  to: string,
+  otp: string,
+  type: string,
+  appName: string
+) {
+  const { sendEmail } = await import('./client')
+  await sendEmail({
+    to,
+    subject: `Votre code de vérification - ${appName}`,
+    html: emailTemplates.otp(otp, type, appName),
   })
 }

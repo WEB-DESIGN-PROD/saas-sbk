@@ -80,9 +80,13 @@ export default function RegisterPage() {
         description: "Bienvenue ! Redirection vers le dashboard..."
       })
 
-      // Rediriger vers le dashboard après inscription réussie
+      // Rediriger après inscription réussie
+      const redirectTo = "{{REGISTER_REDIRECT}}"
+      const redirectUrl = redirectTo === '/verify-email'
+        ? `/verify-email?email=${encodeURIComponent(email)}`
+        : redirectTo
       setTimeout(() => {
-        router.push("/dashboard")
+        router.push(redirectUrl)
       }, 500)
     } catch (error: any) {
       console.error("❌ Exception lors de l'inscription:", error)

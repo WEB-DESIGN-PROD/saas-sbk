@@ -116,7 +116,8 @@ export async function askQuestions() {
       choices: [
         { name: 'Email/Mot de passe', value: 'email', checked: true },
         { name: 'OAuth GitHub', value: 'github' },
-        { name: 'Magic Link (lien par email)', value: 'magiclink' }
+        { name: 'Magic Link (lien par email)', value: 'magiclink' },
+        { name: 'OTP par email (code 6 chiffres)', value: 'otp' }
       ],
       validate: (input) => {
         if (input.length === 0) {

@@ -105,6 +105,8 @@ export default function LoginPage() {
 
             <GitHubButton />
 
+            {{PASSWORDLESS_LINK_SECTION}}
+
             <p className="text-center text-sm text-muted-foreground">
               Pas encore de compte ?{" "}
               <Link href="/register" className="font-medium underline underline-offset-4">
