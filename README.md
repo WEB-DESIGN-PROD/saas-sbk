@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-0.9.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.10.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-16+-black.svg)
@@ -57,9 +57,19 @@ npx create-saas-sbk@latest
 - **Rôle admin** — assigné automatiquement si l'email correspond à `ADMIN_EMAIL`
 - **`/admin`** — espace protégé avec stats (total membres, inscriptions, sessions, vérification)
 - **`/admin/users`** — tableau de gestion : plan, crédits, suppression, impersonation, recherche
+- **`/admin/blog`** — gestion complète des articles (si blog activé)
+- **`/admin/media`** — gestion des médias (si stockage activé)
 - **Impersonation** — l'admin peut se connecter en tant qu'utilisateur avec bannière de retour
 - **Plugin Better Auth `admin`** — ban, impersonation, gestion des rôles
 - **Auto-refresh 30s** — les compteurs se mettent à jour automatiquement
+
+### Blog (optionnel)
+- **Type de SaaS** — choix entre SaaS classique et Blog SaaS à la génération
+- **Pages publiques** — liste articles, article complet, filtre catégorie/tag, aperçu, flux RSS
+- **Éditeur markdown** — image de couverture drag-and-drop, jauges de caractères, categories, tags, SEO
+- **Interface admin** — gestion complète des articles, catégories, tags
+- **`@tailwindcss/typography`** — rendu Markdown avec classes `prose`
+- **SEO intégré** — meta title/description pré-remplis, keywords auto depuis les tags
 
 ### Emails
 - **Resend** - Service moderne (recommandé)
@@ -202,7 +212,7 @@ Pour installer Claude Code : https://claude.ai/docs/cli
 <details>
 <summary><strong>🗺️ Roadmap</strong></summary>
 
-📍 **Version actuelle : v0.9.0** (2 mars 2026)
+📍 **Version actuelle : v0.10.0** (2 mars 2026)
 
 ### ✅ Phase 1 - CLI Interactif (TERMINÉE)
 - ✅ CLI interactif avec @clack/prompts en français
@@ -215,17 +225,17 @@ Pour installer Claude Code : https://claude.ai/docs/cli
 - ✅ Docker Compose pour services locaux
 - ✅ Interface UX optimisée avec récapitulatif en colonnes
 
-### 🚧 Phase 2 - Templates Complets (EN COURS - 85%)
+### 🚧 Phase 2 - Templates Complets (EN COURS - 90%)
 - ✅ Architecture templates statique (`shadcn-base` + overlay `nextjs-base`)
 - ✅ Dashboard UX finalisé (Navbar, SiteHeader, Sidebar, padding)
 - ✅ Templates Next.js complets (landing, dashboard, auth)
 - ✅ Page Médias MinIO (upload, liste, édition, lightbox, recherche)
 - ✅ Système de facturation & types d'utilisateurs (v0.8.0)
 - ✅ Système super administrateur avec impersonation (v0.9.0)
+- ✅ Système de blog complet (éditeur, admin, public, RSS) (v0.10.0)
 - 🚧 Templates multilingues (FR, EN, ES, DE)
 - 📅 Configuration MongoDB et SQLite
 - 📅 Template sans système de connexion
-- 📅 Plus de variantes de templates (blog, e-commerce)
 
 ### 📅 Phase 3 - Génération IA (PLANIFIÉE)
 - Commande `/generate-features` pour génération IA

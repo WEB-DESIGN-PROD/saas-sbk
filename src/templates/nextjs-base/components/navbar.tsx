@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useState, useEffect } from "react"
 import { useSession } from "@/lib/auth/client"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -18,7 +19,9 @@ const showLangToggle = AVAILABLE_LANGUAGES.length > 1
 
 export function Navbar() {
   const { data: session } = useSession()
-  const isLoggedIn = !!session?.user
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  const isLoggedIn = mounted && !!session?.user
 
   return (
     <header className="border-b">
@@ -39,6 +42,11 @@ export function Navbar() {
           <Link href="/pricing" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
             Tarifs
           </Link>
+          {process.env.NEXT_PUBLIC_HAS_BLOG === "true" && (
+            <Link href="/blog" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+              Blog
+            </Link>
+          )}
         </nav>
 
         {/* Droite : Actions */}

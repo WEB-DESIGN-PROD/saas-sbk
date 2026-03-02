@@ -30,7 +30,12 @@ export default async function DashboardLayout({
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" user={user} accountType={plan.accountType} />
+      <AppSidebar
+        variant="inset"
+        user={user}
+        accountType={plan.accountType}
+        hasBlog={process.env.NEXT_PUBLIC_HAS_BLOG === "true"}
+      />
       <SidebarInset>
         {impersonatedBy && (
           <ImpersonationBanner userName={user.name} userEmail={user.email} />

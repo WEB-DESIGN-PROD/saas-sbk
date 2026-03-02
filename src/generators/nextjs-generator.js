@@ -137,6 +137,9 @@ function copyConfigFiles(projectPath, config, templatesDir) {
       'app/dashboard/media/page.tsx',
       'components/media/upload-dialog.tsx',
     );
+    if (config.admin && config.admin.enabled) {
+      conditionalCopy.push('app/admin/media/page.tsx');
+    }
   }
   if (config.ai && config.ai.providers && config.ai.providers.length > 0) {
     conditionalCopy.push('lib/ai/client.ts');
@@ -150,6 +153,7 @@ function copyConfigFiles(projectPath, config, templatesDir) {
       'components/admin/section-cards-admin.tsx',
       'components/admin/admin-chart-signups.tsx',
       'components/admin/users-table.tsx',
+      'components/admin/auto-refresh.tsx',
       'components/impersonation-banner.tsx',
       'app/api/admin/stats/route.ts',
       'app/api/admin/users/route.ts',
@@ -159,6 +163,45 @@ function copyConfigFiles(projectPath, config, templatesDir) {
   // InputOTP composant : seulement si loginMethod = otp
   if (loginMethod === 'otp') {
     conditionalCopy.push('components/ui/input-otp.tsx');
+  }
+
+  // Copie blog
+  if (config.saasType === 'blog') {
+    const blogPublicFiles = [
+      'app/blog/layout.tsx',
+      'app/blog/page.tsx',
+      'app/blog/[slug]/page.tsx',
+      'app/blog/categorie/[slug]/page.tsx',
+      'app/blog/tag/[slug]/page.tsx',
+      'app/blog/preview/[id]/page.tsx',
+      'app/feed.xml/route.ts',
+      'components/blog/article-card.tsx',
+      'components/blog/markdown-preview.tsx',
+    ];
+    for (const f of blogPublicFiles) {
+      conditionalCopy.push(f);
+    }
+
+    const blogMgmtBase = config.admin?.enabled ? 'admin' : 'dashboard';
+    const blogMgmtFiles = [
+      `app/${blogMgmtBase}/blog/page.tsx`,
+      `app/${blogMgmtBase}/blog/new/page.tsx`,
+      `app/${blogMgmtBase}/blog/[id]/edit/page.tsx`,
+      `app/${blogMgmtBase}/blog/categories/page.tsx`,
+      'app/api/blog/posts/route.ts',
+      'app/api/blog/posts/[id]/route.ts',
+      'app/api/blog/categories/route.ts',
+      'app/api/blog/categories/[id]/route.ts',
+      'app/api/blog/check-slug/route.ts',
+      'app/api/blog/tags/route.ts',
+      'components/blog/article-editor.tsx',
+      'components/blog/articles-table.tsx',
+      'components/blog/tag-input.tsx',
+      'components/blog/category-manager.tsx',
+    ];
+    for (const f of blogMgmtFiles) {
+      conditionalCopy.push(f);
+    }
   }
 
   for (const file of [...alwaysCopy, ...conditionalCopy]) {
@@ -174,6 +217,18 @@ function copyConfigFiles(projectPath, config, templatesDir) {
       content = content.replaceAll(key, value);
     }
     fs.writeFileSync(dest, content, 'utf-8');
+  }
+
+  // Injecter @plugin "@tailwindcss/typography" dans globals.css si blog activé
+  if (config.saasType === 'blog') {
+    const globalsCssPath = path.join(projectPath, 'app/globals.css');
+    if (fs.existsSync(globalsCssPath)) {
+      let css = fs.readFileSync(globalsCssPath, 'utf-8');
+      if (!css.includes('@tailwindcss/typography')) {
+        css = css.replace('@import "tailwindcss";', '@import "tailwindcss";\n@plugin "@tailwindcss/typography";');
+        fs.writeFileSync(globalsCssPath, css, 'utf-8');
+      }
+    }
   }
 }
 
