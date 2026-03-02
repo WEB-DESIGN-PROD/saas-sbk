@@ -15,3 +15,15 @@ export interface Session {
   token: string
   expiresAt: Date
 }
+
+// ─── Plan & Abonnement ───────────────────────────────────────────────────────
+
+export type AccountType = 'Free' | 'Freemium' | 'Paid'
+
+export type SubscriptionPlan = 'Pro' | 'Team' | 'Enterprise' | null
+
+export interface UserPlan {
+  accountType: AccountType
+  subscriptionPlan: SubscriptionPlan
+  extraCredits: number
+}

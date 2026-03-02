@@ -4,14 +4,15 @@ import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar"
-import { verifySession } from "@/lib/dal"
+import { verifySession, getUserPlan } from "@/lib/dal"
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const { user } = await verifySession()
+  const { user, userId } = await verifySession()
+  const plan = await getUserPlan(userId)
 
   return (
     <SidebarProvider
@@ -22,7 +23,7 @@ export default async function DashboardLayout({
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" user={user} />
+      <AppSidebar variant="inset" user={user} accountType={plan.accountType} />
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col">

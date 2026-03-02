@@ -10,14 +10,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum AccountType {
+  Free
+  Freemium
+  Paid
+}
+
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified Boolean   @default(false)
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id               String      @id @default(cuid())
+  name             String?
+  email            String      @unique
+  emailVerified    Boolean     @default(false)
+  image            String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  // Plan & crédits
+  accountType      AccountType @default(Free)
+  subscriptionPlan String?     // "Pro" | "Team" | "Enterprise" — null si Free/Freemium
+  extraCredits     Int         @default(0)
 
   sessions Session[]
   accounts Account[]
