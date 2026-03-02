@@ -867,15 +867,6 @@ function copyConditionalVariants(projectPath, config, replacements) {
     );
   }
 
-  // Sidebar avec lien Médias si storage activé
-  if (config.storage && config.storage.enabled) {
-    copyVariantFile(
-      path.join(variantsDir, 'storage/app-sidebar-with-media.tsx'),
-      path.join(projectPath, 'components/app-sidebar.tsx'),
-      replacements
-    );
-  }
-
   // Plus de pages /magic-link ou /otp séparées — la page /login gère tout selon loginMethod
 }
 
