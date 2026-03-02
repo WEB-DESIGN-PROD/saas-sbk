@@ -11,6 +11,7 @@ import {
   isFreemium,
   isPaid,
 } from '@/lib/subscription/helpers'
+import { BuyCreditsDialog } from '@/components/billing/buy-credits-dialog'
 import { CreditCard, Zap, Users, Building2, Coins } from 'lucide-react'
 
 const PLANS = [
@@ -108,7 +109,7 @@ export default async function BillingPage() {
               <p className="text-sm text-muted-foreground">
                 Les crédits s'ajoutent à votre quota mensuel et n'expirent pas.
               </p>
-              <Button size="sm">Acheter des crédits</Button>
+              <BuyCreditsDialog />
             </CardContent>
           </Card>
         </div>

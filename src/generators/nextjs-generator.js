@@ -105,6 +105,8 @@ function copyConfigFiles(projectPath, config, templatesDir) {
     'types/index.ts',
     'prisma/schema.prisma',
     'lib/subscription/helpers.ts',
+    'components/ui/dialog.tsx',
+    'components/billing/buy-credits-dialog.tsx',
     'app/dashboard/billing/page.tsx',
     'app/api/user/plan/route.ts',
     'DEVELOPMENT.md',
@@ -134,7 +136,6 @@ function copyConfigFiles(projectPath, config, templatesDir) {
       'app/api/media/upload/route.ts',
       'app/dashboard/media/page.tsx',
       'components/media/upload-dialog.tsx',
-      'components/ui/dialog.tsx',
     );
   }
   if (config.ai && config.ai.providers && config.ai.providers.length > 0) {
