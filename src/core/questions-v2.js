@@ -619,6 +619,23 @@ export async function askQuestions() {
     }
     answers.resendApiKey = resendApiKey;
 
+    showHeader(answers);
+    const emailFrom = await p.text({
+      message: 'Adresse email expéditeur',
+      placeholder: `noreply@${answers.projectName}.com`,
+      initialValue: `noreply@${answers.projectName}.com`,
+      validate: (value) => {
+        const result = validateEmail(value);
+        return result === true ? undefined : result;
+      }
+    });
+
+    if (p.isCancel(emailFrom)) {
+      p.cancel('Installation annulée.');
+      process.exit(0);
+    }
+    answers.emailFrom = emailFrom;
+
     // Proposer Magic Link ou OTP si Resend est choisi
     if (!answers.skipAuth) {
       showHeader(answers);
