@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-0.6.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.8.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-16+-black.svg)
@@ -45,10 +45,13 @@ npx create-saas-sbk@latest
 - **Prisma** - ORM TypeScript avec migrations
 - _MongoDB et SQLite à venir dans une prochaine version_
 
-### Paiements
-- **Stripe** en mode test
-- Abonnements et paiements uniques
-- Webhooks configurés
+### Abonnements & Facturation
+- **Types d'utilisateurs** — `Free` / `Freemium` (crédits) / `Paid` (abonnement actif)
+- **Plans** — `Pro` (29€/mois), `Team` (79€/mois), `Enterprise` (sur devis)
+- **Crédits supplémentaires** — Packs dégressifs achetables (100/500/1000/2000)
+- **Page `/dashboard/billing`** — Plan actuel, crédits, upgrade
+- **Carte upgrade sidebar** — Invitation à upgrader pour les utilisateurs Free/Freemium
+- **Stripe** en mode test — Prêt pour intégration paiements
 
 ### Emails
 - **Resend** - Service moderne (recommandé)

@@ -12,6 +12,58 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 - Mode debug/verbose pour le CLI
 - Publication npm
 
+## [0.8.0] - 2026-03-02
+
+### Système de facturation & types d'utilisateurs 💳
+
+#### Modèle utilisateur étendu
+- ✅ **`AccountType` enum** — `Free` (défaut), `Freemium` (crédits achetés), `Paid` (abonnement actif)
+- ✅ **`subscriptionPlan`** — `String?` : `Pro`, `Team`, `Enterprise` ou `null`
+- ✅ **`extraCredits Int @default(0)`** — Colonne crédits supplémentaires pour tous les utilisateurs
+- ✅ **Schema Prisma mis à jour** — Enum + 3 nouveaux champs sur le modèle `User`
+
+#### Helpers d'abonnement (`lib/subscription/helpers.ts`)
+- ✅ **Guards typés** — `isFree()`, `isFreemium()`, `isPaid()`, `hasCredits()`
+- ✅ **Labels** — `getAccountTypeLabel()`, `getPlanLabel()`, `getFullPlanLabel()`
+- ✅ **Classes CSS badge** — `getAccountTypeBadgeClass()`, `getPlanBadgeClass()` pour badges colorés
+- ✅ **Accès premium** — `canAccessPremium()`, `hasActiveSubscription()`
+
+#### DAL étendu (`lib/dal.ts`)
+- ✅ **`verifySession()`** — retourne désormais `userId` et `user.id`
+- ✅ **`getUserPlan(userId)`** — fonction cachée qui récupère `accountType`, `subscriptionPlan`, `extraCredits`
+- ✅ **Route API `GET /api/user/plan`** — endpoint pour récupérer le plan côté client
+
+#### Page Facturation (`/dashboard/billing`)
+- ✅ **Card "Plan actuel"** — badges `AccountType` + `SubscriptionPlan` avec couleurs contextuelles
+- ✅ **Card "Crédits supplémentaires"** — affichage du solde + dialog d'achat
+- ✅ **3 cards de plans** — Pro (29€/mois), Team (79€/mois), Enterprise (sur devis)
+- ✅ **Mise en avant plan actuel** — bordure `ring-primary` + badge "Plan actuel"
+
+#### Dialog d'achat de crédits (`BuyCreditsDialog`)
+- ✅ **4 packs dégressifs** — 100→9€, 500→39€ (-13%), 1000→69€ (-23% ⭐), 2000→119€ (-34%)
+- ✅ **UX sélection** — clic pour sélectionner, badge "Populaire" sur le 1000, récap en bas
+- ✅ **TODO Stripe intégré** — commentaire `// TODO: intégrer Stripe` pour la suite
+
+#### Carte d'upgrade dans la sidebar
+- ✅ **Visible pour Free/Freemium** — masquée si `AccountType === Paid`
+- ✅ **Design card gradient** — fond `primary/10 → primary/5`, bordure `primary/25`, coins arrondis `xl`
+- ✅ **3 avantages listés** — Fonctionnalités illimitées, Support prioritaire, Crédits mensuels inclus
+- ✅ **Bouton "Upgrade maintenant"** — pleine largeur, couleur `primary`, icône Zap, lien `/dashboard/billing`
+
+### Ajouté
+- `src/templates/nextjs-base/types/index.ts` — Types `AccountType`, `SubscriptionPlan`, `UserPlan`
+- `src/templates/nextjs-base/lib/subscription/helpers.ts` — Helpers d'abonnement
+- `src/templates/nextjs-base/app/dashboard/billing/page.tsx` — Page facturation complète
+- `src/templates/nextjs-base/components/billing/buy-credits-dialog.tsx` — Dialog achat crédits
+- `src/templates/nextjs-base/app/api/user/plan/route.ts` — Route API plan utilisateur
+
+### Modifié
+- `src/templates/nextjs-base/prisma/schema.prisma` — Enum `AccountType` + champs sur `User`
+- `src/templates/nextjs-base/lib/dal.ts` — `userId` dans `verifySession()` + `getUserPlan()`
+- `src/templates/nextjs-base/components/app-sidebar.tsx` — Prop `accountType` + carte upgrade
+- `src/templates/nextjs-base/app/dashboard/layout.tsx` — Appel `getUserPlan()` + passage prop
+- `src/generators/nextjs-generator.js` — Ajout nouveaux fichiers dans `alwaysCopy`
+
 ## [0.7.0] - 2026-03-02
 
 ### Emails transactionnels + Authentification avancée 📧🔐

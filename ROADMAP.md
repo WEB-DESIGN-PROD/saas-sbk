@@ -1,6 +1,21 @@
 # 🗺️ Roadmap - create-saas-sbk
 
-## ✅ v0.7.0 - 2 mars 2026 (ACTUELLE)
+## ✅ v0.8.0 - 2 mars 2026 (ACTUELLE)
+
+### 💳 Facturation & Types d'utilisateurs
+
+- ✅ **`AccountType` enum** — `Free` (défaut), `Freemium` (crédits achetés), `Paid` (abonnement actif)
+- ✅ **`subscriptionPlan`** — `Pro` / `Team` / `Enterprise` / `null`
+- ✅ **`extraCredits`** — Crédits supplémentaires achetés hors abonnement (`Int @default(0)`)
+- ✅ **`lib/subscription/helpers.ts`** — Guards typés (`isFree`, `isFreemium`, `isPaid`), labels, classes CSS badge
+- ✅ **`getUserPlan(userId)`** — Fonction cachée dans `lib/dal.ts`
+- ✅ **Page `/dashboard/billing`** — Plan actuel, crédits, 3 cards de plans (Pro/Team/Enterprise)
+- ✅ **Dialog d'achat de crédits** — 4 packs dégressifs (100/500/1000/2000) avec badge "Populaire"
+- ✅ **Carte upgrade sidebar** — Visible pour Free/Freemium, gradient, 3 avantages, bouton "Upgrade maintenant"
+
+---
+
+## ✅ v0.7.0 - 2 mars 2026
 
 ### 📧 Emails transactionnels + Authentification avancée
 
