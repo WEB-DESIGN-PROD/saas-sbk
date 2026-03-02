@@ -235,6 +235,13 @@ export async function askQuestions() {
         message: 'Clé API Resend :',
         mask: '*',
         validate: validateApiKey
+      },
+      {
+        type: 'input',
+        name: 'emailFrom',
+        message: 'Adresse email expéditeur (ex: no-reply@mon-site.fr) :',
+        default: `noreply@${answers.projectName}.com`,
+        validate: validateEmail
       }
     ]);
     Object.assign(answers, resendAnswers);

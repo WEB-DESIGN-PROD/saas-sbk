@@ -22,8 +22,14 @@ export function generateNextjsProject(projectPath, config) {
   // 2. Copier les fichiers de configuration spécifiques par-dessus
   copyConfigFiles(projectPath, config, templatesDir);
 
-  // 3. Générer lib/auth/config.ts dynamiquement selon les options
+  // 3. Générer lib/auth/config.ts et lib/auth/client.ts dynamiquement
   generateAuthConfig(projectPath, config);
+  generateAuthClient(projectPath, config);
+
+  // 3b. Générer lib/email/client.ts dynamiquement selon le provider
+  if (config.email && config.email.provider !== 'none') {
+    generateEmailClient(projectPath, config);
+  }
 
   // 4. Copier les variantes conditionnelles (OAuth, Stripe, email, etc.)
   copyConditionalVariants(projectPath, config, replacementsForVariants(config));
@@ -103,7 +109,6 @@ ${links}
     'app/dashboard/account/page.tsx',
     'app/dashboard/settings/page.tsx',
     'app/api/auth/[...all]/route.ts',
-    'lib/auth/client.ts',
     'lib/db/client.ts',
     'lib/dal.ts',
     'components/auth/logout-button.tsx',
@@ -126,7 +131,6 @@ ${links}
   const conditionalCopy = [];
   if (hasEmail) {
     conditionalCopy.push(
-      'lib/email/client.ts',
       'lib/email/templates.ts',
       'app/forgot-password/page.tsx',
       'app/reset-password/page.tsx',
@@ -162,6 +166,115 @@ ${links}
     }
     fs.writeFileSync(dest, content, 'utf-8');
   }
+}
+
+/**
+ * Génère lib/auth/client.ts dynamiquement avec les plugins client correspondant
+ * aux plugins serveur activés (magicLink, emailOtp).
+ */
+function generateAuthClient(projectPath, config) {
+  const hasMagicLink = config.auth?.methods?.includes('magiclink');
+  const hasOtp = config.auth?.methods?.includes('otp');
+
+  const clientPluginImports = [];
+  const clientPluginInits = [];
+
+  if (hasMagicLink) {
+    clientPluginImports.push('magicLinkClient');
+    clientPluginInits.push('magicLinkClient()');
+  }
+  if (hasOtp) {
+    clientPluginImports.push('emailOtpClient');
+    clientPluginInits.push('emailOtpClient()');
+  }
+
+  let lines = [];
+  lines.push('import { createAuthClient } from "better-auth/react"');
+
+  if (clientPluginImports.length > 0) {
+    lines.push(`import { ${clientPluginImports.join(', ')} } from "better-auth/client/plugins"`);
+  }
+
+  lines.push('');
+  lines.push('export const authClient = createAuthClient({');
+  lines.push('  baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",');
+
+  if (clientPluginInits.length > 0) {
+    lines.push(`  plugins: [${clientPluginInits.join(', ')}],`);
+  }
+
+  lines.push('})');
+  lines.push('');
+  lines.push('export const { signIn, signUp, signOut, useSession } = authClient');
+  lines.push('');
+
+  const dest = path.join(projectPath, 'lib/auth/client.ts');
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.writeFileSync(dest, lines.join('\n'), 'utf-8');
+}
+
+/**
+ * Génère lib/email/client.ts dynamiquement selon le provider choisi.
+ * Évite d'inclure nodemailer si provider=resend (et vice-versa),
+ * ce qui résout l'erreur "Module not found: Can't resolve 'nodemailer'" de Next.js.
+ */
+function generateEmailClient(projectPath, config) {
+  const isResend = config.email.provider === 'resend';
+  let content;
+
+  if (isResend) {
+    content = `// Client email Resend
+import { Resend } from 'resend'
+
+const resend = new Resend(process.env.RESEND_API_KEY)
+
+export async function sendEmail(options: {
+  to: string
+  subject: string
+  html: string
+  from?: string
+}) {
+  await resend.emails.send({
+    from: options.from || process.env.EMAIL_FROM || 'noreply@example.com',
+    to: options.to,
+    subject: options.subject,
+    html: options.html,
+  })
+}
+`;
+  } else {
+    content = `// Client email SMTP (Nodemailer)
+import nodemailer from 'nodemailer'
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: parseInt(process.env.SMTP_PORT || '587'),
+  secure: process.env.SMTP_PORT === '465',
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASSWORD,
+  },
+})
+
+export async function sendEmail(options: {
+  to: string
+  subject: string
+  html: string
+  from?: string
+}) {
+  await transporter.sendMail({
+    from: options.from || process.env.EMAIL_FROM || 'noreply@example.com',
+    to: options.to,
+    subject: options.subject,
+    html: options.html,
+  })
+}
+`;
+  }
+
+  const dest = path.join(projectPath, 'lib/email/client.ts');
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.writeFileSync(dest, content, 'utf-8');
 }
 
 /**

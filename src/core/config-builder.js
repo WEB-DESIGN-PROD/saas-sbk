@@ -41,6 +41,7 @@ export function buildConfig(answers) {
     // Email
     email: {
       provider: answers.emailProvider || 'resend',
+      fromEmail: answers.emailFrom || answers.smtpUser || `noreply@${answers.projectName}.com`,
       resendApiKey: answers.resendApiKey || '',
       smtpHost: answers.smtpHost || '',
       smtpPort: answers.smtpPort || '587',
