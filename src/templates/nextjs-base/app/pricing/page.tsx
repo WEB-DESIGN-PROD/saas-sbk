@@ -16,7 +16,7 @@ export default function PricingPage() {
         "Mises à jour régulières"
       ],
       cta: "Commencer gratuitement",
-      href: "/register"
+      href: "{{AUTH_ENTRY_URL}}"
     },
     {
       name: "Pro",
@@ -31,7 +31,7 @@ export default function PricingPage() {
         "API access"
       ],
       cta: "Commencer l'essai",
-      href: "/register",
+      href: "{{AUTH_ENTRY_URL}}",
       popular: true
     },
     {

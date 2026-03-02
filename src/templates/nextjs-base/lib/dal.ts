@@ -19,6 +19,11 @@ export const verifySession = cache(async () => {
     redirect('/login')
   }
 
+  // Bloquer l'accès si l'email n'est pas vérifié (uniquement si emailVerification activé)
+  if (session.user.emailVerified === false) {
+    redirect(`/verify-email?email=${encodeURIComponent(session.user.email)}`)
+  }
+
   return {
     isAuth: true,
     user: {

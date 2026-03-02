@@ -20,6 +20,7 @@ export function buildConfig(answers) {
     // Auth
     auth: {
       methods: answers.authMethods || ['email'],
+      loginMethod: answers.loginMethod || 'email-password',
       githubClientId: answers.githubClientId || '',
       githubClientSecret: answers.githubClientSecret || '',
       googleClientId: answers.googleClientId || '',

@@ -50,8 +50,7 @@ export function generateNextjsProject(projectPath, config) {
  */
 function copyConfigFiles(projectPath, config, templatesDir) {
   const hasEmail = config.email && config.email.provider !== 'none';
-  const hasMagicLink = config.auth?.methods?.includes('magiclink');
-  const hasOtp = config.auth?.methods?.includes('otp');
+  const loginMethod = config.auth?.loginMethod || 'email-password';
 
   // Variables de remplacement
   const allLanguages = [
@@ -59,31 +58,9 @@ function copyConfigFiles(projectPath, config, templatesDir) {
     ...(config.i18n?.languages || []).filter(l => l !== config.i18n?.defaultLanguage),
   ];
 
-  // Déterminer la redirect après inscription
+  // L'inscription est toujours email + mot de passe + vérification email
+  // {{AUTH_ENTRY_URL}} pointe toujours vers /register
   const registerRedirect = hasEmail ? '/verify-email' : '/dashboard';
-
-  // Construire la section de liens passwordless pour la page login
-  const passwordlessLinks = [];
-  if (hasMagicLink) passwordlessLinks.push({ label: 'Se connecter sans mot de passe', href: '/magic-link' });
-  if (hasOtp) passwordlessLinks.push({ label: 'Se connecter par code OTP', href: '/otp' });
-
-  let passwordlessLinkSection = '';
-  if (passwordlessLinks.length > 0) {
-    const links = passwordlessLinks
-      .map(l => `              <Link href="${l.href}" className="text-sm text-muted-foreground hover:underline">\n                ${l.label}\n              </Link>`)
-      .join('\n');
-    passwordlessLinkSection = `<div className="flex flex-col items-center gap-2 w-full">
-              <div className="relative w-full">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">ou</span>
-                </div>
-              </div>
-${links}
-            </div>`;
-  }
 
   const replacements = {
     '{{PROJECT_NAME}}': config.projectName,
@@ -91,7 +68,8 @@ ${links}
     '{{DEFAULT_LANGUAGE}}': config.i18n?.defaultLanguage || 'fr',
     '{{AVAILABLE_LANGUAGES}}': allLanguages.join(','),
     '{{REGISTER_REDIRECT}}': registerRedirect,
-    '{{PASSWORDLESS_LINK_SECTION}}': passwordlessLinkSection,
+    '{{PASSWORDLESS_LINK_SECTION}}': '', // plus utilisé — login page générée dynamiquement
+    '{{AUTH_ENTRY_URL}}': '/register',   // toujours /register
   };
 
   // Fichiers toujours copiés (écrasent le shadcn-base)
@@ -102,6 +80,7 @@ ${links}
     'app/error.tsx',
     'app/not-found.tsx',
     // app/login/page.tsx est généré dynamiquement par generateLoginPage()
+    // app/register/page.tsx est toujours présent (inscription universelle)
     'app/register/page.tsx',
     'app/pricing/page.tsx',
     'app/about/page.tsx',
@@ -130,12 +109,18 @@ ${links}
 
   // Fichiers conditionnels
   const conditionalCopy = [];
+
   if (hasEmail) {
+    conditionalCopy.push('lib/email/templates.ts');
+    // verify-email : toujours présent quand email provider (inscription universelle)
+    conditionalCopy.push('app/verify-email/page.tsx');
+  }
+
+  // forgot-password / reset-password : seulement si loginMethod = email-password
+  if (hasEmail && loginMethod === 'email-password') {
     conditionalCopy.push(
-      'lib/email/templates.ts',
       'app/forgot-password/page.tsx',
       'app/reset-password/page.tsx',
-      'app/verify-email/page.tsx',
     );
   }
   if (config.storage && config.storage.enabled) {
@@ -151,6 +136,11 @@ ${links}
   }
   if (config.ai && config.ai.providers && config.ai.providers.length > 0) {
     conditionalCopy.push('lib/ai/client.ts');
+  }
+
+  // InputOTP composant : seulement si loginMethod = otp
+  if (loginMethod === 'otp') {
+    conditionalCopy.push('components/ui/input-otp.tsx');
   }
 
   for (const file of [...alwaysCopy, ...conditionalCopy]) {
@@ -185,8 +175,8 @@ function generateAuthClient(projectPath, config) {
     clientPluginInits.push('magicLinkClient()');
   }
   if (hasOtp) {
-    clientPluginImports.push('emailOtpClient');
-    clientPluginInits.push('emailOtpClient()');
+    clientPluginImports.push('emailOTPClient');
+    clientPluginInits.push('emailOTPClient()');
   }
 
   let lines = [];
@@ -279,44 +269,38 @@ export async function sendEmail(options: {
 }
 
 /**
- * Génère app/login/page.tsx dynamiquement selon les méthodes d'auth choisies.
+ * Génère app/login/page.tsx selon la méthode de connexion choisie (loginMethod).
  *
- * Cas :
- * - email/password (seul ou avec social/passwordless) → formulaire classique + liens optionnels
- * - magicLink sans email/password → formulaire magic link directement
- * - OTP sans email/password → formulaire OTP 2 étapes directement
- * - magicLink + OTP sans email/password → deux options côte à côte
+ * L'inscription est toujours email/password + vérification.
+ * loginMethod contrôle uniquement la page de connexion après inscription.
+ *
+ * - email-password → formulaire email + mot de passe + lien "mot de passe oublié"
+ * - magiclink      → formulaire email → envoi lien magic link
+ * - otp            → étape 1 email → étape 2 code OTP
  */
 function generateLoginPage(projectPath, config) {
-  const hasEmailPassword = config.auth?.methods?.includes('email');
-  const hasMagicLink = config.auth?.methods?.includes('magiclink');
-  const hasOtp = config.auth?.methods?.includes('otp');
+  const loginMethod = config.auth?.loginMethod || 'email-password';
   const hasGithub = config.auth?.methods?.includes('github');
   const hasGoogle = config.auth?.methods?.includes('google');
   const hasSocial = hasGithub || hasGoogle;
 
-  let content;
-
-  if (hasEmailPassword) {
-    // ── Cas A : email/password (+ optionnellement social + passwordless) ──
-    const passwordlessLinks = [];
-    if (hasMagicLink) passwordlessLinks.push({ label: 'Connexion sans mot de passe', href: '/magic-link' });
-    if (hasOtp) passwordlessLinks.push({ label: 'Connexion par code OTP', href: '/otp' });
-
-    const passwordlessSectionCode = passwordlessLinks.length === 0 ? '' : `
+  // Boutons sociaux communs à tous les cas
+  const githubImport = hasGithub ? '\nimport { GitHubButton } from "@/components/auth/github-button"' : '';
+  const googleImport = hasGoogle ? '\nimport { GoogleButton } from "@/components/auth/google-button"' : '';
+  const socialButtons = !hasSocial ? '' : `
             <div className="flex flex-col items-center gap-2 w-full">
               <div className="relative w-full">
                 <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-background px-2 text-muted-foreground">ou</span>
                 </div>
-              </div>
-${passwordlessLinks.map(l => `              <Link href="${l.href}" className="text-sm text-muted-foreground hover:underline">${l.label}</Link>`).join('\n')}
+              </div>${hasGithub ? '\n              <GitHubButton />' : ''}${hasGoogle ? '\n              <GoogleButton />' : ''}
             </div>`;
 
-    const socialImports = hasGithub || hasGoogle ? `\nimport { GitHubButton } from "@/components/auth/github-button"` : '';
-    const socialButtons = hasSocial ? '\n            <GitHubButton />' : '';
+  let content;
 
+  if (loginMethod === 'email-password') {
+    // ── Email + mot de passe ──
     content = `"use client"
 
 import { useState } from "react"
@@ -327,7 +311,7 @@ import { signIn } from "@/lib/auth/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"${socialImports}
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"${githubImport}${googleImport}
 
 export default function LoginPage() {
   const router = useRouter()
@@ -360,7 +344,7 @@ export default function LoginPage() {
           <CardDescription>Entrez vos identifiants pour accéder à votre compte</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pb-6">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" placeholder="nom@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} />
@@ -376,7 +360,7 @@ export default function LoginPage() {
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Connexion..." : "Se connecter"}
-            </Button>${socialButtons}${passwordlessSectionCode}
+            </Button>${socialButtons}
             <p className="text-center text-sm text-muted-foreground">
               Pas encore de compte ?{" "}
               <Link href="/register" className="font-medium underline underline-offset-4">Créer un compte</Link>
@@ -389,18 +373,8 @@ export default function LoginPage() {
 }
 `;
 
-  } else if (hasMagicLink && !hasOtp) {
-    // ── Cas B : magic link seul (sans email/password) ──
-    const socialImports = hasSocial ? `\nimport { GitHubButton } from "@/components/auth/github-button"` : '';
-    const socialButtons = hasSocial ? `
-            <div className="relative w-full">
-              <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">ou</span>
-              </div>
-            </div>
-            <GitHubButton />` : '';
-
+  } else if (loginMethod === 'magiclink') {
+    // ── Magic Link ──
     content = `"use client"
 
 import { useState } from "react"
@@ -410,7 +384,7 @@ import { authClient } from "@/lib/auth/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"${socialImports}
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"${githubImport}${googleImport}
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -444,7 +418,7 @@ export default function LoginPage() {
             <CardDescription>Un lien de connexion a été envoyé à {email}. Il expire dans 15 minutes.</CardDescription>
           </CardHeader>
           <CardFooter className="justify-center">
-            <Link href="/login" className="text-sm text-muted-foreground hover:underline" onClick={() => setSent(false)}>Renvoyer un lien</Link>
+            <button className="text-sm text-muted-foreground hover:underline" onClick={() => setSent(false)}>Renvoyer un lien</button>
           </CardFooter>
         </Card>
       </div>
@@ -459,16 +433,20 @@ export default function LoginPage() {
           <CardDescription>Entrez votre email pour recevoir un lien de connexion</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pb-6">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" placeholder="nom@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-4">${socialButtons}
+          <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Envoi en cours..." : "Envoyer le lien de connexion"}
-            </Button>
+              {isLoading ? "Envoi en cours..." : "Recevoir un lien de connexion"}
+            </Button>${socialButtons}
+            <p className="text-center text-sm text-muted-foreground">
+              Pas encore de compte ?{" "}
+              <Link href="/register" className="font-medium underline underline-offset-4">Créer un compte</Link>
+            </p>
           </CardFooter>
         </form>
       </Card>
@@ -477,28 +455,20 @@ export default function LoginPage() {
 }
 `;
 
-  } else if (hasOtp && !hasMagicLink) {
-    // ── Cas C : OTP seul (sans email/password) ──
-    const socialImports = hasSocial ? `\nimport { GitHubButton } from "@/components/auth/github-button"` : '';
-    const socialButtons = hasSocial ? `
-              <div className="relative w-full">
-                <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">ou</span>
-                </div>
-              </div>
-              <GitHubButton />` : '';
-
+  } else {
+    // ── OTP ──
     content = `"use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { authClient } from "@/lib/auth/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"${socialImports}
+import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from "@/components/ui/input-otp"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"${githubImport}${googleImport}
 
 export default function LoginPage() {
   const router = useRouter()
@@ -507,7 +477,7 @@ export default function LoginPage() {
   const [otp, setOtp] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
-  const sendOtp = async (e: React.FormEvent) => {
+  const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     try {
@@ -525,8 +495,12 @@ export default function LoginPage() {
     }
   }
 
-  const verifyOtp = async (e: React.FormEvent) => {
+  const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (otp.length !== 6) {
+      toast.error("Code incomplet", { description: "Entrez les 6 chiffres du code." })
+      return
+    }
     setIsLoading(true)
     try {
       const result = await authClient.signIn.emailOtp({ email, otp })
@@ -548,175 +522,60 @@ export default function LoginPage() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Connexion</CardTitle>
           <CardDescription>
-            {step === "email" ? "Entrez votre email pour recevoir un code" : \`Code envoyé à \${email}\`}
+            {step === "email" ? "Entrez votre email pour recevoir un code de connexion" : \`Code envoyé à \${email}\`}
           </CardDescription>
         </CardHeader>
         {step === "email" ? (
-          <form onSubmit={sendOtp}>
-            <CardContent className="space-y-4">
+          <form onSubmit={handleSendOtp}>
+            <CardContent className="space-y-4 pb-6">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" type="email" placeholder="nom@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} />
               </div>
             </CardContent>
-            <CardFooter className="flex flex-col space-y-4">${socialButtons}
+            <CardFooter className="flex flex-col space-y-4">
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Envoi..." : "Envoyer le code"}
-              </Button>
+                {isLoading ? "Envoi en cours..." : "Recevoir un code"}
+              </Button>${socialButtons}
+              <p className="text-center text-sm text-muted-foreground">
+                Pas encore de compte ?{" "}
+                <Link href="/register" className="font-medium underline underline-offset-4">Créer un compte</Link>
+              </p>
             </CardFooter>
           </form>
         ) : (
-          <form onSubmit={verifyOtp}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="otp">Code de vérification</Label>
-                <Input id="otp" type="text" inputMode="numeric" placeholder="123456" maxLength={6} value={otp} onChange={(e) => setOtp(e.target.value.replace(/\\D/g, ""))} required disabled={isLoading} className="text-center text-2xl tracking-widest" />
+          <form onSubmit={handleVerifyOtp}>
+            <CardContent className="pb-6">
+              <div className="space-y-3">
+                <Label>Code à 6 chiffres</Label>
+                <div className="flex justify-center">
+                  <InputOTP maxLength={6} value={otp} onChange={setOtp} disabled={isLoading}>
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                    </InputOTPGroup>
+                    <InputOTPSeparator />
+                    <InputOTPGroup>
+                      <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+                <p className="text-center text-xs text-muted-foreground">Ce code expire dans 10 minutes</p>
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
-              <Button type="submit" className="w-full" disabled={isLoading || otp.length < 6}>
-                {isLoading ? "Vérification..." : "Vérifier le code"}
+              <Button type="submit" className="w-full" disabled={isLoading || otp.length !== 6}>
+                {isLoading ? "Vérification..." : "Se connecter"}
               </Button>
-              <button type="button" onClick={() => setStep("email")} className="text-sm text-muted-foreground hover:underline">
-                Changer d'adresse email
+              <button type="button" className="text-sm text-muted-foreground hover:underline" onClick={() => { setStep("email"); setOtp("") }}>
+                Changer d'email
               </button>
             </CardFooter>
           </form>
         )}
-      </Card>
-    </div>
-  )
-}
-`;
-
-  } else {
-    // ── Cas D : magicLink + OTP (sans email/password) ──
-    const socialImports = hasSocial ? `\nimport { GitHubButton } from "@/components/auth/github-button"` : '';
-    const socialButtons = hasSocial ? `
-            <div className="relative w-full">
-              <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">ou</span>
-              </div>
-            </div>
-            <GitHubButton />` : '';
-
-    content = `"use client"
-
-import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { toast } from "sonner"
-import { authClient } from "@/lib/auth/client"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"${socialImports}
-
-export default function LoginPage() {
-  const router = useRouter()
-  const [email, setEmail] = useState("")
-  const [otp, setOtp] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [magicSent, setMagicSent] = useState(false)
-  const [otpStep, setOtpStep] = useState<"email" | "otp">("email")
-
-  const sendMagicLink = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    try {
-      const result = await authClient.signIn.magicLink({ email, callbackURL: "/dashboard" })
-      if (result.error) { toast.error("Erreur", { description: result.error.message }); return }
-      setMagicSent(true)
-    } catch { toast.error("Erreur", { description: "Réessayez." }) }
-    finally { setIsLoading(false) }
-  }
-
-  const sendOtp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    try {
-      const result = await authClient.emailOtp.sendVerificationOtp({ email, type: "sign-in" })
-      if (result.error) { toast.error("Erreur", { description: result.error.message }); return }
-      setOtpStep("otp")
-      toast.success("Code envoyé !")
-    } catch { toast.error("Erreur", { description: "Réessayez." }) }
-    finally { setIsLoading(false) }
-  }
-
-  const verifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    try {
-      const result = await authClient.signIn.emailOtp({ email, otp })
-      if (result.error) { toast.error("Code invalide", { description: result.error.message }); return }
-      router.push("/dashboard")
-    } catch { toast.error("Erreur", { description: "Réessayez." }) }
-    finally { setIsLoading(false) }
-  }
-
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/50 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Connexion</CardTitle>
-          <CardDescription>Choisissez votre méthode de connexion</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="magic">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="magic">Lien magique</TabsTrigger>
-              <TabsTrigger value="otp">Code OTP</TabsTrigger>
-            </TabsList>
-            <TabsContent value="magic" className="mt-4">
-              {magicSent ? (
-                <div className="text-center space-y-2">
-                  <p className="text-2xl">✉️</p>
-                  <p className="font-medium">Vérifiez vos emails</p>
-                  <p className="text-sm text-muted-foreground">Lien envoyé à {email}</p>
-                  <button onClick={() => setMagicSent(false)} className="text-sm text-muted-foreground hover:underline">Renvoyer</button>
-                </div>
-              ) : (
-                <form onSubmit={sendMagicLink} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email-magic">Email</Label>
-                    <Input id="email-magic" type="email" placeholder="nom@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Envoi..." : "Envoyer le lien de connexion"}
-                  </Button>
-                </form>
-              )}
-            </TabsContent>
-            <TabsContent value="otp" className="mt-4">
-              {otpStep === "email" ? (
-                <form onSubmit={sendOtp} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email-otp">Email</Label>
-                    <Input id="email-otp" type="email" placeholder="nom@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Envoi..." : "Envoyer le code"}
-                  </Button>
-                </form>
-              ) : (
-                <form onSubmit={verifyOtp} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="otp">Code de vérification</Label>
-                    <Input id="otp" type="text" inputMode="numeric" placeholder="123456" maxLength={6} value={otp} onChange={(e) => setOtp(e.target.value.replace(/\\D/g, ""))} required disabled={isLoading} className="text-center text-2xl tracking-widest" />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading || otp.length < 6}>
-                    {isLoading ? "Vérification..." : "Vérifier le code"}
-                  </Button>
-                  <button type="button" onClick={() => setOtpStep("email")} className="w-full text-sm text-muted-foreground hover:underline">
-                    Changer d'adresse email
-                  </button>
-                </form>
-              )}
-            </TabsContent>
-          </Tabs>${socialButtons}
-        </CardContent>
       </Card>
     </div>
   )
@@ -734,8 +593,9 @@ export default function LoginPage() {
  */
 function generateAuthConfig(projectPath, config) {
   const hasEmail = config.email && config.email.provider !== 'none';
-  const hasMagicLink = config.auth?.methods?.includes('magiclink');
-  const hasOtp = config.auth?.methods?.includes('otp');
+  const loginMethod = config.auth?.loginMethod || 'email-password';
+  const hasMagicLink = loginMethod === 'magiclink';
+  const hasOtp = loginMethod === 'otp';
   const hasGithub = config.auth?.methods?.includes('github');
   const hasGoogle = config.auth?.methods?.includes('google');
   const appName = config.projectName;
@@ -743,7 +603,9 @@ function generateAuthConfig(projectPath, config) {
   // Imports conditionnels
   const emailImports = [];
   if (hasEmail) {
-    emailImports.push('sendVerificationEmail', 'sendResetPasswordEmail');
+    // sendVerification toujours (inscription universelle), sendReset seulement si loginMethod=email-password
+    emailImports.push('sendVerificationEmail');
+    if (loginMethod === 'email-password') emailImports.push('sendResetPasswordEmail');
   }
   if (hasMagicLink) {
     emailImports.push('sendMagicLinkEmail');
@@ -754,7 +616,7 @@ function generateAuthConfig(projectPath, config) {
 
   const pluginImports = [];
   if (hasMagicLink) pluginImports.push('magicLink');
-  if (hasOtp) pluginImports.push('emailOtp');
+  if (hasOtp) pluginImports.push('emailOTP');
 
   // Construction du fichier
   let lines = [];
@@ -781,27 +643,29 @@ function generateAuthConfig(projectPath, config) {
   lines.push('    provider: "postgresql",');
   lines.push('  }),');
 
-  // emailAndPassword
-  if (config.auth?.methods?.includes('email')) {
-    lines.push('  emailAndPassword: {');
-    lines.push('    enabled: true,');
-    if (hasEmail) {
-      lines.push('    sendResetPassword: async ({ user, url }) => {');
-      lines.push(`      void sendResetPasswordEmail(user.email, user.name || user.email, url, "${appName}")`);
-      lines.push('    },');
-    }
-    lines.push('  },');
+  // emailAndPassword — toujours actif (inscription universelle)
+  lines.push('  emailAndPassword: {');
+  lines.push('    enabled: true,');
+  if (hasEmail && loginMethod === 'email-password') {
+    lines.push('    sendResetPassword: async ({ user, url }) => {');
+    lines.push('      try {');
+    lines.push(`        await sendResetPasswordEmail(user.email, user.name || user.email, url, "${appName}")`);
+    lines.push('      } catch (err) { console.error("❌ Reset password email error:", err) }');
+    lines.push('    },');
   }
+  lines.push('  },');
 
-  // emailVerification
+  // emailVerification — toujours actif si provider email (inscription universelle)
   if (hasEmail) {
     lines.push('  emailVerification: {');
     lines.push('    sendOnSignUp: true,');
     lines.push('    autoSignInAfterVerification: true,');
     lines.push('    sendVerificationEmail: async ({ user, url }) => {');
-    lines.push('      const verifyUrl = new URL(url)');
-    lines.push('      verifyUrl.searchParams.set("callbackURL", "/dashboard")');
-    lines.push(`      void sendVerificationEmail(user.email, user.name || user.email, verifyUrl.toString(), "${appName}")`);
+    lines.push('      try {');
+    lines.push('        const verifyUrl = new URL(url)');
+    lines.push('        verifyUrl.searchParams.set("callbackURL", "/dashboard")');
+    lines.push(`        await sendVerificationEmail(user.email, user.name || user.email, verifyUrl.toString(), "${appName}")`);
+    lines.push('      } catch (err) { console.error("❌ Verification email error:", err) }');
     lines.push('    },');
     lines.push('  },');
   }
@@ -832,14 +696,18 @@ function generateAuthConfig(projectPath, config) {
     if (hasMagicLink) {
       lines.push('    magicLink({');
       lines.push('      sendMagicLink: async ({ email, url }) => {');
-      lines.push(`        void sendMagicLinkEmail(email, email, url, "${appName}")`);
+      lines.push('        try {');
+      lines.push(`          await sendMagicLinkEmail(email, email, url, "${appName}")`);
+      lines.push('        } catch (err) { console.error("❌ Magic link email error:", err) }');
       lines.push('      },');
       lines.push('    }),');
     }
     if (hasOtp) {
-      lines.push('    emailOtp({');
+      lines.push('    emailOTP({');
       lines.push('      sendVerificationOTP: async ({ email, otp, type }) => {');
-      lines.push(`        void sendOtpEmail(email, otp, type, "${appName}")`);
+      lines.push('        try {');
+      lines.push(`          await sendOtpEmail(email, otp, type, "${appName}")`);
+      lines.push('        } catch (err) { console.error("❌ OTP email error:", err) }');
       lines.push('      },');
       lines.push('    }),');
     }
@@ -908,23 +776,7 @@ function copyConditionalVariants(projectPath, config, replacements) {
     );
   }
 
-  // Page Magic Link si magiclink activé
-  if (config.auth?.methods?.includes('magiclink')) {
-    copyVariantFile(
-      path.join(variantsDir, 'auth/magic-link-page.tsx'),
-      path.join(projectPath, 'app/magic-link/page.tsx'),
-      replacements
-    );
-  }
-
-  // Page OTP si otp activé
-  if (config.auth?.methods?.includes('otp')) {
-    copyVariantFile(
-      path.join(variantsDir, 'auth/otp-page.tsx'),
-      path.join(projectPath, 'app/otp/page.tsx'),
-      replacements
-    );
-  }
+  // Plus de pages /magic-link ou /otp séparées — la page /login gère tout selon loginMethod
 }
 
 function generateGitignore(projectPath) {

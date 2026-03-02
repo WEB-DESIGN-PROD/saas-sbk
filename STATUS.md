@@ -1,6 +1,6 @@
 # Status du Projet create-saas-sbk
 
-Version: **0.6.0**
+Version: **0.7.0**
 
 ## ✅ Fonctionnalités Implémentées
 
@@ -24,7 +24,7 @@ Version: **0.6.0**
 - [x] Landing page publique
 - [x] Pages auth (login/register)
 - [x] Dashboard protégé avec sidebar (Shadcn dashboard-01)
-- [x] Better Auth 1.3.0 (email/password + OAuth GitHub)
+- [x] Better Auth 1.5.1 (email/password + vérification email + OAuth GitHub/Google + Magic Link + OTP)
 - [x] Prisma 6.19.2 + PostgreSQL
 - [x] Shadcn UI (tous composants)
 - [x] Lucide React icons (migration complète depuis Tabler)
@@ -39,27 +39,30 @@ Version: **0.6.0**
 - [x] Support i18n (next-intl)
 - [x] Docker Compose (Postgres + MinIO)
 - [x] Page Médias dashboard (upload, liste, suppression, édition, lightbox, recherche)
+- [x] Emails transactionnels (vérification, reset password, magic link, OTP)
+- [x] Pages auth : `/verify-email`, `/forgot-password`, `/reset-password`
+- [x] LoginMethod configurable : email-password | magiclink | otp
 
 ### Installation
 - [x] Installation automatique des dépendances
 - [x] Installation automatique des skills Claude Code
 - [x] Lancement automatique de /init
 
-## 🎯 Dernières Mises à Jour (v0.6.0)
+## 🎯 Dernières Mises à Jour (v0.7.0)
 
-### Page Médias Dashboard ✅
-- Page `/dashboard/media` avec grille de médias (images + icônes selon type MIME)
-- Upload drag-and-drop multi-fichiers via dialog
-- Modèle Prisma `Media` avec `key`, `name`, `size`, `mimeType`, `description?`, `tags String[]`
-- Clé MinIO stockée en DB → URLs presignées 24h générées à chaque chargement (jamais expirées)
-- Dialog d'édition : renommage (base seul + badge extension), description, tags chips
-- Affichage carte : description `line-clamp-2`, tags `#TAG1 #TAG2`
-- Barre de recherche temps réel (nom + description + tags), visible ≥ 2 fichiers
-- Lightbox plein écran avec navigation prev/next (flèches + clavier `←` `→`), compteur
-- Confirmation avant suppression
-- Responsive mobile : recherche sous le titre, bouton upload fixe en bas (`z-40`)
-- Fix : reset dialog upload à chaque réouverture
-- Fix : fallback `tags ?? []` pour anciens enregistrements sans tags
+### Emails transactionnels + Auth avancée ✅
+- Inscription universelle : email/password + vérification obligatoire (indépendamment de `loginMethod`)
+- `loginMethod` configurable dans le CLI : `email-password` | `magiclink` | `otp`
+- Page `/verify-email` : confirmation + bouton renvoyer l'email
+- Page `/forgot-password` + `/reset-password` si `loginMethod = email-password`
+- Magic Link : page `/login` variant avec envoi de lien + état "email envoyé"
+- OTP : page `/login` 2 étapes + composant `InputOTP` shadcn/ui (6 cases individuelles)
+- Format OTP dans l'email : `XXX-XXX` (ex: `292-158`)
+- `lib/dal.ts` : protection dashboard si `emailVerified === false`
+- Fix Resend : vérification `result.error` (ne throw pas)
+- Fix Better Auth : `emailOTP` en majuscules (serveur + client)
+- Espacement formulaires auth : `pb-6` sur tous les `CardContent`
+- CLI : note d'astuce avant la question "email expéditeur" (domaine vérifié Resend)
 
 ## 📊 Statistiques
 
@@ -131,9 +134,13 @@ Version: **0.6.0**
 10. ✅ URLs MinIO expirées → clé stockée en DB, URL fraîche générée à chaque render
 11. ✅ Dialog upload non réinitialisé → useEffect reset on open
 12. ✅ `tags` null sur anciens enregistrements → fallback `?? []`
+13. ✅ Resend `resend.emails.send()` ne throw pas → vérification `result.error` ajoutée
+14. ✅ Better Auth `emailOTP` en majuscules (serveur + client)
+15. ✅ Dashboard accessible sans vérification email → check `emailVerified === false` dans `dal.ts`
+16. ✅ Espacement formulaires auth → `pb-6` sur `CardContent` inside `<form>`
 
 ---
 
-**Dernière mise à jour**: 18 février 2026
+**Dernière mise à jour**: 2 mars 2026
 **Mainteneur**: Jerome
 **License**: MIT

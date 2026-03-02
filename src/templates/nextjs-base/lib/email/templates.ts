@@ -116,7 +116,7 @@ export const emailTemplates = {
     <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 24px;">
       <tr>
         <td align="center" style="background-color:#f8fafc !important;border:2px solid #e2e8f0;border-radius:12px;padding:28px 20px;">
-          <span style="font-size:52px;font-weight:800;letter-spacing:16px;color:#0f172a !important;font-family:'Courier New',Courier,monospace;">${otp}</span>
+          <span style="font-size:52px;font-weight:800;letter-spacing:8px;color:#0f172a !important;font-family:'Courier New',Courier,monospace;">${otp.slice(0,3)}-${otp.slice(3)}</span>
         </td>
       </tr>
     </table>

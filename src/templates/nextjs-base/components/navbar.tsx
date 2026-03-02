@@ -57,7 +57,7 @@ export function Navbar() {
           {/* Bouton Créer un compte (visible uniquement si non connecté) */}
           {!isLoggedIn && (
             <Button size="sm" asChild>
-              <Link href="/register">Créer un compte</Link>
+              <Link href="{{AUTH_ENTRY_URL}}">Créer un compte</Link>
             </Button>
           )}
 

@@ -143,17 +143,15 @@ function showHeader(answers = {}) {
       leftChoices.push(chalk.green(figures.tick) + ' Base de données : ' + chalk.cyan(dbDisplay));
     }
     if (answers.authMethods && answers.authMethods.length > 0) {
-      // Afficher uniquement Email, GitHub, Google (pas Magic Link ni OTP qui sont dans Email)
       const methodNames = {
-        'email': 'Email',
+        'email': 'Email + Mdp',
+        'magiclink': 'Magic Link',
+        'otp': 'OTP',
         'github': 'GitHub',
         'google': 'Google'
       };
-      const authMethodsFiltered = answers.authMethods.filter(m => ['email', 'github', 'google'].includes(m));
-      if (authMethodsFiltered.length > 0) {
-        const authDisplay = authMethodsFiltered.map(m => methodNames[m] || m).join(' + ');
-        leftChoices.push(chalk.green(figures.tick) + ' Auth : ' + chalk.cyan(authDisplay));
-      }
+      const authDisplay = answers.authMethods.map(m => methodNames[m] || m).join(' + ');
+      leftChoices.push(chalk.green(figures.tick) + ' Auth : ' + chalk.cyan(authDisplay));
     }
     if (answers.storageEnabled !== undefined) {
       let storageDisplay = 'Désactivé';
@@ -169,9 +167,6 @@ function showHeader(answers = {}) {
       let provider = 'Plus tard';
       if (answers.emailProvider === 'resend') {
         provider = 'Resend';
-        // Ajouter Magic Link ou OTP si présent
-        if (answers.authMethods?.includes('magiclink')) provider += ' + Magic Link';
-        else if (answers.authMethods?.includes('otp')) provider += ' + OTP';
       } else if (answers.emailProvider === 'smtp') {
         provider = 'SMTP';
       }
@@ -391,14 +386,12 @@ export async function askQuestions() {
     p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout sélectionner • Entrée = valider'), 'Astuce');
 
     const authMethods = await p.multiselect({
-      message: 'Méthodes d\'authentification',
+      message: 'Authentification OAuth (optionnel — Entrée pour passer)',
       options: [
-        { value: 'email', label: 'Email/Mot de passe', hint: 'Recommandé' },
         { value: 'github', label: 'OAuth GitHub' },
         { value: 'google', label: 'OAuth Google' }
       ],
-      required: true,
-      initialValues: ['email']
+      required: false
     });
 
     if (p.isCancel(authMethods)) {
@@ -620,6 +613,13 @@ export async function askQuestions() {
     answers.resendApiKey = resendApiKey;
 
     showHeader(answers);
+    p.note(
+      chalk.yellow('💡 Astuce :') + ' L\'adresse doit utiliser un domaine\n' +
+      '   vérifié dans votre compte Resend.\n' +
+      '   Ex : ' + chalk.cyan('noreply@votre-domaine.com') + '\n\n' +
+      chalk.dim('   Vérifier vos domaines : https://resend.com/domains'),
+      'Adresse expéditeur'
+    );
     const emailFrom = await p.text({
       message: 'Adresse email expéditeur',
       placeholder: `noreply@${answers.projectName}.com`,
@@ -635,42 +635,6 @@ export async function askQuestions() {
       process.exit(0);
     }
     answers.emailFrom = emailFrom;
-
-    // Proposer Magic Link ou OTP si Resend est choisi
-    if (!answers.skipAuth) {
-      showHeader(answers);
-      const additionalAuth = await p.confirm({
-        message: 'Ajouter une méthode d\'authentification par email (Magic Link ou OTP) ?',
-        initialValue: false
-      });
-
-      if (p.isCancel(additionalAuth)) {
-        p.cancel('Installation annulée.');
-        process.exit(0);
-      }
-
-      if (additionalAuth) {
-        showHeader(answers);
-        const emailAuthType = await p.select({
-          message: 'Type d\'authentification par email',
-          options: [
-            { value: 'magiclink', label: 'Magic Link', hint: 'Lien de connexion par email' },
-            { value: 'otp', label: 'OTP', hint: 'Code à usage unique' }
-          ],
-          initialValue: 'magiclink'
-        });
-
-        if (p.isCancel(emailAuthType)) {
-          p.cancel('Installation annulée.');
-          process.exit(0);
-        }
-
-        // Ajouter la méthode au tableau authMethods si elle n'existe pas déjà
-        if (!answers.authMethods.includes(emailAuthType)) {
-          answers.authMethods.push(emailAuthType);
-        }
-      }
-    }
 
   } else if (emailProvider === 'smtp') {
     showHeader(answers);
@@ -734,6 +698,54 @@ export async function askQuestions() {
       process.exit(0);
     }
     answers.smtpPassword = smtpPassword;
+  }
+
+  // 6b. Méthode de connexion (l'inscription reste toujours email + mot de passe + vérification)
+  if (!answers.skipAuth) {
+    // Email/password toujours présent (inscription)
+    answers.authMethods.push('email');
+
+    const hasEmailProvider = answers.emailProvider === 'resend' || answers.emailProvider === 'smtp';
+
+    if (hasEmailProvider) {
+      showHeader(answers);
+      const loginMethod = await p.select({
+        message: 'Méthode de connexion (après création de compte)',
+        options: [
+          {
+            value: 'email-password',
+            label: 'Email + Mot de passe',
+            hint: 'Formulaire email + mot de passe'
+          },
+          {
+            value: 'magiclink',
+            label: 'Magic Link',
+            hint: 'Lien de connexion envoyé par email'
+          },
+          {
+            value: 'otp',
+            label: 'Code OTP',
+            hint: 'Code à usage unique envoyé par email'
+          },
+        ],
+        initialValue: 'email-password'
+      });
+
+      if (p.isCancel(loginMethod)) {
+        p.cancel('Installation annulée.');
+        process.exit(0);
+      }
+
+      answers.loginMethod = loginMethod;
+
+      if (loginMethod === 'magiclink') {
+        answers.authMethods.push('magiclink');
+      } else if (loginMethod === 'otp') {
+        answers.authMethods.push('otp');
+      }
+    } else {
+      answers.loginMethod = 'email-password';
+    }
   }
 
   // 7. Paiements
