@@ -17,14 +17,7 @@ import {
 } from "@/components/ui/sidebar"
 import type { AccountType } from "@/types"
 
-export function AppSidebar({
-  user,
-  accountType,
-  mode = "dashboard",
-  hasBlog = false,
-  hasStorage = false,
-  ...props
-}: React.ComponentProps<typeof Sidebar> & {
+interface AppSidebarProps {
   user: {
     name: string | null
     email: string
@@ -34,7 +27,16 @@ export function AppSidebar({
   mode?: "dashboard" | "admin"
   hasBlog?: boolean
   hasStorage?: boolean
-}) {
+}
+
+export function AppSidebar({
+  user,
+  accountType,
+  mode = "dashboard",
+  hasBlog = false,
+  hasStorage = false,
+  ...props
+}: AppSidebarProps & Omit<React.ComponentProps<typeof Sidebar>, keyof AppSidebarProps>) {
   const dashboardItems = [
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
     ...(hasBlog ? [{ title: "Articles", url: "/dashboard/blog", icon: FileText }] : []),
