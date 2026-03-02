@@ -4,7 +4,7 @@ import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db/client'
-import type { AccountType, SubscriptionPlan, UserPlan } from '@/types'
+import type { AccountType, SubscriptionPlan, UserPlan, Role } from '@/types'
 
 /**
  * Vérifie la session utilisateur avec cache React.
@@ -26,9 +26,14 @@ export const verifySession = cache(async () => {
     redirect(`/verify-email?email=${encodeURIComponent(session.user.email)}`)
   }
 
+  const role = ((session.user as any).role ?? 'member') as Role
+  const impersonatedBy = (session.session as any).impersonatedBy as string | undefined
+
   return {
     isAuth: true,
     userId: session.user.id,
+    role,
+    impersonatedBy,
     user: {
       id: session.user.id,
       name: session.user.name,
@@ -36,6 +41,18 @@ export const verifySession = cache(async () => {
       image: session.user.image ?? null,
     }
   }
+})
+
+/**
+ * Vérifie que l'utilisateur est admin.
+ * Redirige vers /dashboard si ce n'est pas le cas.
+ */
+export const verifyAdmin = cache(async () => {
+  const session = await verifySession()
+  if (session.role !== 'admin') {
+    redirect('/dashboard')
+  }
+  return session
 })
 
 /**

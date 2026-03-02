@@ -27,3 +27,7 @@ export interface UserPlan {
   subscriptionPlan: SubscriptionPlan
   extraCredits: number
 }
+
+// ─── Rôles ───────────────────────────────────────────────────────────────────
+
+export type Role = 'member' | 'admin'

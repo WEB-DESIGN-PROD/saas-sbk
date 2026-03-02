@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { LayoutDashboard, Home, Zap } from "lucide-react"
+import { LayoutDashboard, Home, Zap, Users } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
@@ -17,19 +17,21 @@ import {
 } from "@/components/ui/sidebar"
 import type { AccountType } from "@/types"
 
-const data = {
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: LayoutDashboard,
-    },
-  ],
-}
+// Les nav items sont définis ici (client) pour éviter de passer des fonctions
+// depuis un Server Component (les icônes Lucide sont des fonctions React)
+const dashboardNavItems = [
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+]
+
+const adminNavItems = [
+  { title: "Vue d'ensemble", url: "/admin", icon: LayoutDashboard },
+  { title: "Utilisateurs", url: "/admin/users", icon: Users },
+]
 
 export function AppSidebar({
   user,
   accountType,
+  mode = "dashboard",
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   user: {
@@ -38,8 +40,10 @@ export function AppSidebar({
     image: string | null
   }
   accountType: AccountType
+  mode?: "dashboard" | "admin"
 }) {
-  const showUpgradeCard = accountType !== "Paid"
+  const items = mode === "admin" ? adminNavItems : dashboardNavItems
+  const showUpgradeCard = mode === "dashboard" && accountType !== "Paid"
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -50,7 +54,7 @@ export function AppSidebar({
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <Link href="/dashboard">
+              <Link href={mode === "admin" ? "/admin" : "/dashboard"}>
                 <Home className="!size-5" />
                 <span className="text-base font-semibold">{{PROJECT_NAME}}</span>
               </Link>
@@ -59,7 +63,7 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={items} />
       </SidebarContent>
       <SidebarFooter>
         {showUpgradeCard && (

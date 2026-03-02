@@ -12,6 +12,58 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 - Mode debug/verbose pour le CLI
 - Publication npm
 
+## [0.9.0] - 2026-03-02
+
+### Système super administrateur 🛡️
+
+#### CLI — Nouvelle question (questions-v2.js + config-builder.js)
+- ✅ **Question "Super Admin"** — note d'info expliquant la fonctionnalité, puis saisie de l'adresse email admin
+- ✅ **`config.admin.enabled` / `config.admin.email`** — intégré dans la config générée
+- ✅ **`ADMIN_EMAIL`** ajouté dans `.env` si admin activé
+
+#### Schéma Prisma (`prisma/schema.prisma`)
+- ✅ **Champs rôle** — `role String @default("member")` sur `User`
+- ✅ **Champs ban** — `banned`, `banReason`, `banExpires` (requis par le plugin admin Better Auth)
+- ✅ **`impersonatedBy`** — sur `Session`, enregistre l'ID de l'admin qui impersonne
+
+#### Auth (`lib/auth/config.ts`)
+- ✅ **Plugin `admin`** de Better Auth — génération conditionnelle si admin activé
+- ✅ **`databaseHooks.user.create.after`** — assigne `role: "admin"` si l'email correspond à `ADMIN_EMAIL`
+- ✅ **Plugin `adminClient`** côté client (`lib/auth/client.ts`)
+
+#### DAL (`lib/dal.ts`)
+- ✅ **`verifySession()`** enrichi — retourne `role` et `impersonatedBy`
+- ✅ **`verifyAdmin()`** — fonction cachée, redirige vers `/dashboard` si non admin
+
+#### Layout & navigation
+- ✅ **`AppSidebar` refactorisé** — prop `mode: "dashboard" | "admin"` au lieu de `navItems` (résout la contrainte Server→Client boundary avec les icônes Lucide)
+- ✅ **`app/dashboard/layout.tsx`** — redirige l'admin vers `/admin` sauf en mode impersonation
+- ✅ **`app/admin/layout.tsx`** — layout protégé par `verifyAdmin()`
+
+#### Page Vue d'ensemble (`/admin`)
+- ✅ **4 cards de stats** — Total membres, Nouveaux aujourd'hui, Sessions actives, Taux d'emails vérifiés
+- ✅ **Graphique inscriptions** — 30 derniers jours (`AdminChartSignups`)
+- ✅ **Exclusion admin** — tous les compteurs filtrent `role !== "admin"`
+- ✅ **Badge dynamique** — "En ligne" (vert) si sessions > 0, "Hors ligne" (rouge) sinon
+- ✅ **Auto-refresh** — `<AutoRefresh intervalMs={30000} />` actualise les données toutes les 30s
+
+#### Page Utilisateurs (`/admin/users`)
+- ✅ **Tableau complet** — avatar, nom, email, rôle, plan, crédits, email vérifié, inscrit le, dernière activité
+- ✅ **Recherche** — filtre instantané par nom ou email (client-side)
+- ✅ **Select plan inline** — 5 options combinées (Free / Freemium / Pro / Team / Enterprise), sauvegarde immédiate via `PATCH /api/admin/users/[id]`
+- ✅ **Input crédits inline** — sauvegarde sur blur ou touche Enter, auto-upgrade Free→Freemium si crédits > 0
+- ✅ **Suppression avec Dialog** — bouton poubelle + confirmation, `DELETE /api/admin/users/[id]`
+- ✅ **Impersonation** — bouton "Voir en tant que" → `authClient.admin.impersonateUser()` + redirect `/dashboard`
+
+#### Route API (`/api/admin/users/[id]`)
+- ✅ **`PATCH`** — whitelist `accountType`, `subscriptionPlan`, `extraCredits`, `prisma.user.update()`
+- ✅ **`DELETE`** — suppression utilisateur, `prisma.user.delete()`
+- ✅ Les deux routes sont protégées par `verifyAdmin()`
+
+#### Bannière d'impersonation (`ImpersonationBanner`)
+- ✅ Bannière ambre sticky affichée dans `/dashboard/layout.tsx` quand `impersonatedBy` est renseigné
+- ✅ Bouton "Quitter la vue" → `authClient.admin.stopImpersonating()` + redirect `/admin`
+
 ## [0.8.0] - 2026-03-02
 
 ### Système de facturation & types d'utilisateurs 💳

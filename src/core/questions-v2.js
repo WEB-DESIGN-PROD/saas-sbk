@@ -185,6 +185,10 @@ function showHeader(answers = {}) {
                        answers.aiProviders.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(', ');
       rightChoices.push(chalk.green(figures.tick) + ' IA : ' + chalk.cyan(aiDisplay));
     }
+    if (answers.wantsAdmin !== undefined) {
+      const adminDisplay = answers.wantsAdmin ? chalk.cyan(answers.adminEmail || 'Oui') : 'Non';
+      rightChoices.push(chalk.green(figures.tick) + ' Super Admin : ' + adminDisplay);
+    }
     if (answers.claudeCodeInstalled !== undefined) {
       rightChoices.push(chalk.green(figures.tick) + ' Claude Code : ' + chalk.cyan(answers.claudeCodeInstalled ? 'Oui' : 'Non'));
     }
@@ -972,7 +976,46 @@ export async function askQuestions() {
   }
   answers.theme = theme;
 
-  // 12. Claude Code
+  // 12. Super administrateur
+  showHeader(answers);
+  p.note(
+    chalk.cyan('👤 Le super administrateur aura accès à un espace /admin dédié\n') +
+    chalk.gray('   pour monitorer les inscriptions, suivre les sessions actives\n') +
+    chalk.gray('   et se connecter temporairement en tant qu\'utilisateur pour du support.\n') +
+    chalk.yellow('   ⚠  Cet accès est exclusif — aucun autre compte ne peut y accéder.'),
+    'Super Administrateur'
+  );
+
+  const wantsAdmin = await p.confirm({
+    message: 'Ajouter un compte super administrateur ?',
+    initialValue: true
+  });
+
+  if (p.isCancel(wantsAdmin)) {
+    p.cancel('Installation annulée.');
+    process.exit(0);
+  }
+  answers.wantsAdmin = wantsAdmin;
+
+  if (wantsAdmin) {
+    showHeader(answers);
+    const adminEmail = await p.text({
+      message: 'Email du super administrateur',
+      placeholder: 'admin@exemple.com',
+      validate: (value) => {
+        const result = validateEmail(value);
+        return result === true ? undefined : result;
+      }
+    });
+
+    if (p.isCancel(adminEmail)) {
+      p.cancel('Installation annulée.');
+      process.exit(0);
+    }
+    answers.adminEmail = adminEmail;
+  }
+
+  // 13. Claude Code
   showHeader(answers);
   const claudeCodeInstalled = await p.confirm({
     message: 'Avez-vous Claude Code CLI installé ?',

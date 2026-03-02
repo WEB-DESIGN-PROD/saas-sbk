@@ -1,25 +1,18 @@
-import { redirect } from "next/navigation"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
-import { ImpersonationBanner } from "@/components/impersonation-banner"
 import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar"
-import { verifySession, getUserPlan } from "@/lib/dal"
+import { verifyAdmin, getUserPlan } from "@/lib/dal"
 
-export default async function DashboardLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const { user, userId, role, impersonatedBy } = await verifySession()
+  const { user, userId } = await verifyAdmin()
   const plan = await getUserPlan(userId)
-
-  // L'admin est redirigé vers /admin sauf s'il est en train d'impersonner un user
-  if (role === "admin" && !impersonatedBy) {
-    redirect("/admin")
-  }
 
   return (
     <SidebarProvider
@@ -30,11 +23,13 @@ export default async function DashboardLayout({
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" user={user} accountType={plan.accountType} />
+      <AppSidebar
+        variant="inset"
+        user={user}
+        accountType={plan.accountType}
+        mode="admin"
+      />
       <SidebarInset>
-        {impersonatedBy && (
-          <ImpersonationBanner userName={user.name} userEmail={user.email} />
-        )}
         <SiteHeader />
         <div className="flex flex-1 flex-col">
           {children}
