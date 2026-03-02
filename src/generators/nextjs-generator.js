@@ -799,7 +799,9 @@ function generateAuthConfig(projectPath, config) {
     lines.push('    sendOnSignUp: true,');
     lines.push('    autoSignInAfterVerification: true,');
     lines.push('    sendVerificationEmail: async ({ user, url }) => {');
-    lines.push(`      void sendVerificationEmail(user.email, user.name || user.email, url, "${appName}")`);
+    lines.push('      const verifyUrl = new URL(url)');
+    lines.push('      verifyUrl.searchParams.set("callbackURL", "/dashboard")');
+    lines.push(`      void sendVerificationEmail(user.email, user.name || user.email, verifyUrl.toString(), "${appName}")`);
     lines.push('    },');
     lines.push('  },');
   }
