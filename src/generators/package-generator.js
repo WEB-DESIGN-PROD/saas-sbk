@@ -50,6 +50,11 @@ export function generatePackageJson(config, projectPath = null) {
     packageJson.dependencies['@stripe/stripe-js'] = '^5.3.0';
   }
 
+  // OTP login method
+  if (config.auth?.loginMethod === 'otp') {
+    packageJson.dependencies['input-otp'] = '^1.4.2';
+  }
+
   // Email
   if (config.email?.provider === 'resend') {
     packageJson.dependencies['resend'] = '^4.0.3';

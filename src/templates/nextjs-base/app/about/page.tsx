@@ -114,7 +114,7 @@ export default function AboutPage() {
             <h2 className="mb-4 text-2xl font-bold">Prêt à démarrer ?</h2>
             <div className="flex items-center justify-center gap-4">
               <Button size="lg" asChild>
-                <Link href="/register">Créer un compte</Link>
+                <Link href="{{AUTH_ENTRY_URL}}">Créer un compte</Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
                 <Link href="/pricing">Voir les tarifs</Link>

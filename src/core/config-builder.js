@@ -20,6 +20,7 @@ export function buildConfig(answers) {
     // Auth
     auth: {
       methods: answers.authMethods || ['email'],
+      loginMethod: answers.loginMethod || 'email-password',
       githubClientId: answers.githubClientId || '',
       githubClientSecret: answers.githubClientSecret || '',
       googleClientId: answers.googleClientId || '',
@@ -41,6 +42,7 @@ export function buildConfig(answers) {
     // Email
     email: {
       provider: answers.emailProvider || 'resend',
+      fromEmail: answers.emailFrom || answers.smtpUser || `noreply@${answers.projectName}.com`,
       resendApiKey: answers.resendApiKey || '',
       smtpHost: answers.smtpHost || '',
       smtpPort: answers.smtpPort || '587',

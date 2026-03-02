@@ -17,7 +17,7 @@ export default function Home() {
             Votre SAAS est prêt à démarrer. Commencez à construire votre application.
           </p>
           <div className="flex items-center justify-center gap-4">
-            <Link href="/register">
+            <Link href="{{AUTH_ENTRY_URL}}">
               <Button size="lg">
                 Commencer gratuitement
               </Button>

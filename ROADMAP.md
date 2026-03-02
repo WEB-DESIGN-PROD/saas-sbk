@@ -1,6 +1,24 @@
 # 🗺️ Roadmap - create-saas-sbk
 
-## ✅ v0.6.0 - 18 février 2026 (ACTUELLE)
+## ✅ v0.7.0 - 2 mars 2026 (ACTUELLE)
+
+### 📧 Emails transactionnels + Authentification avancée
+
+- ✅ **Concept loginMethod** — inscription universelle email/password + vérification ; loginMethod contrôle uniquement `/login`
+- ✅ **Vérification email** — `emailVerification` Better Auth + page `/verify-email` + redirection depuis dashboard
+- ✅ **Forgot/Reset password** — pages `/forgot-password` et `/reset-password` générées si `loginMethod = email-password`
+- ✅ **Magic Link** — page `/login` variant magic link + plugin `magicLink` Better Auth
+- ✅ **OTP** — page `/login` variant OTP 2 étapes + composant `InputOTP` shadcn/ui (6 cases) + plugin `emailOTP`
+- ✅ **Format OTP email** — code affiché `XXX-XXX` dans l'email
+- ✅ **Fix Resend** — gestion correcte `{ data, error }` (ne throw pas)
+- ✅ **Fix emailOTP casse** — `emailOTP` (majuscules) côté serveur et client
+- ✅ **Espacement formulaires** — `pb-6` sur tous les `CardContent` de formulaires auth
+- ✅ **CLI astuce Resend** — note avant la question email expéditeur (domaine vérifié)
+- ✅ **`lib/dal.ts`** — protection dashboard si email non vérifié
+
+---
+
+## ✅ v0.6.0 - 18 février 2026
 
 ### 🗂️ Page Médias Dashboard MinIO
 - ✅ Page `/dashboard/media` - Grille médias avec preview images/icônes selon type MIME
@@ -147,9 +165,10 @@
   - [x] Register
   - [x] OAuth GitHub
   - [x] OAuth Google
-  - [x] Magic Link / OTP avec Resend
-  - [ ] Forgot password
-  - [ ] Email verification
+  - [x] Magic Link avec Resend
+  - [x] OTP avec Resend (composant InputOTP shadcn/ui)
+  - [x] Forgot password / Reset password
+  - [x] Email verification (obligatoire à l'inscription)
 
 ### 🌍 Internationalisation
 - [ ] Fichiers de traduction complets (fr, en, es, de)
@@ -216,7 +235,7 @@
 ## 📊 Métriques de progression
 
 **Phase 1 :** 100% ✅ (CLI fonctionnel avec @clack/prompts)
-**Phase 2 :** 70% 🚧 (Templates complets + dashboard UX + architecture statique + page Médias)
+**Phase 2 :** 80% 🚧 (Templates complets + dashboard UX + architecture statique + page Médias + auth emails complets)
 **Phase 3 :** 0% 📅 (Planifié)
 **Phase 4 :** 0% 💭 (Vision)
 
@@ -232,10 +251,11 @@
 6. ✅ Architecture templates statique (shadcn-base) - **FAIT**
 7. ✅ Navbar + Dashboard UX finalisés - **FAIT**
 8. ✅ Page Médias MinIO complète - **FAIT**
-9. 🚧 Templates multilingues complets
-9. 📅 Configuration MongoDB/SQLite
-10. 📅 Dashboard analytics
+9. ✅ Emails transactionnels complets (vérification, reset, magic link, OTP) - **FAIT**
+10. 🚧 Templates multilingues complets
+11. 📅 Configuration MongoDB/SQLite
+12. 📅 Dashboard analytics
 
 ---
 
-Dernière mise à jour : 18 février 2026
+Dernière mise à jour : 2 mars 2026

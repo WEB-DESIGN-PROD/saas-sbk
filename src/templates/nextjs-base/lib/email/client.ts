@@ -17,12 +17,17 @@ async function createResendClient(): Promise<EmailClient> {
 
   return {
     send: async ({ to, subject, html, from }) => {
-      await resend.emails.send({
+      const { data, error } = await resend.emails.send({
         from: from || process.env.EMAIL_FROM || 'noreply@example.com',
         to,
         subject,
         html,
       })
+      if (error) {
+        console.error("❌ Resend API error:", error)
+        throw new Error(error.message)
+      }
+      console.log("📨 Resend email ID:", data?.id)
     },
   }
 }

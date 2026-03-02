@@ -1,6 +1,6 @@
 import 'server-only'
 import { cache } from 'react'
-import { cookies } from 'next/headers'
+import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth/config'
 
@@ -9,27 +9,19 @@ import { auth } from '@/lib/auth/config'
  * Cette fonction est mémorisée pendant le render pass pour éviter les appels multiples
  */
 export const verifySession = cache(async () => {
-  const cookieStore = await cookies()
-  const sessionToken = cookieStore.get('better-auth.session_token')?.value
-
-  if (!sessionToken) {
-    redirect('/login')
-  }
-
-  // Construire les headers une seule fois
-  const headerObj: Record<string, string> = {}
-  cookieStore.getAll().forEach(cookie => {
-    headerObj.cookie = headerObj.cookie
-      ? `${headerObj.cookie}; ${cookie.name}=${cookie.value}`
-      : `${cookie.name}=${cookie.value}`
-  })
+  const requestHeaders = await headers()
 
   const session = await auth.api.getSession({
-    headers: headerObj as Headers
+    headers: requestHeaders,
   })
 
   if (!session || !session.user) {
     redirect('/login')
+  }
+
+  // Bloquer l'accès si l'email n'est pas vérifié (uniquement si emailVerification activé)
+  if (session.user.emailVerified === false) {
+    redirect(`/verify-email?email=${encodeURIComponent(session.user.email)}`)
   }
 
   return {
@@ -37,7 +29,7 @@ export const verifySession = cache(async () => {
     user: {
       name: session.user.name,
       email: session.user.email,
-      image: session.user.image,
+      image: session.user.image ?? null,
     }
   }
 })

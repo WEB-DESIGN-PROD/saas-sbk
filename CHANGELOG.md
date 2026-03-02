@@ -7,16 +7,68 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
-### Mise à jour dépendances
-- `prisma` `^6.4.0` → `^6.19.0` (dernière version stable 6.x)
-- `@prisma/client` `^6.4.0` → `^6.19.0`
-
-> Note : Prisma 7 non adopté — breaking changes majeurs incompatibles avec l'architecture actuelle des templates (prisma.config.ts obligatoire, datasource block déprécié, nouveau generator provider, nouveau output path PrismaClient).
-
 ### Phase 4 - Futur (optionnel)
 - Tests unitaires et end-to-end
 - Mode debug/verbose pour le CLI
 - Publication npm
+
+## [0.7.0] - 2026-03-02
+
+### Emails transactionnels + Authentification avancée 📧🔐
+
+#### Concept loginMethod
+- ✅ **Inscription universelle** — toujours email/password + vérification email, quelle que soit la méthode de connexion
+- ✅ **loginMethod** — contrôle uniquement la page `/login` : `email-password` | `magiclink` | `otp`
+- ✅ **CLI restructuré** — étape 4 : OAuth seulement (GitHub/Google) ; étape 6b : méthode de connexion email
+
+#### Emails transactionnels connectés à Better Auth
+- ✅ **Vérification email** — `emailVerification.sendVerificationEmail` branché sur `sendVerificationEmail()`
+- ✅ **Réinitialisation de mot de passe** — `emailAndPassword.sendResetPassword` branché sur `sendResetPasswordEmail()`
+- ✅ **Magic Link** — plugin `magicLink` + `sendMagicLinkEmail()` si `loginMethod = magiclink`
+- ✅ **OTP** — plugin `emailOTP` + `sendOtpEmail()` si `loginMethod = otp`
+- ✅ **Fix Resend** — `resend.emails.send()` retourne `{ data, error }`, ne throw pas : vérification `result.error` ajoutée
+- ✅ **Format OTP email** — code affiché `XXX-XXX` (ex: `292-158`) au lieu de `292158`
+
+#### Pages auth générées dynamiquement
+- ✅ **`/verify-email`** — message de confirmation + bouton "Renvoyer l'email"
+- ✅ **`/forgot-password`** — formulaire email → envoi lien de réinitialisation
+- ✅ **`/reset-password`** — formulaire nouveau mot de passe avec token URL
+- ✅ **Page `/login` adaptive** — 3 variants selon `loginMethod` (formulaire / magic link / OTP)
+- ✅ **`/register`** — toujours présent, toujours email/password/nom + redirection vers `/verify-email`
+
+#### Composant InputOTP (shadcn/ui)
+- ✅ **`components/ui/input-otp.tsx`** — composant shadcn/ui avec cases individuelles par chiffre
+- ✅ **6 cases** — 3 chiffres + séparateur + 3 chiffres (comme le format email)
+- ✅ **Bouton désactivé** tant que les 6 chiffres ne sont pas saisis
+- ✅ **Copie conditionnelle** — uniquement si `loginMethod = otp`
+- ✅ **Dépendance `input-otp`** — ajoutée automatiquement dans `package.json` si OTP
+
+#### Sécurité & UX
+- ✅ **`lib/dal.ts`** — `verifySession()` bloque le dashboard si `emailVerified === false`
+- ✅ **`lib/auth/config.ts` généré dynamiquement** — plugins selon la configuration (magicLink, emailOTP, social providers)
+- ✅ **`lib/auth/client.ts` généré dynamiquement** — plugins client selon la configuration
+- ✅ **Espacement formulaires** — `pb-6` sur tous les `CardContent` (register, forgot-password, reset-password, login)
+- ✅ **Fix casse `emailOTP`** — export Better Auth en majuscules côté serveur ET client
+- ✅ **Astuce CLI Resend** — note d'information avant la question "email expéditeur" rappelant d'utiliser un domaine vérifié
+
+### Ajouté
+- `src/templates/nextjs-base/components/ui/input-otp.tsx` — Composant InputOTP shadcn/ui
+- `src/templates/nextjs-base/app/verify-email/page.tsx` — Page vérification email
+- `src/templates/nextjs-base/app/forgot-password/page.tsx` — Page mot de passe oublié
+- `src/templates/nextjs-base/app/reset-password/page.tsx` — Page réinitialisation mot de passe
+
+### Modifié
+- `src/core/questions-v2.js` — Étape 4 OAuth uniquement, étape 6b loginMethod, astuce Resend
+- `src/core/config-builder.js` — Ajout `loginMethod`
+- `src/generators/nextjs-generator.js` — `generateAuthConfig()`, `generateLoginPage()`, `copyConfigFiles()` refactorisés
+- `src/generators/package-generator.js` — Ajout `input-otp` si OTP
+- `src/templates/nextjs-base/lib/email/client.ts` — Vérification `result.error` Resend
+- `src/templates/nextjs-base/lib/email/templates.ts` — Template OTP + format `XXX-XXX`
+- `src/templates/nextjs-base/lib/dal.ts` — Check `emailVerified === false`
+- `src/templates/nextjs-base/app/register/page.tsx` — Redirect `/verify-email` + spacing `pb-6`
+- `src/templates/nextjs-base/app/forgot-password/page.tsx` — Spacing `pb-6`
+- `src/templates/nextjs-base/app/reset-password/page.tsx` — Spacing `pb-6`
+- `src/templates/nextjs-base/app/page.tsx`, `about/`, `pricing/`, `components/navbar.tsx` — `{{AUTH_ENTRY_URL}}` → `/register`
 
 ## [0.6.0] - 2026-02-18
 

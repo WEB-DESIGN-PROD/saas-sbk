@@ -39,55 +39,44 @@ export default function RegisterPage() {
     setIsLoading(true)
 
     try {
-      console.log("🔄 Début de l'inscription...", { email, name })
-
-      // Inscription avec Better Auth
       const result = await signUp.email({
         email,
         password,
         name,
       })
 
-      console.log("📦 Résultat signUp:", result)
-
       if (result.error) {
-        console.error("❌ Erreur Better Auth:", result.error)
-        console.error("Type d'erreur:", typeof result.error)
-        console.error("Clés de l'erreur:", Object.keys(result.error))
+        const errorMessage = result.error.message || ""
 
-        const errorMessage = result.error.message || JSON.stringify(result.error)
-
-        // Détecter si l'utilisateur existe déjà
         if (errorMessage.includes("already exists") || errorMessage.includes("déjà") || errorMessage.includes("unique")) {
           toast.error("Compte existant", {
             description: "Un compte avec cet email existe déjà. Essayez de vous connecter."
           })
-        } else if (!errorMessage || errorMessage === "{}") {
-          toast.error("Erreur de configuration", {
-            description: "Vérifiez que la base de données est démarrée et configurée. Consultez la console pour plus de détails."
-          })
         } else {
           toast.error("Échec de l'inscription", {
-            description: errorMessage
+            description: errorMessage || "Une erreur est survenue lors de l'inscription"
           })
         }
         return
       }
 
-      console.log("✅ Inscription réussie, redirection...")
+      const redirectTo = "{{REGISTER_REDIRECT}}"
+      const redirectUrl = redirectTo === '/verify-email'
+        ? `/verify-email?email=${encodeURIComponent(email)}`
+        : redirectTo
 
-      toast.success("Compte créé avec succès !", {
-        description: "Bienvenue ! Redirection vers le dashboard..."
-      })
+      if (redirectTo === '/verify-email') {
+        toast.success("Compte créé avec succès !", {
+          description: "Un email de vérification a été envoyé. Vérifiez votre boîte mail."
+        })
+      } else {
+        toast.success("Compte créé avec succès !", {
+          description: "Bienvenue !"
+        })
+      }
 
-      // Rediriger vers le dashboard après inscription réussie
-      setTimeout(() => {
-        router.push("/dashboard")
-      }, 500)
+      router.push(redirectUrl)
     } catch (error: any) {
-      console.error("❌ Exception lors de l'inscription:", error)
-      console.error("Stack trace:", error.stack)
-
       toast.error("Erreur d'inscription", {
         description: error?.message || "Une erreur est survenue lors de l'inscription"
       })
@@ -106,7 +95,7 @@ export default function RegisterPage() {
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pb-6">
             <div className="space-y-2">
               <Label htmlFor="name">Nom complet</Label>
               <Input
@@ -142,9 +131,7 @@ export default function RegisterPage() {
                 minLength={8}
                 disabled={isLoading}
               />
-              <p className="text-xs text-muted-foreground">
-                Minimum 8 caractères
-              </p>
+              <p className="text-xs text-muted-foreground">Minimum 8 caractères</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>

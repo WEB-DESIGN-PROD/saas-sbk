@@ -11,6 +11,7 @@ export function generateEnvFile(config) {
     '',
     '# Application',
     `APP_NAME="${sanitizeForEnv(config.projectName)}"`,
+    `NEXT_PUBLIC_APP_NAME="${sanitizeForEnv(config.projectName)}"`,
     `APP_URL="http://localhost:3000"`,
     `NEXT_PUBLIC_APP_URL="http://localhost:3000"`,
     `THEME="${config.theme}"`,
@@ -61,7 +62,7 @@ export function generateEnvFile(config) {
   lines.push('# Emails');
   if (config.email.provider === 'resend') {
     lines.push(`RESEND_API_KEY="${sanitizeForEnv(config.email.resendApiKey)}"`);
-    lines.push(`EMAIL_FROM="noreply@${config.projectName}.com"`);
+    lines.push(`EMAIL_FROM="${sanitizeForEnv(config.email.fromEmail)}"`);
   } else if (config.email.provider === 'smtp') {
     lines.push(`SMTP_HOST="${sanitizeForEnv(config.email.smtpHost)}"`);
     lines.push(`SMTP_PORT="${config.email.smtpPort}"`);

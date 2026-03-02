@@ -116,7 +116,8 @@ export async function askQuestions() {
       choices: [
         { name: 'Email/Mot de passe', value: 'email', checked: true },
         { name: 'OAuth GitHub', value: 'github' },
-        { name: 'Magic Link (lien par email)', value: 'magiclink' }
+        { name: 'Magic Link (lien par email)', value: 'magiclink' },
+        { name: 'OTP par email (code 6 chiffres)', value: 'otp' }
       ],
       validate: (input) => {
         if (input.length === 0) {
@@ -227,7 +228,7 @@ export async function askQuestions() {
   Object.assign(answers, emailAnswers);
 
   if (answers.emailProvider === 'resend') {
-    const resendAnswers = await inquirer.prompt([
+    const resendKeyAnswers = await inquirer.prompt([
       {
         type: 'password',
         name: 'resendApiKey',
@@ -236,7 +237,18 @@ export async function askQuestions() {
         validate: validateApiKey
       }
     ]);
-    Object.assign(answers, resendAnswers);
+    Object.assign(answers, resendKeyAnswers);
+
+    const resendFromAnswers = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'emailFrom',
+        message: 'Adresse email expéditeur (ex: no-reply@mon-site.fr) :',
+        default: `noreply@${answers.projectName}.com`,
+        validate: validateEmail
+      }
+    ]);
+    Object.assign(answers, resendFromAnswers);
   } else {
     const smtpAnswers = await inquirer.prompt([
       {

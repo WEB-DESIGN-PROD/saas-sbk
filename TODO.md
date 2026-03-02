@@ -49,8 +49,8 @@ Inquirer affichait des messages d'aide en anglais qui ne pouvaient pas être sup
 - [x] **OAuth GitHub** - Implémenté
 - [x] **OAuth Google** - Implémenté
 - [x] **Magic Link / OTP** - Implémenté avec Resend
-- [ ] **Forgot password** - À implémenter
-- [ ] **Email verification** - À implémenter
+- [x] **Forgot password** - Implémenté (`/forgot-password` + `/reset-password`)
+- [x] **Email verification** - Implémenté (`/verify-email` + `emailVerification` Better Auth)
 
 ### Architecture Templates
 
