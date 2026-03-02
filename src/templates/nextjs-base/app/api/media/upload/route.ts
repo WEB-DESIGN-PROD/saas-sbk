@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { auth } from '@/lib/auth/config'
-import { uploadMedia } from '@/lib/storage/minio-client'
+import { uploadMedia, getPresignedUrl } from '@/lib/storage/minio-client'
 import { prisma } from '@/lib/db/client'
 
 const MAX_SIZE = 50 * 1024 * 1024 // 50 MB
@@ -54,7 +54,8 @@ export async function POST(request: NextRequest) {
       data: { key, name: file.name, size: file.size, mimeType },
     })
 
-    return NextResponse.json({ key, name: file.name, size: file.size })
+    const url = await getPresignedUrl(key)
+    return NextResponse.json({ key, name: file.name, size: file.size, url })
   } catch (error) {
     console.error('[POST /api/media/upload]', error)
     return NextResponse.json(

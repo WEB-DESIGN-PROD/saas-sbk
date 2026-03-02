@@ -88,6 +88,17 @@ export function generatePackageJson(config, projectPath = null) {
     packageJson.dependencies['@google/generative-ai'] = '^0.24.0';
   }
 
+  // Blog
+  if (config.saasType === 'blog') {
+    packageJson.dependencies['react-markdown'] = '^9.0.0';
+    packageJson.dependencies['remark-gfm'] = '^4.0.0';
+    packageJson.dependencies['slugify'] = '^1.6.6';
+    packageJson.devDependencies = {
+      ...packageJson.devDependencies,
+      '@tailwindcss/typography': '^0.5.16',
+    };
+  }
+
   // i18n
   if (config.i18n.languages.length > 1) {
     packageJson.dependencies['next-intl'] = '^4.8.0';

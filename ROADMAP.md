@@ -1,6 +1,42 @@
 # 🗺️ Roadmap - create-saas-sbk
 
-## ✅ v0.8.0 - 2 mars 2026 (ACTUELLE)
+## ✅ v0.10.0 - 2 mars 2026 (ACTUELLE)
+
+### 📝 Système de blog complet
+
+- ✅ **Option CLI "Type de SaaS"** — SaaS classique ou Blog SaaS
+- ✅ **Schéma Prisma** — modèles `Post`, `Category`, `Tag` avec relations et SEO
+- ✅ **Pages publiques** — liste, article, catégorie, tag, aperçu, RSS
+- ✅ **Layout blog** — Navbar + Footer sur toutes les pages `/blog`
+- ✅ **Lien "Blog" dans la Navbar** — conditionnel via `NEXT_PUBLIC_HAS_BLOG`
+- ✅ **Éditeur d'articles** — markdown, image de couverture drag-and-drop, jauges CharGauge, tags, catégories, statut, SEO avec pré-remplissage auto
+- ✅ **Interface admin blog** — liste filtrée + création + édition
+- ✅ **Interface admin médias** — `/admin/media` accessible sans passer par `/dashboard`
+- ✅ **Dashboard blog** — tableau de gestion des articles auteur
+- ✅ **API REST complète** — posts, catégories, tags (GET/POST/PATCH/DELETE)
+- ✅ **@tailwindcss/typography** — injection automatique pour rendu Markdown `prose`
+- ✅ **Hydration fix Navbar** — pattern `mounted` pour `useSession`
+- ✅ **Upload API** — retourne `url` presigned pour miniature immédiate
+- ✅ **`<img>` à la place de `<Image>`** — compatible URLs MinIO sans config domaine
+
+---
+
+## ✅ v0.9.0 - 2 mars 2026
+
+### 🛡️ Système super administrateur
+- ✅ Question CLI "Super Admin" + email admin
+- ✅ Rôle `admin` assigné automatiquement via `databaseHooks`
+- ✅ Plugin Better Auth `admin` (ban, impersonation, rôles)
+- ✅ `verifyAdmin()` dans le DAL
+- ✅ AppSidebar avec mode `"dashboard"` / `"admin"`
+- ✅ Page `/admin` — stats (membres, inscriptions, sessions, email vérifié) + graphique 30j
+- ✅ Page `/admin/users` — tableau complet (plan, crédits, suppression, impersonation, recherche)
+- ✅ Bannière d'impersonation dans le dashboard
+- ✅ Auto-refresh 30 secondes
+
+---
+
+## ✅ v0.8.0 - 2 mars 2026
 
 ### 💳 Facturation & Types d'utilisateurs
 
@@ -159,6 +195,7 @@
   - [x] Landing page avec Navbar moderne
   - [x] Page pricing
   - [x] Page about/contact
+  - [x] **Blog public** (liste, article, catégorie, tag, aperçu, RSS)
   - [ ] Page features
   - [ ] Footer complet avec liens
 
@@ -170,12 +207,13 @@
   - [x] Page settings (padding corrigé)
   - [x] Page account (padding corrigé)
   - [x] **Page médias** (upload MinIO, liste, édition, lightbox, recherche)
+  - [x] **Dashboard blog** (gestion articles auteur)
   - [ ] Page analytics/stats
   - [ ] Page billing Stripe fonctionnelle
   - [ ] Page team/users
   - [ ] Page API keys
 
-- [ ] **Authentification complète**
+- [x] **Authentification complète**
   - [x] Login avec Better Auth
   - [x] Register
   - [x] OAuth GitHub
@@ -184,6 +222,12 @@
   - [x] OTP avec Resend (composant InputOTP shadcn/ui)
   - [x] Forgot password / Reset password
   - [x] Email verification (obligatoire à l'inscription)
+
+- [x] **Super administration**
+  - [x] `/admin` — stats & graphiques
+  - [x] `/admin/users` — gestion utilisateurs + impersonation
+  - [x] `/admin/blog` — gestion articles (si blog activé)
+  - [x] `/admin/media` — gestion médias (si stockage activé)
 
 ### 🌍 Internationalisation
 - [ ] Fichiers de traduction complets (fr, en, es, de)
@@ -250,7 +294,7 @@
 ## 📊 Métriques de progression
 
 **Phase 1 :** 100% ✅ (CLI fonctionnel avec @clack/prompts)
-**Phase 2 :** 80% 🚧 (Templates complets + dashboard UX + architecture statique + page Médias + auth emails complets)
+**Phase 2 :** 90% 🚧 (Templates complets + blog + admin + médias + emails + facturation)
 **Phase 3 :** 0% 📅 (Planifié)
 **Phase 4 :** 0% 💭 (Vision)
 
@@ -267,9 +311,11 @@
 7. ✅ Navbar + Dashboard UX finalisés - **FAIT**
 8. ✅ Page Médias MinIO complète - **FAIT**
 9. ✅ Emails transactionnels complets (vérification, reset, magic link, OTP) - **FAIT**
-10. 🚧 Templates multilingues complets
-11. 📅 Configuration MongoDB/SQLite
-12. 📅 Dashboard analytics
+10. ✅ Système super administrateur avec impersonation - **FAIT**
+11. ✅ Système de blog complet (éditeur, admin, public, RSS) - **FAIT**
+12. 🚧 Templates multilingues complets
+13. 📅 Configuration MongoDB/SQLite
+14. 📅 Dashboard analytics
 
 ---
 

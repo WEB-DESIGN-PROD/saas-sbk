@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { LayoutDashboard, Home, Zap, Users } from "lucide-react"
+import { LayoutDashboard, Home, Zap, Users, FileText, HardDrive } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
@@ -17,23 +17,7 @@ import {
 } from "@/components/ui/sidebar"
 import type { AccountType } from "@/types"
 
-// Les nav items sont définis ici (client) pour éviter de passer des fonctions
-// depuis un Server Component (les icônes Lucide sont des fonctions React)
-const dashboardNavItems = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-]
-
-const adminNavItems = [
-  { title: "Vue d'ensemble", url: "/admin", icon: LayoutDashboard },
-  { title: "Utilisateurs", url: "/admin/users", icon: Users },
-]
-
-export function AppSidebar({
-  user,
-  accountType,
-  mode = "dashboard",
-  ...props
-}: React.ComponentProps<typeof Sidebar> & {
+interface AppSidebarProps {
   user: {
     name: string | null
     email: string
@@ -41,8 +25,29 @@ export function AppSidebar({
   }
   accountType: AccountType
   mode?: "dashboard" | "admin"
-}) {
-  const items = mode === "admin" ? adminNavItems : dashboardNavItems
+  hasBlog?: boolean
+  hasStorage?: boolean
+}
+
+export function AppSidebar({
+  user,
+  accountType,
+  mode = "dashboard",
+  hasBlog = false,
+  hasStorage = false,
+  ...props
+}: AppSidebarProps & Omit<React.ComponentProps<typeof Sidebar>, keyof AppSidebarProps>) {
+  const dashboardItems = [
+    { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+    ...(hasBlog ? [{ title: "Articles", url: "/dashboard/blog", icon: FileText }] : []),
+  ]
+  const adminItems = [
+    { title: "Vue d'ensemble", url: "/admin", icon: LayoutDashboard },
+    { title: "Utilisateurs", url: "/admin/users", icon: Users },
+    ...(hasBlog ? [{ title: "Articles", url: "/admin/blog", icon: FileText }] : []),
+    ...(hasStorage ? [{ title: "Médias", url: "/admin/media", icon: HardDrive }] : []),
+  ]
+  const items = mode === "admin" ? adminItems : dashboardItems
   const showUpgradeCard = mode === "dashboard" && accountType !== "Paid"
 
   return (

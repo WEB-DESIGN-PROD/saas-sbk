@@ -12,6 +12,112 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 - Mode debug/verbose pour le CLI
 - Publication npm
 
+## [0.10.0] - 2026-03-02
+
+### Système de blog intégré 📝
+
+#### CLI — Nouvelle option (questions-v2.js + config-builder.js)
+- ✅ **Question "Type de SaaS"** — choix entre SaaS classique et Blog SaaS
+- ✅ **`config.saasType === 'blog'`** — détermine la copie des fichiers blog
+- ✅ **`NEXT_PUBLIC_HAS_BLOG="true"`** ajouté dans `.env` si blog activé
+- ✅ **`NEXT_PUBLIC_HAS_STORAGE="true"`** ajouté dans `.env` si stockage activé
+- ✅ **`@tailwindcss/typography`** injecté dans `globals.css` et `package.json` si blog activé
+
+#### Schéma Prisma (`prisma/schema.prisma`)
+- ✅ **Modèle `Post`** — titre, slug, contenu markdown, extrait, image de couverture, statut, temps de lecture, SEO (title, description, keywords), auteur, date de publication, catégorie, tags
+- ✅ **Modèle `Category`** — nom, slug, description, catégorie parente (hiérarchique)
+- ✅ **Modèle `Tag`** — nom, slug
+- ✅ **Relations** — Post ↔ Category (optionnelle), Post ↔ Tag (many-to-many)
+
+#### Pages publiques blog (`app/blog/`)
+- ✅ **`layout.tsx`** — enveloppe toutes les pages blog avec Navbar + Footer
+- ✅ **`page.tsx`** — liste paginée des articles publiés (12 par page) avec barre de recherche, filtres catégories/tags
+- ✅ **`[slug]/page.tsx`** — article complet avec métadonnées Open Graph, image de couverture, rendu Markdown via `prose`
+- ✅ **`categorie/[slug]/page.tsx`** — articles filtrés par catégorie
+- ✅ **`tag/[slug]/page.tsx`** — articles filtrés par tag
+- ✅ **`preview/[id]/page.tsx`** — aperçu des articles non publiés (réservé aux utilisateurs connectés)
+- ✅ **`feed.xml/route.ts`** — flux RSS 2.0 des 20 derniers articles publiés
+
+#### Interface admin blog (`app/admin/blog/`)
+- ✅ **`page.tsx`** — liste de tous les articles avec filtres (statut, catégorie), pagination, boutons édition/suppression, lien aperçu
+- ✅ **`new/page.tsx`** — création d'article avec l'éditeur complet
+- ✅ **`[id]/edit/page.tsx`** — édition d'un article existant
+
+#### Interface admin médias (`app/admin/media/page.tsx`)
+- ✅ **Page `/admin/media`** — gestion des médias accessible en mode super-admin (sans passer par `/dashboard`)
+
+#### Interface dashboard blog (`app/dashboard/blog/`)
+- ✅ **`page.tsx`** — gestion des articles de l'auteur connecté avec filtres et tableau complet
+
+#### Composant éditeur d'articles (`components/blog/article-editor.tsx`)
+- ✅ **Éditeur Markdown** — zone de texte avec rendu markdown côté éditeur
+- ✅ **Image de couverture drag-and-drop** — zone DnD pleine largeur avec retour visuel (`isDragging`), miniature après upload
+- ✅ **CharGauge titre** — jauge de 60 caractères max sous le champ titre
+- ✅ **CharGauge extrait** — jauge de 160 caractères max sous le champ extrait
+- ✅ **Catégories et tags** — Select catégorie (`value="none"` → `null`) + input tags avec chips supprimables
+- ✅ **Statut + date de publication** — `draft` / `published` / `scheduled` avec champ date conditionnel
+- ✅ **Section SEO accordion** — meta title (jauge 60) + meta description (jauge 160) avec pré-remplissage auto depuis titre/extrait, meta keywords readonly depuis les tags
+- ✅ **Sauvegarde brouillon** + **Publication** avec toasts
+
+#### Composants blog (`components/blog/`)
+- ✅ **`ArticleCard`** — carte article avec image, catégorie, tags, auteur, date, temps de lecture, lien `/blog/[slug]`
+- ✅ **`MarkdownPreview`** — rendu Markdown avec `@tailwindcss/typography` (classes `prose`)
+- ✅ **`CharGauge`** — jauge de caractères colorée (vert → orange → rouge)
+- ✅ **`CategoryManager`** — gestionnaire de catégories avec création, édition, suppression et hiérarchie
+
+#### Routes API blog (`app/api/blog/`)
+- ✅ **`posts/route.ts`** — GET (liste/filtres/pagination) + POST (création)
+- ✅ **`posts/[id]/route.ts`** — GET + PATCH + DELETE
+- ✅ **`categories/route.ts`** — GET + POST
+- ✅ **`categories/[id]/route.ts`** — PATCH + DELETE
+- ✅ **`tags/route.ts`** — GET + POST
+- ✅ **`tags/[id]/route.ts`** — DELETE
+
+#### Corrections et améliorations générales
+- ✅ **Navbar** — hydration fix (`mounted` state) + lien "Blog" conditionnel (`NEXT_PUBLIC_HAS_BLOG`)
+- ✅ **AppSidebar** — prop `hasStorage` + entrée "Médias" dans le menu admin (`/admin/media`)
+- ✅ **Upload API** — `/api/media/upload` retourne désormais `url` (presigned URL) en plus de `key`
+- ✅ **`<img>` à la place de `<Image>`** — dans toutes les pages blog (évite les contraintes `next/image` avec les URLs MinIO presignées)
+- ✅ **`value="none"` Radix Select** — correction `value=""` non autorisé dans `article-editor.tsx` et `category-manager.tsx`
+
+### Ajouté
+- `src/templates/nextjs-base/app/blog/layout.tsx` — Layout blog avec Navbar + Footer
+- `src/templates/nextjs-base/app/blog/page.tsx` — Liste articles publics
+- `src/templates/nextjs-base/app/blog/[slug]/page.tsx` — Page article
+- `src/templates/nextjs-base/app/blog/categorie/[slug]/page.tsx` — Articles par catégorie
+- `src/templates/nextjs-base/app/blog/tag/[slug]/page.tsx` — Articles par tag
+- `src/templates/nextjs-base/app/blog/preview/[id]/page.tsx` — Aperçu article
+- `src/templates/nextjs-base/app/feed.xml/route.ts` — Flux RSS
+- `src/templates/nextjs-base/app/admin/blog/page.tsx` — Admin liste articles
+- `src/templates/nextjs-base/app/admin/blog/new/page.tsx` — Admin création article
+- `src/templates/nextjs-base/app/admin/blog/[id]/edit/page.tsx` — Admin édition article
+- `src/templates/nextjs-base/app/admin/media/page.tsx` — Admin médias
+- `src/templates/nextjs-base/app/dashboard/blog/page.tsx` — Dashboard blog auteur
+- `src/templates/nextjs-base/app/api/blog/posts/route.ts` — API posts
+- `src/templates/nextjs-base/app/api/blog/posts/[id]/route.ts` — API post
+- `src/templates/nextjs-base/app/api/blog/categories/route.ts` — API catégories
+- `src/templates/nextjs-base/app/api/blog/categories/[id]/route.ts` — API catégorie
+- `src/templates/nextjs-base/app/api/blog/tags/route.ts` — API tags
+- `src/templates/nextjs-base/app/api/blog/tags/[id]/route.ts` — API tag
+- `src/templates/nextjs-base/components/blog/article-editor.tsx` — Éditeur complet
+- `src/templates/nextjs-base/components/blog/article-card.tsx` — Carte article
+- `src/templates/nextjs-base/components/blog/markdown-preview.tsx` — Rendu Markdown
+- `src/templates/nextjs-base/components/blog/char-gauge.tsx` — Jauge caractères
+- `src/templates/nextjs-base/components/blog/category-manager.tsx` — Gestionnaire catégories
+
+### Modifié
+- `src/core/questions-v2.js` — Question type de SaaS
+- `src/core/config-builder.js` — Champ `saasType`
+- `src/generators/env-generator.js` — `NEXT_PUBLIC_HAS_BLOG`, `NEXT_PUBLIC_HAS_STORAGE`
+- `src/generators/nextjs-generator.js` — Copie conditionnelle fichiers blog, injection `@tailwindcss/typography`, `app/admin/media/page.tsx`
+- `src/generators/package-generator.js` — `@tailwindcss/typography` si blog activé
+- `src/templates/nextjs-base/prisma/schema.prisma` — Modèles Post, Category, Tag
+- `src/templates/nextjs-base/components/navbar.tsx` — Hydration fix + lien Blog conditionnel
+- `src/templates/nextjs-base/components/app-sidebar.tsx` — Prop `hasStorage` + entrée Médias admin
+- `src/templates/nextjs-base/app/admin/layout.tsx` — Prop `hasStorage`
+- `src/templates/nextjs-base/app/dashboard/layout.tsx` — Prop `hasBlog`
+- `src/templates/nextjs-base/app/api/media/upload/route.ts` — Retourne `url` presigned
+
 ## [0.9.0] - 2026-03-02
 
 ### Système super administrateur 🛡️

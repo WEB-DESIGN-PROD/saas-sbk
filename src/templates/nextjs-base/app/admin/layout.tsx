@@ -28,6 +28,8 @@ export default async function AdminLayout({
         user={user}
         accountType={plan.accountType}
         mode="admin"
+        hasBlog={process.env.NEXT_PUBLIC_HAS_BLOG === "true"}
+        hasStorage={process.env.NEXT_PUBLIC_HAS_STORAGE === "true"}
       />
       <SidebarInset>
         <SiteHeader />

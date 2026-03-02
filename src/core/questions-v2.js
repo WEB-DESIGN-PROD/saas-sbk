@@ -189,6 +189,9 @@ function showHeader(answers = {}) {
       const adminDisplay = answers.wantsAdmin ? chalk.cyan(answers.adminEmail || 'Oui') : 'Non';
       rightChoices.push(chalk.green(figures.tick) + ' Super Admin : ' + adminDisplay);
     }
+    if (answers.saasType !== undefined) {
+      rightChoices.push(chalk.green(figures.tick) + ' Type SaaS    : ' + chalk.cyan(answers.saasType === 'blog' ? 'Blog' : 'Default'));
+    }
     if (answers.claudeCodeInstalled !== undefined) {
       rightChoices.push(chalk.green(figures.tick) + ' Claude Code : ' + chalk.cyan(answers.claudeCodeInstalled ? 'Oui' : 'Non'));
     }
@@ -1015,7 +1018,26 @@ export async function askQuestions() {
     answers.adminEmail = adminEmail;
   }
 
-  // 13. Claude Code
+  // 13. Type de SaaS
+  showHeader(answers);
+  p.note(
+    'Choisissez le type de SaaS à générer.\nLe mode Blog ajoute un système complet de publication d\'articles.',
+    'Type de projet'
+  )
+
+  const saasType = await p.select({
+    message: 'Quel type de SaaS souhaitez-vous créer ?',
+    options: [
+      { value: 'default', label: 'Default', hint: 'Plateforme SaaS standard' },
+      { value: 'blog', label: 'Blog', hint: 'Système de publication d\'articles intégré' },
+      { value: 'shop', label: 'Shop — Coming Soon', hint: 'Disponible dans une prochaine version', disabled: true },
+    ],
+    initialValue: 'default',
+  })
+  if (p.isCancel(saasType)) { p.cancel('Installation annulée.'); process.exit(0) }
+  answers.saasType = saasType;
+
+  // 14. Claude Code
   showHeader(answers);
   const claudeCodeInstalled = await p.confirm({
     message: 'Avez-vous Claude Code CLI installé ?',

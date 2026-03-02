@@ -36,6 +36,7 @@ model User {
   banReason        String?
   banExpires       DateTime?
 
+  posts    Post[]
   sessions Session[]
   accounts Account[]
 
@@ -101,4 +102,61 @@ model Media {
   updatedAt   DateTime @updatedAt
 
   @@map("media")
+}
+
+enum PostStatus {
+  Draft
+  Published
+  Scheduled
+  Archived
+}
+
+model Post {
+  id             String     @id @default(cuid())
+  title          String
+  slug           String     @unique
+  excerpt        String?
+  content        String     // Markdown
+  coverImage     String?
+  coverImageAlt  String?
+  authorName     String     // nom affiché, éditable
+  status         PostStatus @default(Draft)
+  publishedAt    DateTime?
+  readingTime    Int?       // minutes, auto-calculé
+  seoTitle       String?
+  seoDescription String?
+
+  authorId   String
+  author     User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags       Tag[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("post")
+}
+
+model Category {
+  id       String     @id @default(cuid())
+  name     String
+  slug     String     @unique
+  parentId String?
+  parent   Category?  @relation("SubCategories", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("SubCategories")
+  posts    Post[]
+
+  createdAt DateTime @default(now())
+
+  @@map("category")
+}
+
+model Tag {
+  id    String @id @default(cuid())
+  name  String @unique
+  slug  String @unique
+  posts Post[]
+
+  @@map("tag")
 }

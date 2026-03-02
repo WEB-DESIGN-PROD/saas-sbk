@@ -42,6 +42,7 @@ export function generateEnvFile(config) {
   // Storage
   if (config.storage.enabled) {
     lines.push('# Stockage');
+    lines.push('NEXT_PUBLIC_HAS_STORAGE="true"');
     if (config.storage.type === 'minio') {
       lines.push(`MINIO_ENDPOINT="localhost"`);
       lines.push(`MINIO_PORT="${config.storage.minioPort}"`);
@@ -85,6 +86,13 @@ export function generateEnvFile(config) {
   if (config.admin && config.admin.enabled && config.admin.email) {
     lines.push('# Super Administrateur');
     lines.push(`ADMIN_EMAIL="${sanitizeForEnv(config.admin.email)}"`);
+    lines.push('');
+  }
+
+  // Blog
+  if (config.saasType === 'blog') {
+    lines.push('# Blog');
+    lines.push('NEXT_PUBLIC_HAS_BLOG="true"');
     lines.push('');
   }
 

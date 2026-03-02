@@ -83,7 +83,10 @@ export function buildConfig(answers) {
     // Claude Code
     claude: {
       cliInstalled: answers.claudeCodeInstalled || false
-    }
+    },
+
+    // Type de SaaS
+    saasType: answers.saasType || 'default',  // 'default' | 'blog'
   };
 
   // Générer l'URL de database si Docker
