@@ -228,14 +228,18 @@ export async function askQuestions() {
   Object.assign(answers, emailAnswers);
 
   if (answers.emailProvider === 'resend') {
-    const resendAnswers = await inquirer.prompt([
+    const resendKeyAnswers = await inquirer.prompt([
       {
         type: 'password',
         name: 'resendApiKey',
         message: 'Clé API Resend :',
         mask: '*',
         validate: validateApiKey
-      },
+      }
+    ]);
+    Object.assign(answers, resendKeyAnswers);
+
+    const resendFromAnswers = await inquirer.prompt([
       {
         type: 'input',
         name: 'emailFrom',
@@ -244,7 +248,7 @@ export async function askQuestions() {
         validate: validateEmail
       }
     ]);
-    Object.assign(answers, resendAnswers);
+    Object.assign(answers, resendFromAnswers);
   } else {
     const smtpAnswers = await inquirer.prompt([
       {
