@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { LayoutDashboard, Home } from "lucide-react"
+import { LayoutDashboard, Home, CreditCard } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
@@ -22,6 +22,11 @@ const data = {
       title: "Dashboard",
       url: "/dashboard",
       icon: LayoutDashboard,
+    },
+    {
+      title: "Facturation",
+      url: "/dashboard/billing",
+      icon: CreditCard,
     },
   ],
 }

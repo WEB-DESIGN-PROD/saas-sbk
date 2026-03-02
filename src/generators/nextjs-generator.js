@@ -104,6 +104,9 @@ function copyConfigFiles(projectPath, config, templatesDir) {
     'components/theme-toggle.tsx',
     'types/index.ts',
     'prisma/schema.prisma',
+    'lib/subscription/helpers.ts',
+    'app/dashboard/billing/page.tsx',
+    'app/api/user/plan/route.ts',
     'DEVELOPMENT.md',
   ];
 
