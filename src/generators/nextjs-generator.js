@@ -345,6 +345,8 @@ function generateAuthConfig(projectPath, config) {
   if (hasEmail) {
     lines.push('  emailVerification: {');
     lines.push('    sendOnSignUp: true,');
+    lines.push('    autoSignInAfterVerification: true,');
+    lines.push('    callbackURL: "/dashboard",');
     lines.push('    sendVerificationEmail: async ({ user, url }) => {');
     lines.push(`      void sendVerificationEmail(user.email, user.name || user.email, url, "${appName}")`);
     lines.push('    },');
