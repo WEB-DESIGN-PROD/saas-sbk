@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Vue d'ensemble du projet
 
-**saas-sbk** est un installateur CLI npm qui génère des projets SaaS Next.js 15+ complets et clés en main. Le CLI pose des questions interactives pour configurer automatiquement l'authentification, la base de données, les paiements, l'IA, les emails, le stockage médias, et l'internationalisation.
+**saas-sbk** est un installateur CLI npm qui génère des projets SaaS Next.js 16+ complets et clés en main. Le CLI pose des questions interactives pour configurer automatiquement l'authentification, la base de données, les paiements, l'IA, les emails, le stockage médias, et l'internationalisation.
 
 ### Commande d'installation finale visée
 ```bash
@@ -15,57 +15,159 @@ npm create saas-sbk@latest
 
 ### Stack du CLI
 - **Node.js** avec modules ESM
-- **inquirer** ou **enquirer** pour les prompts interactifs
+- **@clack/prompts** pour les prompts interactifs (pas inquirer/enquirer)
 - **chalk** pour la coloration des messages
 - **ora** pour les spinners de progression
-- **listr2** (optionnel) pour les barres de progression avancées
 
 ### Stack du projet généré
-- **Next.js 15+** (App Router)
-- **Better Auth** pour l'authentification (email/password, OAuth GitHub, MagicLink)
+- **Next.js 16+** (App Router, Turbopack)
+- **React 19**
+- **Better Auth** pour l'authentification (email/password, OAuth GitHub/Google, MagicLink, OTP)
 - **Prisma** + **PostgreSQL** (Docker ou distant)
 - **Stripe** pour les paiements (mode test)
 - **Resend** ou SMTP personnalisé pour les emails
-- **AWS S3** ou **MinIO** (Docker) pour le stockage médias
-- **Shadcn UI** + **Tailwind CSS** pour l'interface
-- Internationalisation multilingue
+- **MinIO** (Docker) ou **AWS S3** pour le stockage médias
+- **Shadcn UI** + **Tailwind CSS v4** pour l'interface
+- Internationalisation multilingue (next-intl)
 - Intégration IA (Claude/Gemini/ChatGPT selon choix)
+- **@tailwindcss/typography** si blog activé
+
+## Architecture du générateur
+
+### Couches de templates (dans l'ordre d'application)
+
+```
+src/templates/
+├── shadcn-base/       # 1. Base Shadcn UI (copiée en premier avec fs.cpSync)
+│   └── components/ui/ # Composants UI génériques, globals.css, tsconfig.json...
+├── nextjs-base/       # 2. Overlay Next.js (alwaysCopy + conditionalCopy)
+│   ├── app/           # Pages app router, layouts, API routes
+│   ├── components/    # Composants custom (app-sidebar, navbar, blog/...)
+│   ├── lib/           # auth, db, email, storage, subscription, dal
+│   └── prisma/        # schema.prisma
+└── variants/          # 3. Variantes conditionnelles (login, register, email, OAuth...)
+    ├── auth/
+    ├── email/
+    ├── billing/
+    └── storage/       # ⚠️ app-sidebar-with-media.tsx SUPPRIMÉ (était obsolète)
+```
+
+### ⚠️ RÈGLE CRITIQUE — Variants vs nextjs-base
+
+**JAMAIS** ajouter un variant qui écrase un fichier présent dans `nextjs-base/alwaysCopy`.
+Le variant sera copié APRÈS `nextjs-base` et effacera la version correcte.
+
+→ Préférer les **props dynamiques** dans le composant plutôt qu'un fichier variant séparé.
+
+Exemple du bug corrigé : `variants/storage/app-sidebar-with-media.tsx` écrasait
+`nextjs-base/components/app-sidebar.tsx` → supprimé, `app-sidebar.tsx` gère désormais
+`hasStorage` via une prop.
+
+### Générateurs (`src/generators/`)
+- **`nextjs-generator.js`** — copie les templates, gère `alwaysCopy` + `conditionalCopy` + variants
+- **`env-generator.js`** — génère `.env` avec toutes les variables selon la config
+- **`package-generator.js`** — fusionne `package.json` shadcn-base + dépendances selon config
+- **`docker-generator.js`** — génère `docker-compose.yml` si DB/storage Docker
+
+### Questions interactives (`src/core/`)
+- **`questions-v2.js`** — toutes les questions CLI avec @clack/prompts
+- **`config-builder.js`** — transforme les réponses en objet `config` structuré
 
 ## Structure du projet généré
 
 ```
-saas-sbk-project/
+mon-saas/
 ├── app/
 │   ├── page.tsx                    # Landing page publique
-│   ├── pricing/page.tsx            # Page pricing
+│   ├── pricing/page.tsx            # Page tarifs
 │   ├── about/page.tsx              # Page à propos
-│   ├── login/page.tsx              # Login
+│   ├── login/page.tsx              # Connexion (généré dynamiquement)
 │   ├── register/page.tsx           # Inscription
-│   └── dashboard/                  # Zone protégée (auth requise)
-│       ├── layout.tsx              # Layout vérifiant session
-│       ├── page.tsx                # Dashboard home
-│       ├── settings/page.tsx       # Paramètres utilisateur
-│       ├── account/page.tsx        # Gestion compte
-│       └── billing/page.tsx        # Facturation Stripe
-├── .claude/
-│   ├── README.md                   # Description stack pour Claude Code
-│   ├── agents/                     # Agents spécialisés (dev, perf, sécurité, SEO)
-│   └── skills/                     # Skills installés
+│   ├── verify-email/page.tsx       # Vérification email
+│   ├── forgot-password/page.tsx    # Mot de passe oublié
+│   ├── reset-password/page.tsx     # Réinitialisation mot de passe
+│   ├── dashboard/                  # Zone protégée (auth requise)
+│   │   ├── layout.tsx              # Layout vérifiant session
+│   │   ├── page.tsx                # Dashboard home
+│   │   ├── settings/page.tsx       # Paramètres
+│   │   ├── account/page.tsx        # Gestion compte
+│   │   ├── billing/page.tsx        # Facturation Stripe
+│   │   ├── media/page.tsx          # Médias MinIO (si storage activé)
+│   │   └── blog/page.tsx           # Gestion articles (si blog activé)
+│   ├── admin/                      # Zone super admin (si activé)
+│   │   ├── layout.tsx              # Layout admin protégé
+│   │   ├── page.tsx                # Stats & graphiques
+│   │   ├── users/page.tsx          # Gestion utilisateurs + impersonation
+│   │   ├── blog/                   # Gestion blog admin (si blog activé)
+│   │   └── media/page.tsx          # Gestion médias admin (si storage activé)
+│   ├── blog/                       # Blog public (si blog activé)
+│   │   ├── layout.tsx              # Layout avec Navbar + Footer
+│   │   ├── page.tsx                # Liste articles
+│   │   ├── [slug]/page.tsx         # Article complet
+│   │   ├── categorie/[slug]/       # Articles par catégorie
+│   │   ├── tag/[slug]/             # Articles par tag
+│   │   └── preview/[id]/           # Aperçu non publié
+│   ├── api/
+│   │   ├── auth/[...all]/          # Better Auth handler
+│   │   ├── media/                  # Upload + liste + suppression médias
+│   │   └── blog/                   # CRUD posts, catégories, tags (si blog)
+│   └── feed.xml/route.ts           # Flux RSS (si blog activé)
+├── components/
+│   ├── app-sidebar.tsx             # Sidebar avec mode dashboard/admin
+│   ├── navbar.tsx                  # Navbar publique (hydration fix avec mounted)
+│   ├── blog/                       # Composants blog (si blog activé)
+│   │   ├── article-editor.tsx      # Éditeur markdown complet
+│   │   ├── article-card.tsx        # Carte article (utilise <img> pas next/image)
+│   │   ├── char-gauge.tsx          # Jauge de caractères
+│   │   ├── category-manager.tsx    # Gestionnaire catégories
+│   │   └── markdown-preview.tsx    # Rendu Markdown prose
+│   └── admin/
+│       └── auto-refresh.tsx        # Auto-refresh 30s
+├── lib/
+│   ├── auth/config.ts              # Config Better Auth (généré dynamiquement)
+│   ├── auth/client.ts              # Client Better Auth
+│   ├── db/client.ts                # Client Prisma
+│   ├── dal.ts                      # Data Access Layer (getUserPlan, verifyAdmin)
+│   ├── email/client.ts             # Service email (généré dynamiquement)
+│   ├── storage/minio-client.ts     # Client MinIO + getPresignedUrl
+│   └── subscription/helpers.ts    # Guards isFree/isFreemium/isPaid
+├── prisma/schema.prisma            # User, Session, Account, Verification,
+│                                   # Media, Post, Category, Tag (si blog)
+├── types/index.ts                  # AccountType, etc.
 ├── docker-compose.yml              # Postgres + MinIO si configuré
 ├── .env                            # Variables d'environnement générées
-├── package.json
 └── README.md
 ```
 
-## Flux de travail du CLI
+## Variables d'environnement générées
 
-1. **Questions interactives** : thème, base de données, auth, stockage médias, email, paiements, i18n, IA, Claude Code
-2. **Validation stricte** de toutes les entrées utilisateur (regex, longueur, format)
-3. **Génération dynamique** des fichiers `.env`, `docker-compose.yml`, `.claude/README.md`
-4. **Copie des templates** Next.js (pages publiques + dashboard protégé)
-5. **Installation automatique des skills** Claude Code adaptés à la stack choisie
-6. **Lancement de `/init`** sur le projet si Claude Code CLI est installé
-7. **Message final** invitant à lancer `npm run dev` et à utiliser `/generate-features` (v2 future)
+```env
+# Toujours présentes
+DATABASE_URL=...
+BETTER_AUTH_SECRET=...
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Si admin activé
+ADMIN_EMAIL=...
+
+# Si blog activé
+NEXT_PUBLIC_HAS_BLOG="true"
+
+# Si storage activé
+NEXT_PUBLIC_HAS_STORAGE="true"
+MINIO_ENDPOINT=...
+MINIO_ACCESS_KEY=...
+MINIO_SECRET_KEY=...
+MINIO_BUCKET=...
+
+# Si email activé
+RESEND_API_KEY=...
+EMAIL_FROM=...
+
+# Si Stripe activé
+STRIPE_SECRET_KEY=...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=...
+```
 
 ## Principes de sécurité CRITIQUES
 
@@ -73,120 +175,82 @@ saas-sbk-project/
 - **JAMAIS** d'`eval` ni de concaténation de commandes shell non sécurisées
 - Utiliser `execSync` ou `spawn` avec tableaux d'arguments (pas de strings)
 - Échapper et nettoyer les chaînes avant écriture dans `.env`, YAML
-- Masquer les mots de passe dans le terminal (`type: 'password'`)
+- Masquer les mots de passe dans le terminal (type password dans @clack/prompts)
 - Gestion robuste des erreurs avec messages clairs
 
-### Exemple de validation sécurisée
-```js
-{
-  type: 'input',
-  name: 'projectName',
-  message: 'Nom du projet',
-  validate: input => {
-    if (!/^[a-zA-Z0-9-_]+$/.test(input)) {
-      return 'Le nom du projet ne doit contenir que des lettres, chiffres, tirets ou underscores.';
-    }
-    return true;
-  }
-}
+## Pièges connus et solutions
+
+### 1. Props custom propagées au DOM
+**Problème** : Props comme `accountType`, `hasBlog`, `hasStorage` passées à un composant
+qui les spread sur un élément DOM → warning React.
+
+**Solution** : Utiliser `Omit<React.ComponentProps<typeof Comp>, keyof CustomProps>` :
+```tsx
+interface MyProps { foo: string; bar?: boolean }
+export function MyComp({ foo, bar, ...props }:
+  MyProps & Omit<React.ComponentProps<typeof BaseComp>, keyof MyProps>) { ... }
 ```
 
-## Modules npm essentiels
+### 2. Hydration mismatch avec useSession
+**Problème** : `useSession` retourne des valeurs différentes server/client.
 
-- `inquirer` ou `enquirer` - Prompts interactifs
-- `chalk` - Couleurs dans la console
-- `ora` - Spinners de progression
-- `child_process` (execSync/spawn) - Lancer des commandes shell
-- `fs` - Écrire des fichiers système
-- `path` - Manipuler les chemins de fichiers
+**Solution** : Pattern `mounted` dans la Navbar :
+```tsx
+const [mounted, setMounted] = useState(false)
+useEffect(() => setMounted(true), [])
+const isLoggedIn = mounted && !!session?.user
+```
+
+### 3. next/image avec URLs MinIO presignées
+**Problème** : `next/image` exige la configuration du domaine pour les URLs externes.
+
+**Solution** : Utiliser `<img>` à la place dans les composants blog (article-card, pages blog).
+
+### 4. Radix Select value=""
+**Problème** : `<SelectItem value="">` n'est pas autorisé par Radix UI.
+
+**Solution** : Utiliser `value="none"` comme sentinel, convertir en `null` avant sauvegarde.
+
+### 5. @tailwindcss/typography en Tailwind v4
+**Syntaxe** : `@plugin "@tailwindcss/typography";` dans `globals.css` (pas `require`).
 
 ## Commandes importantes (projet généré)
 
-- `npm run dev` - Démarrer le serveur de développement
-- `db:start` - Démarrer PostgreSQL via Docker
-- `claude:init` - Initialiser Claude Code sur le projet
-- `claude:generate-features` - (v2 future) Génération IA de fonctionnalités
-
-## Génération de fichiers dynamiques
-
-### Exemple `.env`
-```js
-const envContent = `
-POSTGRES_USER=${answers.dbUser}
-POSTGRES_PASSWORD=${answers.dbPassword}
-THEME=${answers.theme}
-STRIPE_SECRET_KEY=${answers.stripeKey}
-RESEND_API_KEY=${answers.resendKey}
-`;
-fs.writeFileSync(path.join(projectPath, '.env'), envContent);
+```bash
+npm run dev          # Démarrer le serveur (Turbopack)
+npm run build        # Build de production
+npm run db:push      # Synchroniser le schéma Prisma
+npm run db:studio    # Ouvrir Prisma Studio
+npm run docker:up    # Démarrer les services Docker
 ```
-
-### Exemple `docker-compose.yml`
-```js
-function generateDockerCompose(user, password) {
-  return `
-version: '3.8'
-
-services:
-  postgres:
-    image: postgres:15
-    restart: always
-    environment:
-      POSTGRES_USER: ${user}
-      POSTGRES_PASSWORD: ${password}
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
-volumes:
-  pgdata:
-`;
-}
-```
-
-### Exemple `.claude/README.md`
-Ce fichier doit décrire la stack complète, les choix de configuration, et les commandes disponibles pour que Claude Code soit immédiatement opérationnel sur le projet généré.
-
-## Installation automatique des skills
-
-```js
-const skills = ['nextjs', 'better-auth', 'prisma', 'stripe', 'resend'];
-skills.forEach(skill => {
-  execSync(`npx skills add ${skill}`, { stdio: 'inherit' });
-});
-```
-
-Adapter cette liste en fonction des choix utilisateur lors de la configuration.
-
-## UX et messages
-
-- Utiliser **chalk** pour colorer les messages (succès en vert, erreurs en rouge, info en bleu)
-- Utiliser **ora** pour afficher des spinners pendant les opérations longues
-- Afficher un récapitulatif final clair avant génération, permettre modification
-- Messages motivants et pédagogiques tout au long du CLI
-- Message final clair invitant à lancer le projet et mentionner `/generate-features` pour v2
 
 ## Roadmap
 
-### Phase 1 (actuelle) - CLI d'installation
-- CLI interactif complet
-- Génération projet Next.js clé en main fonctionnel dès le démarrage
-- Installation automatique des skills
-- Lancement automatique de `/init` sur le projet
+### Phase 1 ✅ — CLI Interactif (TERMINÉE)
+- CLI interactif complet avec @clack/prompts
+- Génération projet Next.js 16+ fonctionnel dès le démarrage
+- Installation automatique des skills Claude Code
+- PostgreSQL (Docker ou distant), OAuth GitHub/Google, Magic Link/OTP
 
-### Phase 2 (future) - Génération IA avancée
+### Phase 2 🚧 — Templates Complets (90%)
+- Architecture templates statique (shadcn-base + nextjs-base overlay)
+- Dashboard UX finalisé, auth emails complets
+- Facturation & types d'utilisateurs (v0.8.0)
+- Système super administrateur avec impersonation (v0.9.0)
+- Système de blog complet — éditeur, admin, public, RSS (v0.10.0)
+
+### Phase 3 📅 — Génération IA (À VENIR)
 - Commande `/generate-features` dans Claude Code
-- Agents spécialisés (dev, sécurité, SEO, perf) implémentant en parallèle
-- Suivi et itérations automatiques
+- Agents spécialisés (dev, sécurité, SEO, perf)
 
 ## Ressources
 
 - [Next.js App Router](https://nextjs.org/docs/app/building-your-application/routing)
-- [Better Auth](https://betterauth.dev/)
+- [Better Auth](https://www.better-auth.com/docs)
 - [Prisma](https://www.prisma.io/docs/)
 - [Stripe API](https://stripe.com/docs/api)
 - [Resend](https://resend.com/docs)
-- [Skills.sh](https://skills.sh)
-- [Claude Code docs](https://claude.ai/docs/cli)
+- [MinIO](https://min.io/docs/minio/container/index.html)
+- [Claude Code docs](https://docs.anthropic.com/claude-code)
 - [Docker Compose](https://docs.docker.com/compose/)
+- [@clack/prompts](https://github.com/bombshell-dev/clack)
