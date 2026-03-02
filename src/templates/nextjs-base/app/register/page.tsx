@@ -46,6 +46,7 @@ export default function RegisterPage() {
         email,
         password,
         name,
+        callbackURL: "/dashboard",
       })
 
       console.log("📦 Résultat signUp:", result)

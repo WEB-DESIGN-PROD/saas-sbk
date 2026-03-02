@@ -22,9 +22,10 @@ export function generateNextjsProject(projectPath, config) {
   // 2. Copier les fichiers de configuration spécifiques par-dessus
   copyConfigFiles(projectPath, config, templatesDir);
 
-  // 3. Générer lib/auth/config.ts et lib/auth/client.ts dynamiquement
+  // 3. Générer lib/auth/config.ts, lib/auth/client.ts et app/login/page.tsx dynamiquement
   generateAuthConfig(projectPath, config);
   generateAuthClient(projectPath, config);
+  generateLoginPage(projectPath, config);
 
   // 3b. Générer lib/email/client.ts dynamiquement selon le provider
   if (config.email && config.email.provider !== 'none') {
@@ -94,13 +95,13 @@ ${links}
   };
 
   // Fichiers toujours copiés (écrasent le shadcn-base)
-  // Note: lib/auth/config.ts est généré dynamiquement par generateAuthConfig()
+  // Note: lib/auth/config.ts, lib/auth/client.ts et app/login/page.tsx sont générés dynamiquement
   const alwaysCopy = [
     'app/page.tsx',
     'app/layout.tsx',
     'app/error.tsx',
     'app/not-found.tsx',
-    'app/login/page.tsx',
+    // app/login/page.tsx est généré dynamiquement par generateLoginPage()
     'app/register/page.tsx',
     'app/pricing/page.tsx',
     'app/about/page.tsx',
@@ -278,6 +279,457 @@ export async function sendEmail(options: {
 }
 
 /**
+ * Génère app/login/page.tsx dynamiquement selon les méthodes d'auth choisies.
+ *
+ * Cas :
+ * - email/password (seul ou avec social/passwordless) → formulaire classique + liens optionnels
+ * - magicLink sans email/password → formulaire magic link directement
+ * - OTP sans email/password → formulaire OTP 2 étapes directement
+ * - magicLink + OTP sans email/password → deux options côte à côte
+ */
+function generateLoginPage(projectPath, config) {
+  const hasEmailPassword = config.auth?.methods?.includes('email');
+  const hasMagicLink = config.auth?.methods?.includes('magiclink');
+  const hasOtp = config.auth?.methods?.includes('otp');
+  const hasGithub = config.auth?.methods?.includes('github');
+  const hasGoogle = config.auth?.methods?.includes('google');
+  const hasSocial = hasGithub || hasGoogle;
+
+  let content;
+
+  if (hasEmailPassword) {
+    // ── Cas A : email/password (+ optionnellement social + passwordless) ──
+    const passwordlessLinks = [];
+    if (hasMagicLink) passwordlessLinks.push({ label: 'Connexion sans mot de passe', href: '/magic-link' });
+    if (hasOtp) passwordlessLinks.push({ label: 'Connexion par code OTP', href: '/otp' });
+
+    const passwordlessSectionCode = passwordlessLinks.length === 0 ? '' : `
+            <div className="flex flex-col items-center gap-2 w-full">
+              <div className="relative w-full">
+                <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">ou</span>
+                </div>
+              </div>
+${passwordlessLinks.map(l => `              <Link href="${l.href}" className="text-sm text-muted-foreground hover:underline">${l.label}</Link>`).join('\n')}
+            </div>`;
+
+    const socialImports = hasGithub || hasGoogle ? `\nimport { GitHubButton } from "@/components/auth/github-button"` : '';
+    const socialButtons = hasSocial ? '\n            <GitHubButton />' : '';
+
+    content = `"use client"
+
+import { useState } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import { signIn } from "@/lib/auth/client"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"${socialImports}
+
+export default function LoginPage() {
+  const router = useRouter()
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    try {
+      const result = await signIn.email({ email, password })
+      if (result.error) {
+        toast.error("Échec de la connexion", { description: result.error.message || "Email ou mot de passe incorrect" })
+        return
+      }
+      router.push("/dashboard")
+    } catch (error: any) {
+      toast.error("Erreur de connexion", { description: error?.message || "Une erreur est survenue" })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-muted/50 px-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold">Connexion</CardTitle>
+          <CardDescription>Entrez vos identifiants pour accéder à votre compte</CardDescription>
+        </CardHeader>
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" placeholder="nom@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Mot de passe</Label>
+                <Link href="/forgot-password" className="text-sm text-muted-foreground hover:underline">Mot de passe oublié ?</Link>
+              </div>
+              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isLoading} />
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-4">
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Connexion..." : "Se connecter"}
+            </Button>${socialButtons}${passwordlessSectionCode}
+            <p className="text-center text-sm text-muted-foreground">
+              Pas encore de compte ?{" "}
+              <Link href="/register" className="font-medium underline underline-offset-4">Créer un compte</Link>
+            </p>
+          </CardFooter>
+        </form>
+      </Card>
+    </div>
+  )
+}
+`;
+
+  } else if (hasMagicLink && !hasOtp) {
+    // ── Cas B : magic link seul (sans email/password) ──
+    const socialImports = hasSocial ? `\nimport { GitHubButton } from "@/components/auth/github-button"` : '';
+    const socialButtons = hasSocial ? `
+            <div className="relative w-full">
+              <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">ou</span>
+              </div>
+            </div>
+            <GitHubButton />` : '';
+
+    content = `"use client"
+
+import { useState } from "react"
+import Link from "next/link"
+import { toast } from "sonner"
+import { authClient } from "@/lib/auth/client"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"${socialImports}
+
+export default function LoginPage() {
+  const [email, setEmail] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [sent, setSent] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    try {
+      const result = await authClient.signIn.magicLink({ email, callbackURL: "/dashboard" })
+      if (result.error) {
+        toast.error("Erreur", { description: result.error.message || "Impossible d'envoyer le lien" })
+        return
+      }
+      setSent(true)
+    } catch {
+      toast.error("Erreur", { description: "Une erreur est survenue. Réessayez." })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  if (sent) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-muted/50 px-4">
+        <Card className="w-full max-w-md text-center">
+          <CardHeader>
+            <div className="mx-auto mb-2 text-4xl">✉️</div>
+            <CardTitle className="text-2xl font-bold">Vérifiez vos emails</CardTitle>
+            <CardDescription>Un lien de connexion a été envoyé à {email}. Il expire dans 15 minutes.</CardDescription>
+          </CardHeader>
+          <CardFooter className="justify-center">
+            <Link href="/login" className="text-sm text-muted-foreground hover:underline" onClick={() => setSent(false)}>Renvoyer un lien</Link>
+          </CardFooter>
+        </Card>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-muted/50 px-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold">Connexion</CardTitle>
+          <CardDescription>Entrez votre email pour recevoir un lien de connexion</CardDescription>
+        </CardHeader>
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" placeholder="nom@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} />
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-4">${socialButtons}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Envoi en cours..." : "Envoyer le lien de connexion"}
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
+    </div>
+  )
+}
+`;
+
+  } else if (hasOtp && !hasMagicLink) {
+    // ── Cas C : OTP seul (sans email/password) ──
+    const socialImports = hasSocial ? `\nimport { GitHubButton } from "@/components/auth/github-button"` : '';
+    const socialButtons = hasSocial ? `
+              <div className="relative w-full">
+                <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">ou</span>
+                </div>
+              </div>
+              <GitHubButton />` : '';
+
+    content = `"use client"
+
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import { authClient } from "@/lib/auth/client"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"${socialImports}
+
+export default function LoginPage() {
+  const router = useRouter()
+  const [step, setStep] = useState<"email" | "otp">("email")
+  const [email, setEmail] = useState("")
+  const [otp, setOtp] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+
+  const sendOtp = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    try {
+      const result = await authClient.emailOtp.sendVerificationOtp({ email, type: "sign-in" })
+      if (result.error) {
+        toast.error("Erreur", { description: result.error.message || "Impossible d'envoyer le code" })
+        return
+      }
+      setStep("otp")
+      toast.success("Code envoyé !", { description: "Vérifiez votre boîte mail." })
+    } catch {
+      toast.error("Erreur", { description: "Une erreur est survenue. Réessayez." })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const verifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    try {
+      const result = await authClient.signIn.emailOtp({ email, otp })
+      if (result.error) {
+        toast.error("Code invalide", { description: result.error.message || "Code incorrect ou expiré" })
+        return
+      }
+      router.push("/dashboard")
+    } catch {
+      toast.error("Erreur", { description: "Une erreur est survenue. Réessayez." })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-muted/50 px-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold">Connexion</CardTitle>
+          <CardDescription>
+            {step === "email" ? "Entrez votre email pour recevoir un code" : \`Code envoyé à \${email}\`}
+          </CardDescription>
+        </CardHeader>
+        {step === "email" ? (
+          <form onSubmit={sendOtp}>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" placeholder="nom@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} />
+              </div>
+            </CardContent>
+            <CardFooter className="flex flex-col space-y-4">${socialButtons}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Envoi..." : "Envoyer le code"}
+              </Button>
+            </CardFooter>
+          </form>
+        ) : (
+          <form onSubmit={verifyOtp}>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="otp">Code de vérification</Label>
+                <Input id="otp" type="text" inputMode="numeric" placeholder="123456" maxLength={6} value={otp} onChange={(e) => setOtp(e.target.value.replace(/\\D/g, ""))} required disabled={isLoading} className="text-center text-2xl tracking-widest" />
+              </div>
+            </CardContent>
+            <CardFooter className="flex flex-col space-y-4">
+              <Button type="submit" className="w-full" disabled={isLoading || otp.length < 6}>
+                {isLoading ? "Vérification..." : "Vérifier le code"}
+              </Button>
+              <button type="button" onClick={() => setStep("email")} className="text-sm text-muted-foreground hover:underline">
+                Changer d'adresse email
+              </button>
+            </CardFooter>
+          </form>
+        )}
+      </Card>
+    </div>
+  )
+}
+`;
+
+  } else {
+    // ── Cas D : magicLink + OTP (sans email/password) ──
+    const socialImports = hasSocial ? `\nimport { GitHubButton } from "@/components/auth/github-button"` : '';
+    const socialButtons = hasSocial ? `
+            <div className="relative w-full">
+              <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">ou</span>
+              </div>
+            </div>
+            <GitHubButton />` : '';
+
+    content = `"use client"
+
+import { useState } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import { authClient } from "@/lib/auth/client"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"${socialImports}
+
+export default function LoginPage() {
+  const router = useRouter()
+  const [email, setEmail] = useState("")
+  const [otp, setOtp] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [magicSent, setMagicSent] = useState(false)
+  const [otpStep, setOtpStep] = useState<"email" | "otp">("email")
+
+  const sendMagicLink = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    try {
+      const result = await authClient.signIn.magicLink({ email, callbackURL: "/dashboard" })
+      if (result.error) { toast.error("Erreur", { description: result.error.message }); return }
+      setMagicSent(true)
+    } catch { toast.error("Erreur", { description: "Réessayez." }) }
+    finally { setIsLoading(false) }
+  }
+
+  const sendOtp = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    try {
+      const result = await authClient.emailOtp.sendVerificationOtp({ email, type: "sign-in" })
+      if (result.error) { toast.error("Erreur", { description: result.error.message }); return }
+      setOtpStep("otp")
+      toast.success("Code envoyé !")
+    } catch { toast.error("Erreur", { description: "Réessayez." }) }
+    finally { setIsLoading(false) }
+  }
+
+  const verifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    try {
+      const result = await authClient.signIn.emailOtp({ email, otp })
+      if (result.error) { toast.error("Code invalide", { description: result.error.message }); return }
+      router.push("/dashboard")
+    } catch { toast.error("Erreur", { description: "Réessayez." }) }
+    finally { setIsLoading(false) }
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-muted/50 px-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold">Connexion</CardTitle>
+          <CardDescription>Choisissez votre méthode de connexion</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="magic">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="magic">Lien magique</TabsTrigger>
+              <TabsTrigger value="otp">Code OTP</TabsTrigger>
+            </TabsList>
+            <TabsContent value="magic" className="mt-4">
+              {magicSent ? (
+                <div className="text-center space-y-2">
+                  <p className="text-2xl">✉️</p>
+                  <p className="font-medium">Vérifiez vos emails</p>
+                  <p className="text-sm text-muted-foreground">Lien envoyé à {email}</p>
+                  <button onClick={() => setMagicSent(false)} className="text-sm text-muted-foreground hover:underline">Renvoyer</button>
+                </div>
+              ) : (
+                <form onSubmit={sendMagicLink} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email-magic">Email</Label>
+                    <Input id="email-magic" type="email" placeholder="nom@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? "Envoi..." : "Envoyer le lien de connexion"}
+                  </Button>
+                </form>
+              )}
+            </TabsContent>
+            <TabsContent value="otp" className="mt-4">
+              {otpStep === "email" ? (
+                <form onSubmit={sendOtp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email-otp">Email</Label>
+                    <Input id="email-otp" type="email" placeholder="nom@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? "Envoi..." : "Envoyer le code"}
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={verifyOtp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="otp">Code de vérification</Label>
+                    <Input id="otp" type="text" inputMode="numeric" placeholder="123456" maxLength={6} value={otp} onChange={(e) => setOtp(e.target.value.replace(/\\D/g, ""))} required disabled={isLoading} className="text-center text-2xl tracking-widest" />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading || otp.length < 6}>
+                    {isLoading ? "Vérification..." : "Vérifier le code"}
+                  </Button>
+                  <button type="button" onClick={() => setOtpStep("email")} className="w-full text-sm text-muted-foreground hover:underline">
+                    Changer d'adresse email
+                  </button>
+                </form>
+              )}
+            </TabsContent>
+          </Tabs>${socialButtons}
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+`;
+  }
+
+  const dest = path.join(projectPath, 'app/login/page.tsx');
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.writeFileSync(dest, content, 'utf-8');
+}
+
+/**
  * Génère lib/auth/config.ts dynamiquement selon les options de configuration
  */
 function generateAuthConfig(projectPath, config) {
@@ -346,7 +798,6 @@ function generateAuthConfig(projectPath, config) {
     lines.push('  emailVerification: {');
     lines.push('    sendOnSignUp: true,');
     lines.push('    autoSignInAfterVerification: true,');
-    lines.push('    callbackURL: "/dashboard",');
     lines.push('    sendVerificationEmail: async ({ user, url }) => {');
     lines.push(`      void sendVerificationEmail(user.email, user.name || user.email, url, "${appName}")`);
     lines.push('    },');
