@@ -1,4 +1,4 @@
-import type { AccountType, SubscriptionPlan } from '@/types'
+import type { AccountType, SubscriptionPlan, Role } from '@/types'
 
 // ─── Prédicats ────────────────────────────────────────────────────────────────
 
@@ -75,4 +75,14 @@ export function canAccessPremium(accountType: AccountType, extraCredits: number)
  */
 export function hasActiveSubscription(accountType: AccountType): boolean {
   return isPaid(accountType)
+}
+
+// ─── Rôles ────────────────────────────────────────────────────────────────────
+
+export function isAdmin(role: Role): boolean {
+  return role === 'admin'
+}
+
+export function isMember(role: Role): boolean {
+  return role === 'member'
 }

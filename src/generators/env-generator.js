@@ -81,6 +81,13 @@ export function generateEnvFile(config) {
     lines.push('');
   }
 
+  // Super Admin
+  if (config.admin && config.admin.enabled && config.admin.email) {
+    lines.push('# Super Administrateur');
+    lines.push(`ADMIN_EMAIL="${sanitizeForEnv(config.admin.email)}"`);
+    lines.push('');
+  }
+
   // i18n
   lines.push('# Internationalisation');
   lines.push('# Note: next-intl sera installé si plus d\'une langue est configurée');

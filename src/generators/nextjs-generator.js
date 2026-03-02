@@ -142,6 +142,20 @@ function copyConfigFiles(projectPath, config, templatesDir) {
     conditionalCopy.push('lib/ai/client.ts');
   }
 
+  if (config.admin && config.admin.enabled) {
+    conditionalCopy.push(
+      'app/admin/layout.tsx',
+      'app/admin/page.tsx',
+      'app/admin/users/page.tsx',
+      'components/admin/section-cards-admin.tsx',
+      'components/admin/admin-chart-signups.tsx',
+      'components/admin/users-table.tsx',
+      'components/impersonation-banner.tsx',
+      'app/api/admin/stats/route.ts',
+      'app/api/admin/users/route.ts',
+    );
+  }
+
   // InputOTP composant : seulement si loginMethod = otp
   if (loginMethod === 'otp') {
     conditionalCopy.push('components/ui/input-otp.tsx');
@@ -170,6 +184,7 @@ function copyConfigFiles(projectPath, config, templatesDir) {
 function generateAuthClient(projectPath, config) {
   const hasMagicLink = config.auth?.methods?.includes('magiclink');
   const hasOtp = config.auth?.methods?.includes('otp');
+  const hasAdmin = config.admin?.enabled && config.admin?.email;
 
   const clientPluginImports = [];
   const clientPluginInits = [];
@@ -181,6 +196,10 @@ function generateAuthClient(projectPath, config) {
   if (hasOtp) {
     clientPluginImports.push('emailOTPClient');
     clientPluginInits.push('emailOTPClient()');
+  }
+  if (hasAdmin) {
+    clientPluginImports.push('adminClient');
+    clientPluginInits.push('adminClient()');
   }
 
   let lines = [];
@@ -602,6 +621,7 @@ function generateAuthConfig(projectPath, config) {
   const hasOtp = loginMethod === 'otp';
   const hasGithub = config.auth?.methods?.includes('github');
   const hasGoogle = config.auth?.methods?.includes('google');
+  const hasAdmin = config.admin?.enabled && config.admin?.email;
   const appName = config.projectName;
 
   // Imports conditionnels
@@ -621,6 +641,7 @@ function generateAuthConfig(projectPath, config) {
   const pluginImports = [];
   if (hasMagicLink) pluginImports.push('magicLink');
   if (hasOtp) pluginImports.push('emailOTP');
+  if (hasAdmin) pluginImports.push('admin');
 
   // Construction du fichier
   let lines = [];
@@ -715,7 +736,27 @@ function generateAuthConfig(projectPath, config) {
       lines.push('      },');
       lines.push('    }),');
     }
+    if (hasAdmin) {
+      lines.push('    admin({');
+      lines.push('      defaultRole: "member",');
+      lines.push('    }),');
+    }
     lines.push('  ],');
+  }
+
+  // databaseHooks : attribution automatique du rôle admin à l'inscription
+  if (hasAdmin) {
+    lines.push('  databaseHooks: {');
+    lines.push('    user: {');
+    lines.push('      create: {');
+    lines.push('        after: async (user) => {');
+    lines.push('          if (process.env.ADMIN_EMAIL && user.email === process.env.ADMIN_EMAIL) {');
+    lines.push('            await prisma.user.update({ where: { id: user.id }, data: { role: "admin" } })');
+    lines.push('          }');
+    lines.push('        },');
+    lines.push('      },');
+    lines.push('    },');
+    lines.push('  },');
   }
 
   lines.push('})');

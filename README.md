@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-0.8.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.9.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-16+-black.svg)
@@ -53,6 +53,14 @@ npx create-saas-sbk@latest
 - **Carte upgrade sidebar** — Invitation à upgrader pour les utilisateurs Free/Freemium
 - **Stripe** en mode test — Prêt pour intégration paiements
 
+### Super Administration
+- **Rôle admin** — assigné automatiquement si l'email correspond à `ADMIN_EMAIL`
+- **`/admin`** — espace protégé avec stats (total membres, inscriptions, sessions, vérification)
+- **`/admin/users`** — tableau de gestion : plan, crédits, suppression, impersonation, recherche
+- **Impersonation** — l'admin peut se connecter en tant qu'utilisateur avec bannière de retour
+- **Plugin Better Auth `admin`** — ban, impersonation, gestion des rôles
+- **Auto-refresh 30s** — les compteurs se mettent à jour automatiquement
+
 ### Emails
 - **Resend** - Service moderne (recommandé)
 - **SMTP personnalisé** - Pour vos propres serveurs
@@ -92,6 +100,10 @@ mon-saas/
 │       ├── settings/               # Paramètres
 │       ├── account/                # Gestion compte
 │       └── billing/                # Facturation
+├── admin/                          # Zone super admin (si activé)
+│   ├── layout.tsx              # Layout admin protégé
+│   ├── page.tsx                # Stats & graphiques
+│   └── users/page.tsx          # Gestion utilisateurs
 ├── components/                     # Composants réutilisables
 │   └── ui/                         # Composants Shadcn UI
 ├── lib/                            # Configurations et utils
@@ -190,7 +202,7 @@ Pour installer Claude Code : https://claude.ai/docs/cli
 <details>
 <summary><strong>🗺️ Roadmap</strong></summary>
 
-📍 **Version actuelle : v0.6.0** (20 février 2026)
+📍 **Version actuelle : v0.9.0** (2 mars 2026)
 
 ### ✅ Phase 1 - CLI Interactif (TERMINÉE)
 - ✅ CLI interactif avec @clack/prompts en français
@@ -203,11 +215,13 @@ Pour installer Claude Code : https://claude.ai/docs/cli
 - ✅ Docker Compose pour services locaux
 - ✅ Interface UX optimisée avec récapitulatif en colonnes
 
-### 🚧 Phase 2 - Templates Complets (EN COURS - 70%)
+### 🚧 Phase 2 - Templates Complets (EN COURS - 85%)
 - ✅ Architecture templates statique (`shadcn-base` + overlay `nextjs-base`)
 - ✅ Dashboard UX finalisé (Navbar, SiteHeader, Sidebar, padding)
 - ✅ Templates Next.js complets (landing, dashboard, auth)
 - ✅ Page Médias MinIO (upload, liste, édition, lightbox, recherche)
+- ✅ Système de facturation & types d'utilisateurs (v0.8.0)
+- ✅ Système super administrateur avec impersonation (v0.9.0)
 - 🚧 Templates multilingues (FR, EN, ES, DE)
 - 📅 Configuration MongoDB et SQLite
 - 📅 Template sans système de connexion

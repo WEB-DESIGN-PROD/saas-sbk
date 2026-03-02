@@ -74,6 +74,12 @@ export function buildConfig(answers) {
       geminiApiKey: answers.geminiApiKey || ''
     },
 
+    // Super Admin
+    admin: {
+      enabled: answers.wantsAdmin || false,
+      email: answers.adminEmail || ''
+    },
+
     // Claude Code
     claude: {
       cliInstalled: answers.claudeCodeInstalled || false
