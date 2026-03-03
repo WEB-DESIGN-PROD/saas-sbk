@@ -474,10 +474,10 @@ async function stepStorage(answers) {
   const storageEnabled = await selectWithBack({
     message: 'Activer le stockage de fichiers médias ?',
     options: [
-      { value: false, label: 'Non' },
       { value: true, label: 'Oui' },
+      { value: false, label: 'Non' },
     ],
-    initialValue: false
+    initialValue: true
   });
   cancelIfCancel(storageEnabled);
   if (storageEnabled === BACK) return BACK;
