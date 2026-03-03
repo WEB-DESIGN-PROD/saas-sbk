@@ -32,6 +32,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
+import Link from "next/link"
 import { UploadDialog } from "@/components/media/upload-dialog"
 
 type MediaItem = {
@@ -42,6 +43,7 @@ type MediaItem = {
   url: string
   description?: string
   tags: string[]
+  associatedPost?: { id: string; title: string; slug: string } | null
 }
 
 function formatSize(bytes: number): string {
@@ -432,6 +434,16 @@ export default function AdminMediaPage() {
                       </div>
                     </div>
                     <p className="truncate text-xs font-medium leading-tight px-0.5">{item.name}</p>
+                    {item.associatedPost && (
+                      <Link
+                        href={`/blog/${item.associatedPost.slug}`}
+                        target="_blank"
+                        className="flex items-center gap-1 mx-0.5 px-1.5 py-0.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary transition-colors w-fit max-w-full overflow-hidden"
+                      >
+                        <FileText className="size-3 shrink-0" />
+                        <span className="truncate text-xs leading-tight">{item.associatedPost.title}</span>
+                      </Link>
+                    )}
                     {item.description && (
                       <p className="text-xs text-muted-foreground px-0.5 line-clamp-2 leading-tight">
                         {item.description}

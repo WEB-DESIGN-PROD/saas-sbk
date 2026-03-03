@@ -28,20 +28,32 @@ export async function GET() {
   }
 
   try {
-    const records = await prisma.media.findMany({
-      orderBy: { createdAt: 'desc' },
-    })
+    const [records, postsWithCover] = await Promise.all([
+      prisma.media.findMany({ orderBy: { createdAt: 'desc' } }),
+      prisma.post.findMany({
+        where: { coverImage: { not: null } },
+        select: { id: true, title: true, slug: true, coverImage: true },
+      }),
+    ])
 
     const media = await Promise.all(
-      records.map(async (record) => ({
-        key: record.key,
-        name: record.name,
-        size: record.size,
-        lastModified: record.createdAt.toISOString(),
-        url: await getPresignedUrl(record.key),
-        description: record.description ?? undefined,
-        tags: record.tags ?? [],
-      }))
+      records.map(async (record) => {
+        const associatedPost = postsWithCover.find(
+          (p) => p.coverImage?.includes(record.key)
+        ) ?? null
+        return {
+          key: record.key,
+          name: record.name,
+          size: record.size,
+          lastModified: record.createdAt.toISOString(),
+          url: await getPresignedUrl(record.key),
+          description: record.description ?? undefined,
+          tags: record.tags ?? [],
+          associatedPost: associatedPost
+            ? { id: associatedPost.id, title: associatedPost.title, slug: associatedPost.slug }
+            : null,
+        }
+      })
     )
 
     return NextResponse.json(media)

@@ -131,14 +131,23 @@ function RoleBadge({ role }: { role: string }) {
 
 const isStaff = (role: string) => ["admin", "co-admin", "editor", "contributor"].includes(role)
 
+const ROLE_OPTIONS = [
+  { value: "co-admin",    label: "Co-Admin" },
+  { value: "editor",      label: "Éditeur" },
+  { value: "contributor", label: "Contributeur" },
+  { value: "member",      label: "Membre" },
+]
+
 export function UsersTable({
   users: initialUsers,
   invitations: initialInvitations = [],
   currentUserId = "",
+  currentUserRole = "admin",
 }: {
   users: UserRow[]
   invitations?: InvitationRow[]
   currentUserId?: string
+  currentUserRole?: string
 }) {
   const router = useRouter()
   const [users, setUsers] = useState(initialUsers)
@@ -180,6 +189,17 @@ export function UsersTable({
       toast.success("Plan mis à jour")
     } catch {
       toast.error("Impossible de mettre à jour le plan")
+    }
+  }
+
+  // ── Role select ──────────────────────────────────────────────────────────────
+  const handleRoleChange = async (userId: string, newRole: string) => {
+    try {
+      await patchUser(userId, { role: newRole })
+      setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, role: newRole } : u))
+      toast.success("Rôle mis à jour")
+    } catch {
+      toast.error("Impossible de mettre à jour le rôle")
     }
   }
 
@@ -315,7 +335,22 @@ export function UsersTable({
 
                   {/* Rôle */}
                   <TableCell>
-                    <RoleBadge role={user.role} />
+                    {currentUserRole === "admin" && user.role !== "admin" && user.id !== currentUserId ? (
+                      <Select value={user.role} onValueChange={(val) => handleRoleChange(user.id, val)}>
+                        <SelectTrigger className="h-7 w-36 text-xs px-2">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ROLE_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <RoleBadge role={user.role} />
+                    )}
                   </TableCell>
 
                   {/* Plan — select inline */}

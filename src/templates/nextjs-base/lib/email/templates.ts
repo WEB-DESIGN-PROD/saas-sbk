@@ -5,19 +5,19 @@ export { sendEmail } from './client'
 // Wrapper commun (outer + header)
 function emailWrapper(appName: string, content: string) {
   return `<!DOCTYPE html>
-<html lang="fr" style="color-scheme: light;">
+<html lang="fr" style="color-scheme:light only;">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="light only">
   <meta name="supported-color-schemes" content="light">
   <title>${appName}</title>
   <!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><![endif]-->
 </head>
-<body style="margin:0;padding:0;background-color:#f4f4f5 !important;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f5 !important;">
+<body style="margin:0;padding:0;background-color:#f4f4f5 !important;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#09090b !important;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f5 !important;padding:40px 16px;">
     <tr>
-      <td align="center" style="padding:40px 16px;">
+      <td align="center">
         <!-- Header : nom du projet -->
         <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
           <tr>
@@ -29,7 +29,7 @@ function emailWrapper(appName: string, content: string) {
         <!-- Card principale -->
         <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff !important;border-radius:12px;border:1px solid #e2e8f0;">
           <tr>
-            <td style="padding:40px 40px 32px;">
+            <td style="padding:40px 40px 32px;background-color:#ffffff !important;">
               ${content}
             </td>
           </tr>
