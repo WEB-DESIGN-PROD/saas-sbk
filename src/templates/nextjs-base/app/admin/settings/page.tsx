@@ -78,27 +78,27 @@ export default function AdminSettingsPage() {
             <CardHeader>
               <CardTitle>Notifications</CardTitle>
               <CardDescription>
-                Gérez vos préférences de notifications
+                Gérez vos préférences de notifications administrateur
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label>Notifications par email</Label>
+                  <Label>Nouvelle inscription utilisateur</Label>
                   <p className="text-sm text-muted-foreground">
-                    Recevoir des notifications par email
+                    Recevoir un email à chaque nouvelle inscription sur la plateforme
                   </p>
                 </div>
-                <Button variant="outline" size="sm">Activé</Button>
+                <Button variant="outline" size="sm" className="text-green-600 border-green-600/40 bg-green-50 dark:bg-green-950/20">Activé</Button>
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <Label>Newsletter</Label>
+                  <Label>Notifications par email</Label>
                   <p className="text-sm text-muted-foreground">
-                    Recevoir les actualités et mises à jour
+                    Recevoir des notifications système par email
                   </p>
                 </div>
-                <Button variant="outline" size="sm">Désactivé</Button>
+                <Button variant="outline" size="sm">Activé</Button>
               </div>
             </CardContent>
           </Card>

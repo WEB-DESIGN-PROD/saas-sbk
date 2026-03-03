@@ -687,6 +687,8 @@ function generateAuthConfig(projectPath, config) {
     // sendVerification toujours (inscription universelle), sendReset seulement si loginMethod=email-password
     emailImports.push('sendVerificationEmail');
     if (loginMethod === 'email-password') emailImports.push('sendResetPasswordEmail');
+    // sendEmail pour la notification admin (nouvelle inscription)
+    if (hasAdmin) emailImports.push('sendEmail');
   }
   if (hasMagicLink) {
     emailImports.push('sendMagicLinkEmail');
@@ -801,14 +803,26 @@ function generateAuthConfig(projectPath, config) {
     lines.push('  ],');
   }
 
-  // databaseHooks : attribution automatique du rôle admin à l'inscription
+  // databaseHooks : attribution automatique du rôle admin + notification email nouvelle inscription
   if (hasAdmin) {
     lines.push('  databaseHooks: {');
     lines.push('    user: {');
     lines.push('      create: {');
     lines.push('        after: async (user) => {');
     lines.push('          if (process.env.ADMIN_EMAIL && user.email === process.env.ADMIN_EMAIL) {');
+    lines.push('            // Attribuer le rôle admin');
     lines.push('            await prisma.user.update({ where: { id: user.id }, data: { role: "admin" } })');
+    lines.push('          } else if (process.env.ADMIN_EMAIL) {');
+    if (hasEmail) {
+      lines.push('            // Notifier l\'admin d\'une nouvelle inscription');
+      lines.push('            try {');
+      lines.push('              await sendEmail({');
+      lines.push(`                to: process.env.ADMIN_EMAIL,`);
+      lines.push(`                subject: \`[${appName}] Nouvelle inscription — \${user.name || user.email}\`,`);
+      lines.push('                html: `<h2>Nouvelle inscription</h2><ul><li><strong>Nom</strong> : ${user.name || "Non renseigné"}</li><li><strong>Email</strong> : ${user.email}</li><li><strong>Date</strong> : ${new Date().toLocaleString("fr-FR")}</li></ul>`,');
+      lines.push('              })');
+      lines.push('            } catch {}');
+    }
     lines.push('          }');
     lines.push('        },');
     lines.push('      },');
