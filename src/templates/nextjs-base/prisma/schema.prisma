@@ -30,8 +30,8 @@ model User {
   subscriptionPlan String?     // "Pro" | "Team" | "Enterprise" — null si Free/Freemium
   extraCredits     Int         @default(0)
 
-  // Rôle (admin plugin Better Auth)
-  role             String      @default("member") // "member" | "admin"
+  // Rôle (admin plugin Better Auth + rôles staff)
+  role             String      @default("member") // "member" | "admin" | "co-admin" | "editor" | "contributor"
   banned           Boolean     @default(false)
   banReason        String?
   banExpires       DateTime?
@@ -106,6 +106,7 @@ model Media {
 
 enum PostStatus {
   Draft
+  PendingReview
   Published
   Scheduled
   Archived
@@ -139,10 +140,11 @@ model Post {
 }
 
 model Category {
-  id       String     @id @default(cuid())
-  name     String
-  slug     String     @unique
-  parentId String?
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  description String?
+  parentId    String?
   parent   Category?  @relation("SubCategories", fields: [parentId], references: [id], onDelete: SetNull)
   children Category[] @relation("SubCategories")
   posts    Post[]
@@ -159,4 +161,17 @@ model Tag {
   posts Post[]
 
   @@map("tag")
+}
+
+model Invitation {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  role      String   // "co-admin" | "editor" | "contributor"
+  token     String   @unique @default(cuid())
+  invitedBy String   // userId du super admin
+  expiresAt DateTime
+  accepted  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("invitation")
 }

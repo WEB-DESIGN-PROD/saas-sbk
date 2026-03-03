@@ -30,4 +30,25 @@ export interface UserPlan {
 
 // ─── Rôles ───────────────────────────────────────────────────────────────────
 
-export type Role = 'member' | 'admin'
+export type Role = 'member' | 'admin' | 'co-admin' | 'editor' | 'contributor'
+
+export type StaffRole = 'admin' | 'co-admin' | 'editor' | 'contributor'
+
+export const STAFF_ROLES: Role[] = ['admin', 'co-admin', 'editor', 'contributor']
+
+// Rôles pouvant modifier des articles via le bouton public (excl. contributeur)
+export const BLOG_EDITOR_ROLES: Role[] = ['admin', 'co-admin', 'editor']
+
+export const ROLE_LABELS: Record<Role, string> = {
+  'admin':       'Super Admin',
+  'co-admin':    'Co-Admin',
+  'editor':      'Éditeur',
+  'contributor': 'Contributeur',
+  'member':      'Membre',
+}
+
+export const INVITATION_ROLES: Array<{ value: string; label: string }> = [
+  { value: 'co-admin',    label: 'Co-Admin' },
+  { value: 'editor',      label: 'Éditeur' },
+  { value: 'contributor', label: 'Contributeur' },
+]

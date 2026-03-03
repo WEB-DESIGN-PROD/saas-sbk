@@ -155,10 +155,15 @@ function copyConfigFiles(projectPath, config, templatesDir) {
       'components/admin/section-cards-admin.tsx',
       'components/admin/admin-chart-signups.tsx',
       'components/admin/users-table.tsx',
+      'components/admin/invite-user-button.tsx',
+      'components/admin/roles-permissions-card.tsx',
       'components/admin/auto-refresh.tsx',
       'components/impersonation-banner.tsx',
       'app/api/admin/stats/route.ts',
       'app/api/admin/users/route.ts',
+      'app/api/admin/users/[id]/route.ts',
+      'app/api/admin/invitations/route.ts',
+      'app/api/admin/invitations/[id]/route.ts',
     );
   }
 
@@ -200,6 +205,7 @@ function copyConfigFiles(projectPath, config, templatesDir) {
       'components/blog/articles-table.tsx',
       'components/blog/tag-input.tsx',
       'components/blog/category-manager.tsx',
+      'components/blog/categories-card.tsx',
     ];
     for (const f of blogMgmtFiles) {
       conditionalCopy.push(f);
@@ -293,6 +299,97 @@ function generateEmailClient(projectPath, config) {
   const isResend = config.email.provider === 'resend';
   let content;
 
+  const sharedFunctions = `
+function emailLayout(title: string, preheader: string, body: string, buttonUrl: string, buttonLabel: string, footer: string): string {
+  return \`<!DOCTYPE html>
+<html lang="fr" style="color-scheme:light only;">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light only">
+  <meta name="supported-color-schemes" content="light">
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f5 !important;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#09090b !important;">
+  <div style="display:none;max-height:0;overflow:hidden">\${preheader}</div>
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5 !important;padding:40px 16px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff !important;border-radius:12px;border:1px solid #e4e4e7;">
+        <tr><td style="background-color:#18181b !important;padding:20px 32px;border-radius:12px 12px 0 0;">
+          <span style="color:#ffffff !important;font-size:16px;font-weight:700;letter-spacing:-0.01em;">{{PROJECT_NAME}}</span>
+        </td></tr>
+        <tr><td style="padding:40px 32px 32px;background-color:#ffffff !important;">
+          <h1 style="margin:0 0 16px;color:#09090b !important;font-size:22px;font-weight:700;line-height:1.3;">\${title}</h1>
+          \${body}
+          <table cellpadding="0" cellspacing="0" style="margin-top:32px;">
+            <tr><td style="border-radius:8px;background-color:#18181b !important;">
+              <a href="\${buttonUrl}" style="display:inline-block;padding:13px 28px;color:#ffffff !important;font-size:14px;font-weight:600;text-decoration:none;border-radius:8px;letter-spacing:0.01em;background-color:#18181b !important;">\${buttonLabel}</a>
+            </td></tr>
+          </table>
+          <p style="margin:20px 0 0;color:#71717a !important;font-size:12px;line-height:1.5;">Ou copiez ce lien dans votre navigateur :<br><a href="\${buttonUrl}" style="color:#71717a !important;word-break:break-all;">\${buttonUrl}</a></p>
+        </td></tr>
+        <tr><td style="padding:20px 32px;background-color:#f8f8f8 !important;border-top:1px solid #e4e4e7;border-radius:0 0 12px 12px;">
+          <p style="margin:0;color:#71717a !important;font-size:12px;line-height:1.6;">\${footer}</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>\`
+}
+
+export async function sendInvitationEmail(to: string, role: string, appUrl: string) {
+  const roleLabels: Record<string, string> = {
+    'co-admin': 'Co-Admin',
+    'editor': 'Éditeur',
+    'contributor': 'Contributeur',
+  }
+  const roleLabel = roleLabels[role] || role
+  const body = \`
+    <p style="margin:0 0 8px;color:#3f3f46;font-size:15px;line-height:1.6">Vous avez été invité(e) à rejoindre l'équipe en tant que <strong style="color:#09090b">\${roleLabel}</strong>.</p>
+    <p style="margin:0;color:#3f3f46;font-size:15px;line-height:1.6">Créez votre compte en cliquant sur le bouton ci-dessous. Votre rôle sera attribué automatiquement à l'inscription.</p>
+  \`
+  await sendEmail({
+    to,
+    subject: \`Invitation à rejoindre l'équipe — rôle \${roleLabel}\`,
+    html: emailLayout(
+      'Vous avez été invité(e)',
+      \`Invitation avec le rôle \${roleLabel}\`,
+      body,
+      \`\${appUrl}/register\`,
+      'Créer mon compte',
+      "Cette invitation expire dans 7 jours. Si vous n'attendiez pas cet email, vous pouvez l'ignorer."
+    ),
+  })
+}
+
+export async function sendPendingReviewEmail(to: string, postTitle: string, postId: string, authorName: string, appUrl: string) {
+  const body = \`
+    <p style="margin:0 0 16px;color:#3f3f46;font-size:15px;line-height:1.6">Un article est en attente de validation.</p>
+    <table cellpadding="0" cellspacing="0" style="border:1px solid #e4e4e7;border-radius:8px;overflow:hidden;width:100%">
+      <tr><td style="padding:12px 16px;background-color:#fafafa;border-bottom:1px solid #e4e4e7">
+        <span style="color:#71717a;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em">Titre</span>
+        <p style="margin:4px 0 0;color:#09090b;font-size:14px;font-weight:600">\${postTitle}</p>
+      </td></tr>
+      <tr><td style="padding:12px 16px">
+        <span style="color:#71717a;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em">Auteur</span>
+        <p style="margin:4px 0 0;color:#09090b;font-size:14px">\${authorName}</p>
+      </td></tr>
+    </table>
+  \`
+  await sendEmail({
+    to,
+    subject: \`Article en attente — \${postTitle}\`,
+    html: emailLayout(
+      'Article en attente de validation',
+      \`"\${postTitle}" par \${authorName}\`,
+      body,
+      \`\${appUrl}/admin/blog/\${postId}/edit\`,
+      "Voir et valider l'article",
+      'Vous recevez cet email car vous êtes administrateur ou co-administrateur de la plateforme.'
+    ),
+  })
+}
+`;
+
   if (isResend) {
     content = `// Client email Resend
 import { Resend } from 'resend'
@@ -312,7 +409,7 @@ export async function sendEmail(options: {
     html: options.html,
   })
 }
-`;
+${sharedFunctions}`;
   } else {
     content = `// Client email SMTP (Nodemailer)
 import nodemailer from 'nodemailer'
@@ -340,12 +437,12 @@ export async function sendEmail(options: {
     html: options.html,
   })
 }
-`;
+${sharedFunctions}`;
   }
 
   const dest = path.join(projectPath, 'lib/email/client.ts');
   fs.mkdirSync(path.dirname(dest), { recursive: true });
-  fs.writeFileSync(dest, content, 'utf-8');
+  fs.writeFileSync(dest, content.replaceAll('{{PROJECT_NAME}}', config.projectName), 'utf-8');
 }
 
 /**
@@ -803,25 +900,35 @@ function generateAuthConfig(projectPath, config) {
     lines.push('  ],');
   }
 
-  // databaseHooks : attribution automatique du rôle admin + notification email nouvelle inscription
+  // databaseHooks : attribution automatique du rôle admin/staff + notification email nouvelle inscription
   if (hasAdmin) {
     lines.push('  databaseHooks: {');
     lines.push('    user: {');
     lines.push('      create: {');
     lines.push('        after: async (user) => {');
     lines.push('          if (process.env.ADMIN_EMAIL && user.email === process.env.ADMIN_EMAIL) {');
-    lines.push('            // Attribuer le rôle admin');
+    lines.push('            // Attribuer le rôle super admin');
     lines.push('            await prisma.user.update({ where: { id: user.id }, data: { role: "admin" } })');
-    lines.push('          } else if (process.env.ADMIN_EMAIL) {');
+    lines.push('          } else {');
+    lines.push('            // Vérifier si l\'email correspond à une invitation staff');
+    lines.push('            const invitation = await prisma.invitation.findUnique({');
+    lines.push('              where: { email: user.email, accepted: false, expiresAt: { gt: new Date() } },');
+    lines.push('            })');
+    lines.push('            if (invitation) {');
+    lines.push('              await prisma.user.update({ where: { id: user.id }, data: { role: invitation.role } })');
+    lines.push('              await prisma.invitation.update({ where: { id: invitation.id }, data: { accepted: true } })');
+    lines.push('            }');
     if (hasEmail) {
-      lines.push('            // Notifier l\'admin d\'une nouvelle inscription');
-      lines.push('            try {');
-      lines.push('              await sendEmail({');
-      lines.push(`                to: process.env.ADMIN_EMAIL,`);
-      lines.push(`                subject: \`[${appName}] Nouvelle inscription — \${user.name || user.email}\`,`);
-      lines.push('                html: `<h2>Nouvelle inscription</h2><ul><li><strong>Nom</strong> : ${user.name || "Non renseigné"}</li><li><strong>Email</strong> : ${user.email}</li><li><strong>Date</strong> : ${new Date().toLocaleString("fr-FR")}</li></ul>`,');
-      lines.push('              })');
-      lines.push('            } catch {}');
+      lines.push('            // Notifier l\'admin d\'une nouvelle inscription (hors staff invité)');
+      lines.push('            if (!invitation && process.env.ADMIN_EMAIL) {');
+      lines.push('              try {');
+      lines.push('                await sendEmail({');
+      lines.push(`                  to: process.env.ADMIN_EMAIL,`);
+      lines.push(`                  subject: \`[${appName}] Nouvelle inscription — \${user.name || user.email}\`,`);
+      lines.push('                  html: `<h2>Nouvelle inscription</h2><ul><li><strong>Nom</strong> : ${user.name || "Non renseigné"}</li><li><strong>Email</strong> : ${user.email}</li><li><strong>Date</strong> : ${new Date().toLocaleString("fr-FR")}</li></ul>`,');
+      lines.push('                })');
+      lines.push('              } catch {}');
+      lines.push('            }');
     }
     lines.push('          }');
     lines.push('        },');

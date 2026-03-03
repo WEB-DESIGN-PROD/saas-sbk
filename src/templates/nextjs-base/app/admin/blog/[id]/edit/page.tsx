@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation"
-import { verifyAdmin } from "@/lib/dal"
+import { verifyStaff } from "@/lib/dal"
 import { prisma } from "@/lib/db/client"
 import { ArticleEditor } from "@/components/blog/article-editor"
 
@@ -10,7 +10,7 @@ interface Props {
 export const metadata = { title: "Modifier l'article" }
 
 export default async function AdminBlogEditPage({ params }: Props) {
-  const { user } = await verifyAdmin()
+  const { user, role, userId } = await verifyStaff()
   const { id } = await params
 
   const [post, categories] = await Promise.all([
@@ -26,6 +26,9 @@ export default async function AdminBlogEditPage({ params }: Props) {
   ])
 
   if (!post) notFound()
+
+  // Un contributeur ne peut éditer que ses propres articles
+  if (role === 'contributor' && post.authorId !== userId) notFound()
 
   const serialized = {
     ...post,
@@ -46,6 +49,7 @@ export default async function AdminBlogEditPage({ params }: Props) {
             categories={categories}
             currentUserName={user.name || user.email}
             basePath="/admin/blog"
+            userRole={role}
           />
         </div>
       </div>

@@ -76,6 +76,7 @@ interface ArticleEditorProps {
   categories: Category[]
   currentUserName: string
   basePath: string // "/admin/blog" ou "/dashboard/blog"
+  userRole?: string // "admin" | "co-admin" | "editor" | "contributor"
 }
 
 function generateSlug(title: string): string {
@@ -90,9 +91,11 @@ function generateSlug(title: string): string {
     .slice(0, 80)
 }
 
-export function ArticleEditor({ post, categories, currentUserName, basePath }: ArticleEditorProps) {
+export function ArticleEditor({ post, categories, currentUserName, basePath, userRole = "admin" }: ArticleEditorProps) {
+  const isContributor = userRole === "contributor"
   const router = useRouter()
   const isEdit = !!post
+  const isPublished = isEdit && post?.status === "Published"
 
   // Champs
   const [title, setTitle] = useState(post?.title || "")
@@ -122,9 +125,11 @@ export function ArticleEditor({ post, categories, currentUserName, basePath }: A
     }
     setShowSeo(!showSeo)
   }
-  const [pubMode, setPubMode] = useState<"now" | "draft" | "scheduled">(
+  const [pubMode, setPubMode] = useState<"now" | "draft" | "scheduled" | "pending_review">(
     post?.status === "Draft" ? "draft" :
-    post?.status === "Scheduled" ? "scheduled" : "now"
+    post?.status === "Scheduled" ? "scheduled" :
+    post?.status === "PendingReview" ? (isContributor ? "pending_review" : "now") :
+    isContributor ? "draft" : "now"
   )
   const [scheduledDate, setScheduledDate] = useState(
     post?.publishedAt ? new Date(post.publishedAt).toISOString().slice(0, 16) : ""
@@ -219,8 +224,8 @@ export function ArticleEditor({ post, categories, currentUserName, basePath }: A
 
     setSaving(true)
     try {
-      const status = pubMode === "draft" ? "Draft" : pubMode === "scheduled" ? "Scheduled" : "Published"
-      const publishedAt = pubMode === "scheduled" ? scheduledDate : pubMode === "now" ? new Date().toISOString() : null
+      const status = isPublished ? "Published" : pubMode === "draft" ? "Draft" : pubMode === "scheduled" ? "Scheduled" : pubMode === "pending_review" ? "PendingReview" : "Published"
+      const publishedAt = isPublished ? (post!.publishedAt ?? new Date().toISOString()) : pubMode === "scheduled" ? scheduledDate : pubMode === "now" ? new Date().toISOString() : null
 
       const body = {
         title: title.trim(),
@@ -436,9 +441,11 @@ export function ArticleEditor({ post, categories, currentUserName, basePath }: A
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label>Categorie</Label>
-            <Button type="button" variant="ghost" size="sm" onClick={() => setShowNewCat(true)} className="text-xs h-7">
-              + Nouvelle categorie
-            </Button>
+            {!isContributor && (
+              <Button type="button" variant="ghost" size="sm" onClick={() => setShowNewCat(true)} className="text-xs h-7">
+                + Nouvelle categorie
+              </Button>
+            )}
           </div>
           <Select value={categoryId} onValueChange={setCategoryId}>
             <SelectTrigger>
@@ -493,27 +500,48 @@ export function ArticleEditor({ post, categories, currentUserName, basePath }: A
       </div>
 
       {/* Publication */}
-      <div className="rounded-xl border bg-card p-6 space-y-4">
+      {!isPublished && <div className="rounded-xl border bg-card p-6 space-y-4">
         <Label>Publication</Label>
-        <div className="space-y-2">
-          {(["now", "draft", "scheduled"] as const).map((mode) => (
-            <label key={mode} className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="radio"
-                name="pubMode"
-                value={mode}
-                checked={pubMode === mode}
-                onChange={() => setPubMode(mode)}
-                className="accent-primary"
-              />
-              <span className="text-sm">
-                {mode === "now" && "Publier maintenant"}
-                {mode === "draft" && "Enregistrer en brouillon"}
-                {mode === "scheduled" && "Programmer"}
-              </span>
-            </label>
-          ))}
-        </div>
+        {isContributor ? (
+          <div className="space-y-2">
+            {(["draft", "pending_review"] as const).map((mode) => (
+              <label key={mode} className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="radio"
+                  name="pubMode"
+                  value={mode}
+                  checked={pubMode === mode}
+                  onChange={() => setPubMode(mode)}
+                  className="accent-primary"
+                />
+                <span className="text-sm">
+                  {mode === "draft" && "Enregistrer en brouillon"}
+                  {mode === "pending_review" && "Soumettre pour validation"}
+                </span>
+              </label>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {(["now", "draft", "scheduled"] as const).map((mode) => (
+              <label key={mode} className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="radio"
+                  name="pubMode"
+                  value={mode}
+                  checked={pubMode === mode}
+                  onChange={() => setPubMode(mode)}
+                  className="accent-primary"
+                />
+                <span className="text-sm">
+                  {mode === "now" && "Publier maintenant"}
+                  {mode === "draft" && "Enregistrer en brouillon"}
+                  {mode === "scheduled" && "Programmer"}
+                </span>
+              </label>
+            ))}
+          </div>
+        )}
         {pubMode === "scheduled" && (
           <div className="space-y-2 pl-6">
             <Label>Date et heure de publication</Label>
@@ -525,7 +553,7 @@ export function ArticleEditor({ post, categories, currentUserName, basePath }: A
             />
           </div>
         )}
-      </div>
+      </div>}
 
       {/* Actions */}
       <div className="flex items-center justify-between gap-3 pt-2">
@@ -545,7 +573,13 @@ export function ArticleEditor({ post, categories, currentUserName, basePath }: A
           </Button>
           <Button onClick={handleSave} disabled={saving} className="gap-1.5 min-w-32">
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            {saving ? "Enregistrement…" : isEdit ? "Mettre à jour" : "Créer l'article"}
+            {saving ? "Enregistrement…" :
+              isPublished ? "Mettre à jour" :
+              pubMode === "pending_review" ? (isEdit ? "Soumettre à nouveau" : "Soumettre pour validation") :
+              pubMode === "draft" ? "Enregistrer en brouillon" :
+              pubMode === "scheduled" ? "Programmer" :
+              pubMode === "now" ? (isEdit ? "Publier" : "Publier l'article") :
+              isEdit ? "Mettre à jour" : "Créer l'article"}
           </Button>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { verifyAdmin } from "@/lib/dal"
+import { verifyStaff } from "@/lib/dal"
 import { prisma } from "@/lib/db/client"
 import { CategoryManager } from "@/components/blog/category-manager"
 import Link from "next/link"
@@ -8,7 +8,7 @@ import { ArrowLeft } from "lucide-react"
 export const metadata = { title: "Catégories" }
 
 export default async function AdminBlogCategoriesPage() {
-  await verifyAdmin()
+  await verifyStaff()
 
   const categories = await prisma.category.findMany({
     where: { parentId: null },

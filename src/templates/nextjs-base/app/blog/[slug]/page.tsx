@@ -1,10 +1,13 @@
 import { notFound } from "next/navigation"
 import { prisma } from "@/lib/db/client"
+import { getOptionalSession } from "@/lib/dal"
 import { MarkdownPreview } from "@/components/blog/markdown-preview"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Clock, User, ArrowLeft } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Calendar, Clock, User, ArrowLeft, Pencil } from "lucide-react"
 import type { Metadata } from "next"
+import { BLOG_EDITOR_ROLES } from "@/types"
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -32,19 +35,24 @@ export default async function BlogArticlePage({ params }: Props) {
   const { slug } = await params
   const now = new Date()
 
-  const post = await prisma.post.findFirst({
-    where: {
-      slug,
-      status: "Published",
-      publishedAt: { lte: now },
-    },
-    include: {
-      category: { select: { name: true, slug: true } },
-      tags: { select: { name: true, slug: true } },
-    },
-  })
+  const [session, post] = await Promise.all([
+    getOptionalSession(),
+    prisma.post.findFirst({
+      where: {
+        slug,
+        status: "Published",
+        publishedAt: { lte: now },
+      },
+      include: {
+        category: { select: { name: true, slug: true } },
+        tags: { select: { name: true, slug: true } },
+      },
+    }),
+  ])
 
   if (!post) notFound()
+
+  const canEdit = session && BLOG_EDITOR_ROLES.includes(session.role)
 
   return (
     <main className="container mx-auto px-4 py-12 max-w-3xl">
@@ -73,6 +81,18 @@ export default async function BlogArticlePage({ params }: Props) {
       <h1 className="text-3xl sm:text-4xl font-bold tracking-tight leading-tight mb-4">
         {post.title}
       </h1>
+
+      {/* Bouton modifier (staff uniquement) */}
+      {canEdit && (
+        <div className="mb-6">
+          <Button variant="outline" size="sm" asChild className="gap-1.5">
+            <Link href={`/admin/blog/${post.id}/edit`}>
+              <Pencil className="h-3.5 w-3.5" />
+              Modifier l'article
+            </Link>
+          </Button>
+        </div>
+      )}
 
       {/* Meta */}
       <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-8 pb-6 border-b">

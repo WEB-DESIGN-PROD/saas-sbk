@@ -1,26 +1,30 @@
-import { verifyAdmin } from "@/lib/dal"
+import { verifyStaff } from "@/lib/dal"
 import { prisma } from "@/lib/db/client"
 import { SectionCardsAdmin } from "@/components/admin/section-cards-admin"
 import { AdminChartSignups } from "@/components/admin/admin-chart-signups"
 import { AutoRefresh } from "@/components/admin/auto-refresh"
 
 export default async function AdminPage() {
-  await verifyAdmin()
+  await verifyStaff()
 
   const now = new Date()
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
 
   const memberFilter = { role: { not: "admin" } } as const
+  const staffRoles = ['co-admin', 'editor', 'contributor'] as const
 
-  const [totalUsers, newToday, activeSessions, verifiedUsers, recentSignups] = await Promise.all([
+  const [totalUsers, newToday, activeStaffSessions, verifiedUsers, recentSignups] = await Promise.all([
     prisma.user.count({ where: memberFilter }),
     prisma.user.count({ where: { ...memberFilter, createdAt: { gte: startOfToday } } }),
-    prisma.session.count({
+    // Sessions actives des rôles staff (hors super admin), par utilisateur distinct
+    prisma.session.findMany({
       where: {
         expiresAt: { gte: now },
-        user: memberFilter,
+        user: { role: { in: [...staffRoles] } },
       },
+      distinct: ['userId'],
+      select: { user: { select: { role: true } } },
     }),
     prisma.user.count({ where: { ...memberFilter, emailVerified: true } }),
     prisma.user.findMany({
@@ -29,6 +33,13 @@ export default async function AdminPage() {
       orderBy: { createdAt: "asc" },
     }),
   ])
+
+  // Grouper les collaborateurs actifs par rôle
+  const activeStaff: Record<string, number> = {}
+  for (const s of activeStaffSessions) {
+    const r = s.user.role
+    activeStaff[r] = (activeStaff[r] || 0) + 1
+  }
 
   // Grouper les inscriptions par jour
   const signupsByDay: Record<string, number> = {}
@@ -54,7 +65,7 @@ export default async function AdminPage() {
         <SectionCardsAdmin
           totalUsers={totalUsers}
           newToday={newToday}
-          activeSessions={activeSessions}
+          activeStaff={activeStaff}
           verifiedUsers={verifiedUsers}
         />
         <div className="px-4 lg:px-6">
