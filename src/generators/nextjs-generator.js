@@ -299,28 +299,33 @@ function generateEmailClient(projectPath, config) {
   const sharedFunctions = `
 function emailLayout(title: string, preheader: string, body: string, buttonUrl: string, buttonLabel: string, footer: string): string {
   return \`<!DOCTYPE html>
-<html lang="fr">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
+<html lang="fr" style="color-scheme:light only;">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light only">
+  <meta name="supported-color-schemes" content="light">
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f5 !important;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#09090b !important;">
   <div style="display:none;max-height:0;overflow:hidden">\${preheader}</div>
-  <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 16px">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5 !important;padding:40px 16px;">
     <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:12px;border:1px solid #e4e4e7;overflow:hidden">
-        <tr><td style="background-color:#18181b;padding:20px 32px">
-          <span style="color:#ffffff;font-size:16px;font-weight:700;letter-spacing:-0.01em">{{PROJECT_NAME}}</span>
+      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff !important;border-radius:12px;border:1px solid #e4e4e7;">
+        <tr><td style="background-color:#18181b !important;padding:20px 32px;border-radius:12px 12px 0 0;">
+          <span style="color:#ffffff !important;font-size:16px;font-weight:700;letter-spacing:-0.01em;">{{PROJECT_NAME}}</span>
         </td></tr>
-        <tr><td style="padding:40px 32px 32px">
-          <h1 style="margin:0 0 16px;color:#09090b;font-size:22px;font-weight:700;line-height:1.3">\${title}</h1>
+        <tr><td style="padding:40px 32px 32px;background-color:#ffffff !important;">
+          <h1 style="margin:0 0 16px;color:#09090b !important;font-size:22px;font-weight:700;line-height:1.3;">\${title}</h1>
           \${body}
-          <table cellpadding="0" cellspacing="0" style="margin-top:32px">
-            <tr><td style="border-radius:8px;background-color:#18181b">
-              <a href="\${buttonUrl}" style="display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;border-radius:8px;letter-spacing:0.01em">\${buttonLabel}</a>
+          <table cellpadding="0" cellspacing="0" style="margin-top:32px;">
+            <tr><td style="border-radius:8px;background-color:#18181b !important;">
+              <a href="\${buttonUrl}" style="display:inline-block;padding:13px 28px;color:#ffffff !important;font-size:14px;font-weight:600;text-decoration:none;border-radius:8px;letter-spacing:0.01em;background-color:#18181b !important;">\${buttonLabel}</a>
             </td></tr>
           </table>
-          <p style="margin:20px 0 0;color:#71717a;font-size:12px;line-height:1.5">Ou copiez ce lien dans votre navigateur :<br><a href="\${buttonUrl}" style="color:#71717a;word-break:break-all">\${buttonUrl}</a></p>
+          <p style="margin:20px 0 0;color:#71717a !important;font-size:12px;line-height:1.5;">Ou copiez ce lien dans votre navigateur :<br><a href="\${buttonUrl}" style="color:#71717a !important;word-break:break-all;">\${buttonUrl}</a></p>
         </td></tr>
-        <tr><td style="padding:20px 32px;background-color:#fafafa;border-top:1px solid #f4f4f5">
-          <p style="margin:0;color:#a1a1aa;font-size:12px;line-height:1.6">\${footer}</p>
+        <tr><td style="padding:20px 32px;background-color:#f8f8f8 !important;border-top:1px solid #e4e4e7;border-radius:0 0 12px 12px;">
+          <p style="margin:0;color:#71717a !important;font-size:12px;line-height:1.6;">\${footer}</p>
         </td></tr>
       </table>
     </td></tr>
@@ -434,7 +439,7 @@ ${sharedFunctions}`;
 
   const dest = path.join(projectPath, 'lib/email/client.ts');
   fs.mkdirSync(path.dirname(dest), { recursive: true });
-  fs.writeFileSync(dest, content, 'utf-8');
+  fs.writeFileSync(dest, content.replaceAll('{{PROJECT_NAME}}', config.projectName), 'utf-8');
 }
 
 /**
