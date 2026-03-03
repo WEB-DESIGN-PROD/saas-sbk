@@ -11,14 +11,14 @@ export async function PATCH(
   if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
   const { id } = await params
-  const { name, slug, parentId } = await req.json()
+  const { name, slug, description } = await req.json()
 
   const category = await prisma.category.update({
     where: { id },
     data: {
       ...(name !== undefined && { name }),
       ...(slug !== undefined && { slug }),
-      ...(parentId !== undefined && { parentId: parentId || null }),
+      ...(description !== undefined && { description: description?.trim() || null }),
     },
   })
   return NextResponse.json(category)

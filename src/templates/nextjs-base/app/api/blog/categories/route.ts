@@ -19,11 +19,11 @@ export async function POST(req: Request) {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
-  const { name, slug, parentId } = await req.json()
+  const { name, slug, description } = await req.json()
   if (!name || !slug) return NextResponse.json({ error: 'Nom et slug requis' }, { status: 400 })
 
   const category = await prisma.category.create({
-    data: { name, slug, parentId: parentId || null },
+    data: { name, slug, description: description?.trim() || null },
   })
   return NextResponse.json(category, { status: 201 })
 }

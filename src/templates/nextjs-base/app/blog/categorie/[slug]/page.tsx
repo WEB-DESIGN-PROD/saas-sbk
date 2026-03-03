@@ -43,7 +43,10 @@ export default async function CategoryPage({ params }: Props) {
       </Link>
       <div className="mb-10">
         <h1 className="text-3xl font-bold">{category.name}</h1>
-        <p className="text-muted-foreground mt-1">{posts.length} article{posts.length !== 1 ? "s" : ""}</p>
+        {category.description && (
+          <p className="text-muted-foreground mt-2 max-w-2xl">{category.description}</p>
+        )}
+        <p className="text-muted-foreground text-sm mt-1">{posts.length} article{posts.length !== 1 ? "s" : ""}</p>
       </div>
       {posts.length === 0 ? (
         <p className="text-muted-foreground text-center py-12">Aucun article dans cette catégorie.</p>

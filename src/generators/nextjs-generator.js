@@ -203,6 +203,7 @@ function copyConfigFiles(projectPath, config, templatesDir) {
       'components/blog/articles-table.tsx',
       'components/blog/tag-input.tsx',
       'components/blog/category-manager.tsx',
+      'components/blog/categories-card.tsx',
     ];
     for (const f of blogMgmtFiles) {
       conditionalCopy.push(f);

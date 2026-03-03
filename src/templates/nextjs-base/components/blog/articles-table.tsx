@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -16,7 +16,7 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog"
-import { Pencil, Trash2, Search, Eye, Plus, CheckCircle2, XCircle } from "lucide-react"
+import { Pencil, Trash2, Search, Eye, Plus, CheckCircle2, XCircle, ImageIcon, Link2, AlertTriangle } from "lucide-react"
 
 type PostStatus = "Draft" | "Published" | "Scheduled" | "Archived" | "PendingReview"
 
@@ -25,6 +25,7 @@ interface PostRow {
   title: string
   slug: string
   status: PostStatus
+  coverImage: string | null
   authorName: string
   publishedAt: string | null
   readingTime: number | null
@@ -78,6 +79,20 @@ export function ArticlesTable({
   const [isDeleting, setIsDeleting] = useState(false)
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null)
 
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const { oldName, newName } = (e as CustomEvent).detail
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.category?.name === oldName ? { ...p, category: { name: newName } } : p
+        )
+      )
+    }
+    window.addEventListener("blog:category-renamed", handler)
+    return () => window.removeEventListener("blog:category-renamed", handler)
+  }, [])
+
   const isContributor = userRole === "contributor"
   const canValidate = !isContributor
 
@@ -92,6 +107,15 @@ export function ArticlesTable({
 
   // Nombre d'articles en attente pour badge
   const pendingCount = posts.filter((p) => p.status === "PendingReview").length
+
+  const handleCopyLink = (slug: string) => {
+    const url = `${window.location.origin}/blog/${slug}`
+    navigator.clipboard.writeText(url).then(() => {
+      toast.success("Lien copié dans le presse-papier")
+    }).catch(() => {
+      toast.error("Impossible de copier le lien")
+    })
+  }
 
   const handleDelete = async () => {
     if (!deleteTarget) return
@@ -138,6 +162,7 @@ export function ArticlesTable({
     }
   }
 
+
   return (
     <>
       <div className="flex items-center gap-3 mb-4 flex-wrap">
@@ -162,14 +187,13 @@ export function ArticlesTable({
             <SelectItem value="Draft">Brouillons</SelectItem>
             <SelectItem value="Published">Publiés</SelectItem>
             <SelectItem value="Scheduled">Programmés</SelectItem>
-            <SelectItem value="Archived">Archivés</SelectItem>
           </SelectContent>
         </Select>
-        <Link href={`${basePath}/new`}>
-          <Button size="sm" className="h-9 gap-1.5">
+        <Button asChild size="sm" className="h-9 gap-1.5">
+          <Link href={`${basePath}/new`}>
             <Plus className="h-3.5 w-3.5" /> Nouvel article
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
       {filtered.length === 0 ? (
@@ -181,44 +205,57 @@ export function ArticlesTable({
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-14">Média</TableHead>
                 <TableHead>Titre</TableHead>
-                <TableHead>Auteur</TableHead>
-                <TableHead>Catégorie</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Lecture</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((post) => (
                 <TableRow key={post.id} className={post.status === "PendingReview" ? "bg-orange-500/5" : ""}>
+                  {/* Miniature image de couverture */}
                   <TableCell>
-                    <div>
-                      <p className="text-sm font-medium line-clamp-1">{post.title}</p>
-                      <p className="text-xs text-muted-foreground">/blog/{post.slug}</p>
+                    <div className="h-10 w-10 rounded overflow-hidden border bg-muted flex items-center justify-center shrink-0">
+                      {post.coverImage ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={post.coverImage} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        <ImageIcon className="h-4 w-4 text-muted-foreground/40" />
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className="text-sm text-muted-foreground">{post.authorName}</span>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-xs text-muted-foreground">{post.category?.name || "—"}</span>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={`text-xs ${STATUS_COLORS[post.status]}`}>
-                      {STATUS_LABELS[post.status]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-xs text-muted-foreground">
-                      {post.publishedAt ? formatDate(post.publishedAt) : "—"}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-xs text-muted-foreground">
-                      {post.readingTime ? `${post.readingTime} min` : "—"}
-                    </span>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium line-clamp-1 flex-1">{post.title}</p>
+                        <Badge className={`text-xs shrink-0 ${STATUS_COLORS[post.status]}`}>
+                          {STATUS_LABELS[post.status]}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                        {post.publishedAt && (
+                          <span className="text-xs text-muted-foreground">
+                            {post.status === "Scheduled" ? "Programmé le" : "Publié le"} {formatDate(post.publishedAt)}
+                          </span>
+                        )}
+                        <span className="text-muted-foreground/40 text-xs">·</span>
+                        <span className="text-xs text-muted-foreground">Auteur : {post.authorName}</span>
+                        {post.category ? (
+                          <>
+                            <span className="text-muted-foreground/40 text-xs">·</span>
+                            <span className="text-xs text-muted-foreground">Catégorie : {post.category.name}</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-muted-foreground/40 text-xs">·</span>
+                            <span className="flex items-center gap-1 text-xs text-amber-500">
+                              <AlertTriangle className="h-3 w-3" />
+                              Sans catégorie
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-end gap-1">
@@ -248,11 +285,22 @@ export function ArticlesTable({
                         </>
                       )}
                       {post.status === "Published" && (
-                        <Link href={`/blog/${post.slug}`} target="_blank">
-                          <Button variant="ghost" size="icon" className="h-7 w-7">
-                            <Eye className="h-3.5 w-3.5" />
+                        <>
+                          <Link href={`/blog/${post.slug}`} target="_blank">
+                            <Button variant="ghost" size="icon" className="h-7 w-7" title="Voir l'article">
+                              <Eye className="h-3.5 w-3.5" />
+                            </Button>
+                          </Link>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            title="Copier le lien"
+                            onClick={() => handleCopyLink(post.slug)}
+                          >
+                            <Link2 className="h-3.5 w-3.5" />
                           </Button>
-                        </Link>
+                        </>
                       )}
                       <Link href={`${basePath}/${post.id}/edit`}>
                         <Button variant="ghost" size="icon" className="h-7 w-7">
@@ -276,10 +324,11 @@ export function ArticlesTable({
         </div>
       )}
 
+      {/* Dialog suppression article */}
       <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Supprimer l'article</DialogTitle>
+            <DialogTitle>Supprimer l&apos;article</DialogTitle>
             <DialogDescription>
               Êtes-vous sûr de vouloir supprimer <strong>{deleteTarget?.title}</strong> ?
               <br />Cette action est irréversible.
@@ -293,6 +342,7 @@ export function ArticlesTable({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
     </>
   )
 }

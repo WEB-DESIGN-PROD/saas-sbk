@@ -95,6 +95,7 @@ export function ArticleEditor({ post, categories, currentUserName, basePath, use
   const isContributor = userRole === "contributor"
   const router = useRouter()
   const isEdit = !!post
+  const isPublished = isEdit && post?.status === "Published"
 
   // Champs
   const [title, setTitle] = useState(post?.title || "")
@@ -223,8 +224,8 @@ export function ArticleEditor({ post, categories, currentUserName, basePath, use
 
     setSaving(true)
     try {
-      const status = pubMode === "draft" ? "Draft" : pubMode === "scheduled" ? "Scheduled" : pubMode === "pending_review" ? "PendingReview" : "Published"
-      const publishedAt = pubMode === "scheduled" ? scheduledDate : pubMode === "now" ? new Date().toISOString() : null
+      const status = isPublished ? "Published" : pubMode === "draft" ? "Draft" : pubMode === "scheduled" ? "Scheduled" : pubMode === "pending_review" ? "PendingReview" : "Published"
+      const publishedAt = isPublished ? (post!.publishedAt ?? new Date().toISOString()) : pubMode === "scheduled" ? scheduledDate : pubMode === "now" ? new Date().toISOString() : null
 
       const body = {
         title: title.trim(),
@@ -497,7 +498,7 @@ export function ArticleEditor({ post, categories, currentUserName, basePath, use
       </div>
 
       {/* Publication */}
-      <div className="rounded-xl border bg-card p-6 space-y-4">
+      {!isPublished && <div className="rounded-xl border bg-card p-6 space-y-4">
         <Label>Publication</Label>
         {isContributor ? (
           <div className="space-y-2">
@@ -550,7 +551,7 @@ export function ArticleEditor({ post, categories, currentUserName, basePath, use
             />
           </div>
         )}
-      </div>
+      </div>}
 
       {/* Actions */}
       <div className="flex items-center justify-between gap-3 pt-2">
@@ -571,7 +572,11 @@ export function ArticleEditor({ post, categories, currentUserName, basePath, use
           <Button onClick={handleSave} disabled={saving} className="gap-1.5 min-w-32">
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             {saving ? "Enregistrement…" :
+              isPublished ? "Mettre à jour" :
               pubMode === "pending_review" ? (isEdit ? "Soumettre à nouveau" : "Soumettre pour validation") :
+              pubMode === "draft" ? "Enregistrer en brouillon" :
+              pubMode === "scheduled" ? "Programmer" :
+              pubMode === "now" ? (isEdit ? "Publier" : "Publier l'article") :
               isEdit ? "Mettre à jour" : "Créer l'article"}
           </Button>
         </div>
