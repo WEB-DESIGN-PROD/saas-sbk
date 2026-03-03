@@ -26,6 +26,7 @@ interface PostRow {
   slug: string
   status: PostStatus
   coverImage: string | null
+  authorId: string
   authorName: string
   publishedAt: string | null
   readingTime: number | null
@@ -66,10 +67,12 @@ export function ArticlesTable({
   posts: initialPosts,
   basePath,
   userRole = "admin",
+  currentUserId,
 }: {
   posts: PostRow[]
   basePath: string
   userRole?: string
+  currentUserId?: string
 }) {
   const router = useRouter()
   const [posts, setPosts] = useState(initialPosts)
@@ -94,7 +97,14 @@ export function ArticlesTable({
   }, [])
 
   const isContributor = userRole === "contributor"
+  const isEditor = userRole === "editor"
   const canValidate = !isContributor
+  const canEditPost = (post: PostRow) => !isContributor || post.authorId === currentUserId
+  const canDeletePost = (post: PostRow) => {
+    if (isContributor) return false
+    if (isEditor) return post.authorId === currentUserId
+    return true
+  }
 
   const filtered = posts.filter((p) => {
     const matchSearch = search
@@ -302,19 +312,23 @@ export function ArticlesTable({
                           </Button>
                         </>
                       )}
-                      <Link href={`${basePath}/${post.id}/edit`}>
-                        <Button variant="ghost" size="icon" className="h-7 w-7">
-                          <Pencil className="h-3.5 w-3.5" />
+                      {canEditPost(post) && (
+                        <Link href={`${basePath}/${post.id}/edit`}>
+                          <Button variant="ghost" size="icon" className="h-7 w-7">
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                        </Link>
+                      )}
+                      {canDeletePost(post) && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setDeleteTarget(post)}
+                          className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
                         </Button>
-                      </Link>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setDeleteTarget(post)}
-                        className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

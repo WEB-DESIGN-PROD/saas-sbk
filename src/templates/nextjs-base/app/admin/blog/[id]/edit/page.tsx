@@ -10,7 +10,7 @@ interface Props {
 export const metadata = { title: "Modifier l'article" }
 
 export default async function AdminBlogEditPage({ params }: Props) {
-  const { user, role } = await verifyStaff()
+  const { user, role, userId } = await verifyStaff()
   const { id } = await params
 
   const [post, categories] = await Promise.all([
@@ -26,6 +26,9 @@ export default async function AdminBlogEditPage({ params }: Props) {
   ])
 
   if (!post) notFound()
+
+  // Un contributeur ne peut éditer que ses propres articles
+  if (role === 'contributor' && post.authorId !== userId) notFound()
 
   const serialized = {
     ...post,

@@ -40,7 +40,7 @@ export function AppSidebar({
   ...props
 }: AppSidebarProps & Omit<React.ComponentProps<typeof Sidebar>, keyof AppSidebarProps>) {
   const canManageUsers = ["admin", "co-admin"].includes(role)
-  const canManageMedia = ["admin", "co-admin"].includes(role)
+  const canManageMedia = ["admin", "co-admin", "editor"].includes(role)
 
   const dashboardItems = [
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },

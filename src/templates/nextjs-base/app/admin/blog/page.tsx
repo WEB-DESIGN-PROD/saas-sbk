@@ -10,7 +10,7 @@ import { BlogCategoriesCard } from "@/components/blog/categories-card"
 export const metadata = { title: "Articles" }
 
 export default async function AdminBlogPage() {
-  const { role } = await verifyStaff()
+  const { role, userId } = await verifyStaff()
 
   const [posts, publishedCount, pendingCount, draftCount, categories] = await Promise.all([
     prisma.post.findMany({
@@ -18,7 +18,7 @@ export default async function AdminBlogPage() {
       select: {
         id: true, title: true, slug: true, status: true,
         coverImage: true,
-        authorName: true, publishedAt: true, readingTime: true,
+        authorId: true, authorName: true, publishedAt: true, readingTime: true,
         category: { select: { name: true } },
         tags: { select: { name: true } },
       },
@@ -106,11 +106,11 @@ export default async function AdminBlogPage() {
 
         {/* Catégories */}
         <div className="px-4 lg:px-6">
-          <BlogCategoriesCard categories={categories} />
+          <BlogCategoriesCard categories={categories} userRole={role} />
         </div>
 
         <div className="px-4 lg:px-6">
-          <ArticlesTable posts={serialized} basePath="/admin/blog" userRole={role} />
+          <ArticlesTable posts={serialized} basePath="/admin/blog" userRole={role} currentUserId={userId} />
         </div>
       </div>
     </div>

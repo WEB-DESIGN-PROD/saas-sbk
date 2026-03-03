@@ -441,9 +441,11 @@ export function ArticleEditor({ post, categories, currentUserName, basePath, use
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label>Categorie</Label>
-            <Button type="button" variant="ghost" size="sm" onClick={() => setShowNewCat(true)} className="text-xs h-7">
-              + Nouvelle categorie
-            </Button>
+            {!isContributor && (
+              <Button type="button" variant="ghost" size="sm" onClick={() => setShowNewCat(true)} className="text-xs h-7">
+                + Nouvelle categorie
+              </Button>
+            )}
           </div>
           <Select value={categoryId} onValueChange={setCategoryId}>
             <SelectTrigger>

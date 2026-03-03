@@ -156,6 +156,7 @@ function copyConfigFiles(projectPath, config, templatesDir) {
       'components/admin/admin-chart-signups.tsx',
       'components/admin/users-table.tsx',
       'components/admin/invite-user-button.tsx',
+      'components/admin/roles-permissions-card.tsx',
       'components/admin/auto-refresh.tsx',
       'components/impersonation-banner.tsx',
       'app/api/admin/stats/route.ts',

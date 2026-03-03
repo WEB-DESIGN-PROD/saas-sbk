@@ -2,6 +2,7 @@ import { verifyRole } from "@/lib/dal"
 import { prisma } from "@/lib/db/client"
 import { UsersTable } from "@/components/admin/users-table"
 import { InviteUserButton } from "@/components/admin/invite-user-button"
+import { RolesPermissionsCard } from "@/components/admin/roles-permissions-card"
 
 export default async function AdminUsersPage() {
   const { role, userId } = await verifyRole(['admin', 'co-admin'])
@@ -57,8 +58,13 @@ export default async function AdminUsersPage() {
           </div>
           {role === 'admin' && <InviteUserButton />}
         </div>
+        {/* Rappel des rôles & permissions */}
         <div className="px-4 lg:px-6">
-          <UsersTable users={serializedUsers} invitations={serializedInvitations} currentUserId={userId} />
+          <RolesPermissionsCard />
+        </div>
+
+        <div className="px-4 lg:px-6">
+          <UsersTable users={serializedUsers} invitations={serializedInvitations} currentUserId={userId} currentUserRole={role} />
         </div>
       </div>
     </div>

@@ -52,7 +52,14 @@ function generateSlug(name: string): string {
     .replace(/-+/g, "-")
 }
 
-export function BlogCategoriesCard({ categories: initialCategories }: { categories: Category[] }) {
+export function BlogCategoriesCard({
+  categories: initialCategories,
+  userRole = "admin",
+}: {
+  categories: Category[]
+  userRole?: string
+}) {
+  const canManage = userRole !== "contributor"
   const router = useRouter()
   const [categories, setCategories] = useState(initialCategories)
 
@@ -152,34 +159,48 @@ export function BlogCategoriesCard({ categories: initialCategories }: { categori
               {categories.length} catégorie{categories.length !== 1 ? "s" : ""}
             </span>
           </div>
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-7 gap-1 text-xs"
-            onClick={() => setShowNewCat(true)}
-          >
-            <Plus className="h-3 w-3" />
-            Nouvelle catégorie
-          </Button>
+          {canManage && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 gap-1 text-xs"
+              onClick={() => setShowNewCat(true)}
+            >
+              <Plus className="h-3 w-3" />
+              Nouvelle catégorie
+            </Button>
+          )}
         </div>
         {categories.length === 0 ? (
           <p className="text-sm text-muted-foreground">Aucune catégorie créée.</p>
         ) : (
           <div className="flex flex-wrap gap-2">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => openEdit(cat)}
-                className="flex items-center gap-2 rounded-lg border bg-muted/40 px-3 py-1.5 hover:border-primary/50 hover:bg-muted/60 transition-colors"
-                title="Cliquer pour modifier"
-              >
-                <span className="text-sm font-medium">{cat.name}</span>
-                <Badge variant="secondary" className="text-xs tabular-nums">
-                  {cat._count.posts}
-                </Badge>
-              </button>
-            ))}
+            {categories.map((cat) =>
+              canManage ? (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => openEdit(cat)}
+                  className="flex items-center gap-2 rounded-lg border bg-muted/40 px-3 py-1.5 hover:border-primary/50 hover:bg-muted/60 transition-colors"
+                  title="Cliquer pour modifier"
+                >
+                  <span className="text-sm font-medium">{cat.name}</span>
+                  <Badge variant="secondary" className="text-xs tabular-nums">
+                    {cat._count.posts}
+                  </Badge>
+                </button>
+              ) : (
+                <div
+                  key={cat.id}
+                  className="flex items-center gap-2 rounded-lg border bg-muted/40 px-3 py-1.5"
+                >
+                  <span className="text-sm font-medium">{cat.name}</span>
+                  <Badge variant="secondary" className="text-xs tabular-nums">
+                    {cat._count.posts}
+                  </Badge>
+                </div>
+              )
+            )}
           </div>
         )}
       </div>

@@ -19,6 +19,11 @@ export async function POST(req: Request) {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
+  const role = (session.user as any).role ?? 'member'
+  if (role === 'contributor' || role === 'member') {
+    return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
+  }
+
   const { name, slug, description } = await req.json()
   if (!name || !slug) return NextResponse.json({ error: 'Nom et slug requis' }, { status: 400 })
 
