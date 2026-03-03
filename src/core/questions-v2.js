@@ -170,7 +170,7 @@ function showHeader(answers = {}) {
       rightChoices.push(chalk.green(figures.tick) + ' Super Admin  : ' + chalk.cyan(adminDisplay));
     }
     if (answers.saasType !== undefined) {
-      rightChoices.push(chalk.green(figures.tick) + ' Type SaaS    : ' + chalk.cyan(answers.saasType === 'blog' ? 'Blog' : 'Default'));
+      rightChoices.push(chalk.green(figures.tick) + ' Type SaaS    : ' + chalk.cyan(answers.saasType === 'blog' ? 'Blog' : 'Starter Kit'));
     }
     if (answers.claudeCodeInstalled !== undefined) {
       rightChoices.push(chalk.green(figures.tick) + ' Claude Code  : ' + chalk.cyan(answers.claudeCodeInstalled ? 'Oui' : 'Non'));
@@ -892,16 +892,16 @@ async function stepAdmin(answers) {
 async function stepSaasType(answers) {
   showHeader(answers);
   p.note(
-    'Choisissez le type de SaaS à générer.\nLe mode Blog ajoute un système complet de publication d\'articles.',
+    'Choisissez le type de SAAS à générer.\nD\'autres types de projets seront ajoutés lors des prochaines mises à jour.',
     'Type de projet'
   );
 
   const saasType = await selectWithBack({
-    message: 'Quel type de SaaS souhaitez-vous créer ?',
+    message: 'Quel type de SAAS souhaitez-vous créer ?',
     options: [
-      { value: 'default', label: 'Default', hint: 'Plateforme SaaS standard' },
-      { value: 'blog', label: 'Blog', hint: 'Système de publication d\'articles intégré' },
-      { value: 'shop', label: 'Shop — Coming Soon', hint: 'Disponible dans une prochaine version', disabled: true },
+      { value: 'default', label: 'Starter Kit', hint: 'Modèle de Dashboard' },
+      { value: 'blog', label: 'Blog', hint: 'CMS intégré → Articles, Catégories, Rôles et Permissions' },
+      { value: 'shop', label: 'Boutique en ligne — Coming Soon', hint: 'Disponible lors d\'une prochaine mise à jour', disabled: true },
     ],
     initialValue: 'default',
   });
