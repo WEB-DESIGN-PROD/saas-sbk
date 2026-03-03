@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db/client'
 import type { AccountType, SubscriptionPlan, UserPlan, Role } from '@/types'
+import { STAFF_ROLES } from '@/types'
 
 /**
  * Vérifie la session utilisateur avec cache React.
@@ -44,12 +45,37 @@ export const verifySession = cache(async () => {
 })
 
 /**
- * Vérifie que l'utilisateur est admin.
+ * Vérifie que l'utilisateur est super admin.
  * Redirige vers /dashboard si ce n'est pas le cas.
  */
 export const verifyAdmin = cache(async () => {
   const session = await verifySession()
   if (session.role !== 'admin') {
+    redirect('/dashboard')
+  }
+  return session
+})
+
+/**
+ * Vérifie que l'utilisateur a un des rôles autorisés.
+ * Redirige vers /dashboard si ce n'est pas le cas.
+ * Usage : await verifyRole(['admin', 'co-admin'])
+ */
+export const verifyRole = cache(async (allowedRoles: Role[]) => {
+  const session = await verifySession()
+  if (!allowedRoles.includes(session.role)) {
+    redirect('/dashboard')
+  }
+  return session
+})
+
+/**
+ * Vérifie que l'utilisateur est un membre du staff (tout rôle sauf "member").
+ * Redirige vers /dashboard si ce n'est pas le cas.
+ */
+export const verifyStaff = cache(async () => {
+  const session = await verifySession()
+  if (!STAFF_ROLES.includes(session.role)) {
     redirect('/dashboard')
   }
   return session

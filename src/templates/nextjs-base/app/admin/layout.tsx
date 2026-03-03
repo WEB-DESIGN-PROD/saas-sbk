@@ -4,14 +4,14 @@ import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar"
-import { verifyAdmin, getUserPlan } from "@/lib/dal"
+import { verifyStaff, getUserPlan } from "@/lib/dal"
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const { user, userId } = await verifyAdmin()
+  const { user, userId, role } = await verifyStaff()
   const plan = await getUserPlan(userId)
 
   return (
@@ -28,6 +28,7 @@ export default async function AdminLayout({
         user={user}
         accountType={plan.accountType}
         mode="admin"
+        role={role}
         hasBlog={process.env.NEXT_PUBLIC_HAS_BLOG === "true"}
         hasStorage={process.env.NEXT_PUBLIC_HAS_STORAGE === "true"}
       />

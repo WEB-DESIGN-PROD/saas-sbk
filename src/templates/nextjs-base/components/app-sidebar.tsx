@@ -25,6 +25,7 @@ interface AppSidebarProps {
   }
   accountType: AccountType
   mode?: "dashboard" | "admin"
+  role?: string
   hasBlog?: boolean
   hasStorage?: boolean
 }
@@ -33,19 +34,23 @@ export function AppSidebar({
   user,
   accountType,
   mode = "dashboard",
+  role = "member",
   hasBlog = false,
   hasStorage = false,
   ...props
 }: AppSidebarProps & Omit<React.ComponentProps<typeof Sidebar>, keyof AppSidebarProps>) {
+  const canManageUsers = ["admin", "co-admin"].includes(role)
+  const canManageMedia = ["admin", "co-admin"].includes(role)
+
   const dashboardItems = [
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
     ...(hasBlog ? [{ title: "Articles", url: "/dashboard/blog", icon: FileText }] : []),
   ]
   const adminItems = [
     { title: "Vue d'ensemble", url: "/admin", icon: LayoutDashboard },
-    { title: "Utilisateurs", url: "/admin/users", icon: Users },
+    ...(canManageUsers ? [{ title: "Utilisateurs", url: "/admin/users", icon: Users }] : []),
     ...(hasBlog ? [{ title: "Articles", url: "/admin/blog", icon: FileText }] : []),
-    ...(hasStorage ? [{ title: "Médias", url: "/admin/media", icon: HardDrive }] : []),
+    ...(hasStorage && canManageMedia ? [{ title: "Médias", url: "/admin/media", icon: HardDrive }] : []),
   ]
   const items = mode === "admin" ? adminItems : dashboardItems
   const showUpgradeCard = mode === "dashboard" && accountType !== "Paid"

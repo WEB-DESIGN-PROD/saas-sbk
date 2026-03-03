@@ -293,6 +293,39 @@ function generateEmailClient(projectPath, config) {
   const isResend = config.email.provider === 'resend';
   let content;
 
+  const sharedFunctions = `
+export async function sendInvitationEmail(to: string, role: string, appUrl: string) {
+  const roleLabels: Record<string, string> = {
+    'co-admin': 'Co-Admin',
+    'editor': 'Éditeur',
+    'contributor': 'Contributeur',
+  }
+  const roleLabel = roleLabels[role] || role
+  await sendEmail({
+    to,
+    subject: \`Vous avez été invité(e) en tant que \${roleLabel}\`,
+    html: \`<h2>Invitation à rejoindre la plateforme</h2>
+<p>Vous avez été invité(e) avec le rôle <strong>\${roleLabel}</strong>.</p>
+<p>Créez votre compte en cliquant sur le lien ci-dessous. Votre rôle sera attribué automatiquement.</p>
+<p><a href="\${appUrl}/register" style="background:#000;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;margin-top:8px">Créer mon compte</a></p>
+<p style="color:#888;font-size:12px;margin-top:16px">Ce lien expire dans 7 jours. Si vous n'attendiez pas cette invitation, ignorez cet email.</p>\`,
+  })
+}
+
+export async function sendPendingReviewEmail(to: string, postTitle: string, postId: string, authorName: string, appUrl: string) {
+  await sendEmail({
+    to,
+    subject: \`Article en attente de validation — \${postTitle}\`,
+    html: \`<h2>Un article est en attente de validation</h2>
+<ul>
+  <li><strong>Titre</strong> : \${postTitle}</li>
+  <li><strong>Auteur</strong> : \${authorName}</li>
+</ul>
+<p><a href="\${appUrl}/admin/blog/\${postId}/edit" style="background:#000;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;margin-top:8px">Voir et valider l'article</a></p>\`,
+  })
+}
+`;
+
   if (isResend) {
     content = `// Client email Resend
 import { Resend } from 'resend'
@@ -312,7 +345,7 @@ export async function sendEmail(options: {
     html: options.html,
   })
 }
-`;
+${sharedFunctions}`;
   } else {
     content = `// Client email SMTP (Nodemailer)
 import nodemailer from 'nodemailer'
@@ -340,7 +373,7 @@ export async function sendEmail(options: {
     html: options.html,
   })
 }
-`;
+${sharedFunctions}`;
   }
 
   const dest = path.join(projectPath, 'lib/email/client.ts');
@@ -803,25 +836,35 @@ function generateAuthConfig(projectPath, config) {
     lines.push('  ],');
   }
 
-  // databaseHooks : attribution automatique du rôle admin + notification email nouvelle inscription
+  // databaseHooks : attribution automatique du rôle admin/staff + notification email nouvelle inscription
   if (hasAdmin) {
     lines.push('  databaseHooks: {');
     lines.push('    user: {');
     lines.push('      create: {');
     lines.push('        after: async (user) => {');
     lines.push('          if (process.env.ADMIN_EMAIL && user.email === process.env.ADMIN_EMAIL) {');
-    lines.push('            // Attribuer le rôle admin');
+    lines.push('            // Attribuer le rôle super admin');
     lines.push('            await prisma.user.update({ where: { id: user.id }, data: { role: "admin" } })');
-    lines.push('          } else if (process.env.ADMIN_EMAIL) {');
+    lines.push('          } else {');
+    lines.push('            // Vérifier si l\'email correspond à une invitation staff');
+    lines.push('            const invitation = await prisma.invitation.findUnique({');
+    lines.push('              where: { email: user.email, accepted: false, expiresAt: { gt: new Date() } },');
+    lines.push('            })');
+    lines.push('            if (invitation) {');
+    lines.push('              await prisma.user.update({ where: { id: user.id }, data: { role: invitation.role } })');
+    lines.push('              await prisma.invitation.update({ where: { id: invitation.id }, data: { accepted: true } })');
+    lines.push('            }');
     if (hasEmail) {
-      lines.push('            // Notifier l\'admin d\'une nouvelle inscription');
-      lines.push('            try {');
-      lines.push('              await sendEmail({');
-      lines.push(`                to: process.env.ADMIN_EMAIL,`);
-      lines.push(`                subject: \`[${appName}] Nouvelle inscription — \${user.name || user.email}\`,`);
-      lines.push('                html: `<h2>Nouvelle inscription</h2><ul><li><strong>Nom</strong> : ${user.name || "Non renseigné"}</li><li><strong>Email</strong> : ${user.email}</li><li><strong>Date</strong> : ${new Date().toLocaleString("fr-FR")}</li></ul>`,');
-      lines.push('              })');
-      lines.push('            } catch {}');
+      lines.push('            // Notifier l\'admin d\'une nouvelle inscription (hors staff invité)');
+      lines.push('            if (!invitation && process.env.ADMIN_EMAIL) {');
+      lines.push('              try {');
+      lines.push('                await sendEmail({');
+      lines.push(`                  to: process.env.ADMIN_EMAIL,`);
+      lines.push(`                  subject: \`[${appName}] Nouvelle inscription — \${user.name || user.email}\`,`);
+      lines.push('                  html: `<h2>Nouvelle inscription</h2><ul><li><strong>Nom</strong> : ${user.name || "Non renseigné"}</li><li><strong>Email</strong> : ${user.email}</li><li><strong>Date</strong> : ${new Date().toLocaleString("fr-FR")}</li></ul>`,');
+      lines.push('                })');
+      lines.push('              } catch {}');
+      lines.push('            }');
     }
     lines.push('          }');
     lines.push('        },');

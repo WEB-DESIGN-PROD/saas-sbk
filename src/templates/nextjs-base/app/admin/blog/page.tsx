@@ -1,11 +1,11 @@
-import { verifyAdmin } from "@/lib/dal"
+import { verifyStaff } from "@/lib/dal"
 import { prisma } from "@/lib/db/client"
 import { ArticlesTable } from "@/components/blog/articles-table"
 
 export const metadata = { title: "Articles" }
 
 export default async function AdminBlogPage() {
-  await verifyAdmin()
+  const { role } = await verifyStaff()
 
   const posts = await prisma.post.findMany({
     orderBy: { createdAt: "desc" },
@@ -32,7 +32,7 @@ export default async function AdminBlogPage() {
           </p>
         </div>
         <div className="px-4 lg:px-6">
-          <ArticlesTable posts={serialized} basePath="/admin/blog" />
+          <ArticlesTable posts={serialized} basePath="/admin/blog" userRole={role} />
         </div>
       </div>
     </div>

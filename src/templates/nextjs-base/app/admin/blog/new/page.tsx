@@ -1,11 +1,11 @@
-import { verifyAdmin } from "@/lib/dal"
+import { verifyStaff } from "@/lib/dal"
 import { prisma } from "@/lib/db/client"
 import { ArticleEditor } from "@/components/blog/article-editor"
 
 export const metadata = { title: "Nouvel article" }
 
 export default async function AdminBlogNewPage() {
-  const { user } = await verifyAdmin()
+  const { user, role } = await verifyStaff()
 
   const categories = await prisma.category.findMany({
     where: { parentId: null },
@@ -24,6 +24,7 @@ export default async function AdminBlogNewPage() {
             categories={categories}
             currentUserName={user.name || user.email}
             basePath="/admin/blog"
+            userRole={role}
           />
         </div>
       </div>

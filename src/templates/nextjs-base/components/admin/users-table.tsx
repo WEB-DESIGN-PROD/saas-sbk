@@ -31,7 +31,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { LogIn, ShieldCheck, CheckCircle2, XCircle, Trash2, Search } from "lucide-react"
+import { LogIn, ShieldCheck, CheckCircle2, XCircle, Trash2, Search, Mail, Clock } from "lucide-react"
 
 // Valeurs combinées plan = accountType + subscriptionPlan
 const PLAN_OPTIONS = [
@@ -61,6 +61,14 @@ interface UserRow {
   sessions: Array<{ updatedAt: string }>
 }
 
+interface InvitationRow {
+  id: string
+  email: string
+  role: string
+  expiresAt: string
+  createdAt: string
+}
+
 function getInitials(name: string | null, email: string) {
   if (name) return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
   return email.slice(0, 2).toUpperCase()
@@ -84,9 +92,55 @@ async function deleteUser(id: string) {
   if (!res.ok) throw new Error("Erreur lors de la suppression")
 }
 
-export function UsersTable({ users: initialUsers }: { users: UserRow[] }) {
+async function cancelInvitation(id: string) {
+  const res = await fetch(`/api/admin/invitations/${id}`, { method: "DELETE" })
+  if (!res.ok) throw new Error("Erreur lors de l'annulation")
+}
+
+// ── Badge rôle ───────────────────────────────────────────────────────────────
+function RoleBadge({ role }: { role: string }) {
+  switch (role) {
+    case "admin":
+      return (
+        <Badge className="gap-1 bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20">
+          <ShieldCheck className="h-3 w-3" /> Admin
+        </Badge>
+      )
+    case "co-admin":
+      return (
+        <Badge className="gap-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20">
+          Co-Admin
+        </Badge>
+      )
+    case "editor":
+      return (
+        <Badge className="gap-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20">
+          Éditeur
+        </Badge>
+      )
+    case "contributor":
+      return (
+        <Badge className="gap-1 bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20">
+          Contributeur
+        </Badge>
+      )
+    default:
+      return <Badge variant="outline" className="text-xs">Membre</Badge>
+  }
+}
+
+const isStaff = (role: string) => ["admin", "co-admin", "editor", "contributor"].includes(role)
+
+export function UsersTable({
+  users: initialUsers,
+  invitations: initialInvitations = [],
+}: {
+  users: UserRow[]
+  invitations?: InvitationRow[]
+}) {
   const router = useRouter()
   const [users, setUsers] = useState(initialUsers)
+  const [invitations, setInvitations] = useState(initialInvitations)
   const [search, setSearch] = useState("")
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<UserRow | null>(null)
@@ -172,7 +226,7 @@ export function UsersTable({ users: initialUsers }: { users: UserRow[] }) {
     }
   }
 
-  // ── Suppression ──────────────────────────────────────────────────────────────
+  // ── Suppression utilisateur ──────────────────────────────────────────────────
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return
     setIsDeleting(true)
@@ -186,6 +240,17 @@ export function UsersTable({ users: initialUsers }: { users: UserRow[] }) {
       toast.error("Impossible de supprimer cet utilisateur")
     } finally {
       setIsDeleting(false)
+    }
+  }
+
+  // ── Annuler invitation ───────────────────────────────────────────────────────
+  const handleCancelInvitation = async (id: string, email: string) => {
+    try {
+      await cancelInvitation(id)
+      setInvitations((prev) => prev.filter((inv) => inv.id !== id))
+      toast.success(`Invitation annulée pour ${email}`)
+    } catch {
+      toast.error("Impossible d'annuler l'invitation")
     }
   }
 
@@ -209,142 +274,190 @@ export function UsersTable({ users: initialUsers }: { users: UserRow[] }) {
           </p>
         </div>
       ) : (
-      <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Utilisateur</TableHead>
-              <TableHead>Rôle</TableHead>
-              <TableHead>Plan</TableHead>
-              <TableHead>Crédits</TableHead>
-              <TableHead>Email vérifié</TableHead>
-              <TableHead>Inscrit le</TableHead>
-              <TableHead>Dernière activité</TableHead>
-              <TableHead className="text-right">Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filtered.map((user) => (
-              <TableRow key={user.id}>
-                {/* Utilisateur */}
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.image ?? undefined} />
-                      <AvatarFallback className="text-xs">
-                        {getInitials(user.name, user.email)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm font-medium leading-tight">{user.name || "—"}</p>
-                      <p className="text-xs text-muted-foreground">{user.email}</p>
-                    </div>
-                  </div>
-                </TableCell>
-
-                {/* Rôle */}
-                <TableCell>
-                  {user.role === "admin" ? (
-                    <Badge className="gap-1 bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20">
-                      <ShieldCheck className="h-3 w-3" /> Admin
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-xs">Membre</Badge>
-                  )}
-                </TableCell>
-
-                {/* Plan — select inline */}
-                <TableCell>
-                  {user.role === "admin" ? (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  ) : (
-                    <Select
-                      value={getPlanValue(user.accountType, user.subscriptionPlan)}
-                      onValueChange={(val) => handlePlanChange(user.id, val)}
-                    >
-                      <SelectTrigger className="h-7 w-32 text-xs px-2">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PLAN_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </TableCell>
-
-                {/* Crédits — input inline */}
-                <TableCell>
-                  {user.role === "admin" ? (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  ) : (
-                    <Input
-                      type="number"
-                      min={0}
-                      defaultValue={user.extraCredits}
-                      onBlur={(e) => handleCreditsBlur(user.id, e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur() }}
-                      className="h-7 w-20 text-xs px-2 tabular-nums"
-                    />
-                  )}
-                </TableCell>
-
-                {/* Email vérifié */}
-                <TableCell>
-                  {user.emailVerified ? (
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <XCircle className="h-4 w-4 text-muted-foreground/50" />
-                  )}
-                </TableCell>
-
-                {/* Inscrit le */}
-                <TableCell>
-                  <span className="text-xs text-muted-foreground">{formatDate(user.createdAt)}</span>
-                </TableCell>
-
-                {/* Dernière activité */}
-                <TableCell>
-                  <span className="text-xs text-muted-foreground">
-                    {user.sessions[0] ? formatDate(user.sessions[0].updatedAt) : "—"}
-                  </span>
-                </TableCell>
-
-                {/* Actions */}
-                <TableCell>
-                  <div className="flex items-center justify-end gap-1.5">
-                    {user.role !== "admin" && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleImpersonate(user.id, user.name, user.email)}
-                        disabled={loadingId === user.id}
-                        className="gap-1.5 text-xs h-7 px-2"
-                      >
-                        <LogIn className="h-3.5 w-3.5" />
-                        {loadingId === user.id ? "..." : "Voir en tant que"}
-                      </Button>
-                    )}
-                    {user.role !== "admin" && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setDeleteTarget(user)}
-                        className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    )}
-                  </div>
-                </TableCell>
+        <div className="rounded-lg border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Utilisateur</TableHead>
+                <TableHead>Rôle</TableHead>
+                <TableHead>Plan</TableHead>
+                <TableHead>Crédits</TableHead>
+                <TableHead>Email vérifié</TableHead>
+                <TableHead>Inscrit le</TableHead>
+                <TableHead>Dernière activité</TableHead>
+                <TableHead className="text-right">Action</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {filtered.map((user) => (
+                <TableRow key={user.id}>
+                  {/* Utilisateur */}
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.image ?? undefined} />
+                        <AvatarFallback className="text-xs">
+                          {getInitials(user.name, user.email)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium leading-tight">{user.name || "—"}</p>
+                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                      </div>
+                    </div>
+                  </TableCell>
+
+                  {/* Rôle */}
+                  <TableCell>
+                    <RoleBadge role={user.role} />
+                  </TableCell>
+
+                  {/* Plan — select inline */}
+                  <TableCell>
+                    {isStaff(user.role) ? (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    ) : (
+                      <Select
+                        value={getPlanValue(user.accountType, user.subscriptionPlan)}
+                        onValueChange={(val) => handlePlanChange(user.id, val)}
+                      >
+                        <SelectTrigger className="h-7 w-32 text-xs px-2">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PLAN_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </TableCell>
+
+                  {/* Crédits — input inline */}
+                  <TableCell>
+                    {isStaff(user.role) ? (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    ) : (
+                      <Input
+                        type="number"
+                        min={0}
+                        defaultValue={user.extraCredits}
+                        onBlur={(e) => handleCreditsBlur(user.id, e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur() }}
+                        className="h-7 w-20 text-xs px-2 tabular-nums"
+                      />
+                    )}
+                  </TableCell>
+
+                  {/* Email vérifié */}
+                  <TableCell>
+                    {user.emailVerified ? (
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-muted-foreground/50" />
+                    )}
+                  </TableCell>
+
+                  {/* Inscrit le */}
+                  <TableCell>
+                    <span className="text-xs text-muted-foreground">{formatDate(user.createdAt)}</span>
+                  </TableCell>
+
+                  {/* Dernière activité */}
+                  <TableCell>
+                    <span className="text-xs text-muted-foreground">
+                      {user.sessions[0] ? formatDate(user.sessions[0].updatedAt) : "—"}
+                    </span>
+                  </TableCell>
+
+                  {/* Actions */}
+                  <TableCell>
+                    <div className="flex items-center justify-end gap-1.5">
+                      {user.role !== "admin" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleImpersonate(user.id, user.name, user.email)}
+                          disabled={loadingId === user.id}
+                          className="gap-1.5 text-xs h-7 px-2"
+                        >
+                          <LogIn className="h-3.5 w-3.5" />
+                          {loadingId === user.id ? "…" : "Voir en tant que"}
+                        </Button>
+                      )}
+                      {user.role !== "admin" && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setDeleteTarget(user)}
+                          className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
+      {/* ── Invitations en attente ──────────────────────────────────────────── */}
+      {invitations.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-base font-semibold mb-3 flex items-center gap-2">
+            <Mail className="h-4 w-4 text-muted-foreground" />
+            Invitations en attente
+            <Badge variant="secondary" className="text-xs">{invitations.length}</Badge>
+          </h2>
+          <div className="rounded-lg border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Rôle</TableHead>
+                  <TableHead>Expire le</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {invitations.map((inv) => (
+                  <TableRow key={inv.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-3.5 w-3.5 text-muted-foreground/50" />
+                        <span className="text-sm">{inv.email}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <RoleBadge role={inv.role} />
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-xs text-muted-foreground">{formatDate(inv.expiresAt)}</span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-end">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleCancelInvitation(inv.id, inv.email)}
+                          className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                          title="Annuler l'invitation"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
       )}
 
       {/* Dialog de confirmation suppression */}
@@ -364,7 +477,7 @@ export function UsersTable({ users: initialUsers }: { users: UserRow[] }) {
               Annuler
             </Button>
             <Button variant="destructive" onClick={handleDeleteConfirm} disabled={isDeleting}>
-              {isDeleting ? "Suppression..." : "Supprimer"}
+              {isDeleting ? "Suppression…" : "Supprimer"}
             </Button>
           </DialogFooter>
         </DialogContent>
