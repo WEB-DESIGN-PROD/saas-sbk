@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { authClient } from "@/lib/auth/client"
 import { toast } from "sonner"
@@ -134,13 +134,19 @@ const isStaff = (role: string) => ["admin", "co-admin", "editor", "contributor"]
 export function UsersTable({
   users: initialUsers,
   invitations: initialInvitations = [],
+  currentUserId = "",
 }: {
   users: UserRow[]
   invitations?: InvitationRow[]
+  currentUserId?: string
 }) {
   const router = useRouter()
   const [users, setUsers] = useState(initialUsers)
   const [invitations, setInvitations] = useState(initialInvitations)
+
+  // Synchroniser le state quand le serveur rafraîchit les données (router.refresh())
+  useEffect(() => { setUsers(initialUsers) }, [initialUsers])
+  useEffect(() => { setInvitations(initialInvitations) }, [initialInvitations])
   const [search, setSearch] = useState("")
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<UserRow | null>(null)
@@ -375,7 +381,7 @@ export function UsersTable({
                   {/* Actions */}
                   <TableCell>
                     <div className="flex items-center justify-end gap-1.5">
-                      {user.role !== "admin" && (
+                      {user.role !== "admin" && user.id !== currentUserId && (
                         <Button
                           variant="outline"
                           size="sm"
@@ -387,7 +393,7 @@ export function UsersTable({
                           {loadingId === user.id ? "…" : "Voir en tant que"}
                         </Button>
                       )}
-                      {user.role !== "admin" && (
+                      {user.role !== "admin" && user.id !== currentUserId && (
                         <Button
                           variant="ghost"
                           size="icon"

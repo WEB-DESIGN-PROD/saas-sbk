@@ -4,7 +4,7 @@ import { UsersTable } from "@/components/admin/users-table"
 import { InviteUserButton } from "@/components/admin/invite-user-button"
 
 export default async function AdminUsersPage() {
-  const { role } = await verifyRole(['admin', 'co-admin'])
+  const { role, userId } = await verifyRole(['admin', 'co-admin'])
 
   const [users, invitations] = await Promise.all([
     prisma.user.findMany({
@@ -58,7 +58,7 @@ export default async function AdminUsersPage() {
           {role === 'admin' && <InviteUserButton />}
         </div>
         <div className="px-4 lg:px-6">
-          <UsersTable users={serializedUsers} invitations={serializedInvitations} />
+          <UsersTable users={serializedUsers} invitations={serializedInvitations} currentUserId={userId} />
         </div>
       </div>
     </div>
