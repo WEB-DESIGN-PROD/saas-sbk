@@ -24,25 +24,17 @@ const __dirname = dirname(__filename);
 const packageJson = JSON.parse(readFileSync(join(__dirname, '../../package.json'), 'utf-8'));
 const version = packageJson.version;
 
+// Sentinel pour signaler un retour arrière
+const BACK = 'BACK';
 
 /**
  * Centre une ligne de texte dans le terminal
- * Gère automatiquement les codes ANSI et s'adapte au redimensionnement
  */
 function centerText(text) {
-  // Utiliser la largeur actuelle du terminal avec fallback
   const terminalWidth = Math.max(process.stdout.columns || 80, 40);
-
-  // Nettoyer tous les codes ANSI et séquences d'échappement pour calculer la longueur réelle
   const cleanText = text.replace(/\u001b\[[0-9;]*m/g, '').replace(/\u001b\]8;;.*?\u001b\\/g, '');
   const textLength = cleanText.length;
-
-  // Si le texte est plus large que le terminal, ne pas centrer
-  if (textLength >= terminalWidth) {
-    return text;
-  }
-
-  // Calculer le padding pour centrer
+  if (textLength >= terminalWidth) return text;
   const padding = Math.floor((terminalWidth - textLength) / 2);
   return ' '.repeat(Math.max(0, padding)) + text;
 }
@@ -51,7 +43,6 @@ function centerText(text) {
  * Crée un lien cliquable dans le terminal (OSC 8)
  */
 function createLink(url, text, color = chalk.blue) {
-  // Format: OSC 8 ; ; URL ST TEXT OSC 8 ; ; ST
   return `\x1b]8;;${url}\x1b\\${color(text)}\x1b]8;;\x1b\\`;
 }
 
@@ -70,12 +61,10 @@ function showHeader(answers = {}) {
     '╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝    ╚══════╝╚═════╝ ╚═╝  ╚═╝'
   ];
 
-  // Dégradé de gauche à droite : cyan → lavande → violet
-  // Dégradé 3 points : cyan → bleu électrique → indigo
   const grad = [
-    [6, 182, 212],    // #06b6d4 cyan-500
-    [99, 102, 241],   // #6366f1 indigo-500
-    [139, 92, 246],   // #8b5cf6 violet-500
+    [6, 182, 212],
+    [99, 102, 241],
+    [139, 92, 246],
   ];
   const maxLen = Math.max(...logoLines.map(l => l.length));
   const toHex = (r, g, b) => `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
@@ -102,15 +91,12 @@ function showHeader(answers = {}) {
   });
   console.log('');
 
-  // Baseline centrée
   const baseline1 = chalk.gray(`Générateur de SAAS Next.js • v${version}`);
-
   console.log(centerText(baseline1));
   console.log('');
 
   // Afficher les réponses validées sur 2 colonnes
   if (Object.keys(answers).length > 0) {
-    // Bordure avec titre centré sur la même ligne
     const terminalWidth = process.stdout.columns || 80;
     const title = ' Récap\' de votre SAAS ';
     const titleLength = title.length;
@@ -120,27 +106,20 @@ function showHeader(answers = {}) {
     const headerLine = chalk.gray(leftBorder) + chalk.gray(title) + chalk.gray(rightBorder);
 
     console.log(headerLine);
-    console.log(''); // Padding du haut
+    console.log('');
 
     const leftChoices = [];
     const rightChoices = [];
 
-    // Colonne gauche : Projet, Thème, BDD, Auth, Stockage
+    // ── Colonne gauche : Projet, BDD, Auth, Stockage, Email, Paiements ──────────
     if (answers.projectName) {
-      leftChoices.push(chalk.green(figures.tick) + ' Projet : ' + chalk.cyan(answers.projectName));
-    }
-    if (answers.theme) {
-      leftChoices.push(chalk.green(figures.tick) + ' Thème : ' + chalk.cyan(answers.theme === 'dark' ? 'Sombre' : 'Clair'));
+      leftChoices.push(chalk.green(figures.tick) + ' Projet        : ' + chalk.cyan(answers.projectName));
     }
     if (answers.databaseType) {
       let dbDisplay = 'Distant ☁️';
       if (answers.databaseType === 'docker') dbDisplay = 'PostgreSQL 🐳';
       else if (answers.databaseType === 'skip') dbDisplay = 'Aucune';
-      else if (answers.databaseType === 'mongodb-local') dbDisplay = 'MongoDB 🐳';
-      else if (answers.databaseType === 'mongodb-remote') dbDisplay = 'MongoDB ☁️';
-      else if (answers.databaseType === 'sqlite') dbDisplay = 'SQLite';
-
-      leftChoices.push(chalk.green(figures.tick) + ' Base de données : ' + chalk.cyan(dbDisplay));
+      leftChoices.push(chalk.green(figures.tick) + ' Base de données: ' + chalk.cyan(dbDisplay));
     }
     if (answers.authMethods && answers.authMethods.length > 0) {
       const methodNames = {
@@ -151,7 +130,7 @@ function showHeader(answers = {}) {
         'google': 'Google'
       };
       const authDisplay = answers.authMethods.map(m => methodNames[m] || m).join(' + ');
-      leftChoices.push(chalk.green(figures.tick) + ' Auth : ' + chalk.cyan(authDisplay));
+      leftChoices.push(chalk.green(figures.tick) + ' Auth          : ' + chalk.cyan(authDisplay));
     }
     if (answers.storageEnabled !== undefined) {
       let storageDisplay = 'Désactivé';
@@ -159,41 +138,41 @@ function showHeader(answers = {}) {
         if (answers.storageType === 'minio') storageDisplay = 'MinIO 🐳';
         else if (answers.storageType === 's3') storageDisplay = 'AWS S3 ☁️';
       }
-      leftChoices.push(chalk.green(figures.tick) + ' Stockage : ' + chalk.cyan(storageDisplay));
+      leftChoices.push(chalk.green(figures.tick) + ' Stockage      : ' + chalk.cyan(storageDisplay));
     }
-
-    // Colonne droite : Email, Paiements, I18n, IA, Claude Code
     if (answers.emailProvider !== undefined) {
       let provider = 'Plus tard';
-      if (answers.emailProvider === 'resend') {
-        provider = 'Resend';
-      } else if (answers.emailProvider === 'smtp') {
-        provider = 'SMTP';
-      }
-      rightChoices.push(chalk.green(figures.tick) + ' Email : ' + chalk.cyan(provider));
+      if (answers.emailProvider === 'resend') provider = 'Resend';
+      else if (answers.emailProvider === 'smtp') provider = 'SMTP';
+      leftChoices.push(chalk.green(figures.tick) + ' Email         : ' + chalk.cyan(provider));
     }
     if (answers.paymentsEnabled !== undefined) {
       const paymentsDisplay = answers.paymentsEnabled ? 'Stripe' : 'Désactivé';
-      rightChoices.push(chalk.green(figures.tick) + ' Paiements : ' + chalk.cyan(paymentsDisplay));
+      leftChoices.push(chalk.green(figures.tick) + ' Paiements     : ' + chalk.cyan(paymentsDisplay));
+    }
+
+    // ── Colonne droite : Thème, I18n, IA, Super Admin, Type SaaS, Claude Code ──
+    if (answers.theme) {
+      rightChoices.push(chalk.green(figures.tick) + ' Thème        : ' + chalk.cyan(answers.theme === 'dark' ? 'Sombre' : 'Clair'));
     }
     if (answers.i18nDefaultLanguage) {
       const allLangs = [answers.i18nDefaultLanguage.toUpperCase(), ...(answers.i18nLanguages?.map(l => l.toUpperCase()) || [])];
-      rightChoices.push(chalk.green(figures.tick) + ' I18n : ' + chalk.cyan(allLangs.join(', ')));
+      rightChoices.push(chalk.green(figures.tick) + ' I18n         : ' + chalk.cyan(allLangs.join(', ')));
     }
     if (answers.aiProviders !== undefined) {
       const aiDisplay = answers.aiProviders.length === 0 ? 'Aucune' :
                        answers.aiProviders.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(', ');
-      rightChoices.push(chalk.green(figures.tick) + ' IA : ' + chalk.cyan(aiDisplay));
+      rightChoices.push(chalk.green(figures.tick) + ' IA           : ' + chalk.cyan(aiDisplay));
     }
     if (answers.wantsAdmin !== undefined) {
-      const adminDisplay = answers.wantsAdmin ? chalk.cyan(answers.adminEmail || 'Oui') : 'Non';
-      rightChoices.push(chalk.green(figures.tick) + ' Super Admin : ' + adminDisplay);
+      const adminDisplay = answers.wantsAdmin ? 'Activé' : 'Non';
+      rightChoices.push(chalk.green(figures.tick) + ' Super Admin  : ' + chalk.cyan(adminDisplay));
     }
     if (answers.saasType !== undefined) {
       rightChoices.push(chalk.green(figures.tick) + ' Type SaaS    : ' + chalk.cyan(answers.saasType === 'blog' ? 'Blog' : 'Default'));
     }
     if (answers.claudeCodeInstalled !== undefined) {
-      rightChoices.push(chalk.green(figures.tick) + ' Claude Code : ' + chalk.cyan(answers.claudeCodeInstalled ? 'Oui' : 'Non'));
+      rightChoices.push(chalk.green(figures.tick) + ' Claude Code  : ' + chalk.cyan(answers.claudeCodeInstalled ? 'Oui' : 'Non'));
     }
 
     // Afficher sur 2 colonnes
@@ -203,29 +182,33 @@ function showHeader(answers = {}) {
     for (let i = 0; i < maxLines; i++) {
       const left = leftChoices[i] || '';
       const right = rightChoices[i] || '';
-
-      // Calculer le padding pour aligner les colonnes
       const leftStripped = left.replace(/\u001b\[[0-9;]*m/g, '');
       const padding = ' '.repeat(Math.max(0, columnWidth - leftStripped.length));
-
       console.log(left + padding + right);
     }
 
-    console.log(''); // Padding du bas
-    // Bordure du bas pleine largeur
+    console.log('');
     const bottomBorder = '─'.repeat(terminalWidth);
     console.log(chalk.gray(bottomBorder));
+
+    // Hint de navigation persistant
+    console.log(chalk.dim('  ◀ Sélectionnez "◀ Étape précédente" dans les menus à choix pour revenir  •  Ctrl+C : annuler'));
     console.log('');
   }
 }
 
-/**
- * Pose toutes les questions avec l'interface moderne de @clack/prompts
- */
-export async function askQuestions() {
-  const answers = {};
+// ── Helpers annulation ──────────────────────────────────────────────────────
 
-  // 1. Nom du projet
+function cancelIfCancel(value) {
+  if (p.isCancel(value)) {
+    p.cancel('Installation annulée.');
+    process.exit(0);
+  }
+}
+
+// ── Étape 0 : Nom du projet ──────────────────────────────────────────────────
+
+async function stepProjectName(answers) {
   showHeader(answers);
   const projectName = await p.text({
     message: 'Nom du projet',
@@ -236,273 +219,243 @@ export async function askQuestions() {
       return result === true ? undefined : result;
     }
   });
-
-  if (p.isCancel(projectName)) {
-    p.cancel('Installation annulée.');
-    process.exit(0);
-  }
+  cancelIfCancel(projectName);
   answers.projectName = projectName;
+  return 'done';
+}
 
-  // 2. Base de données avec boucle pour confirmation si "skip"
-  let databaseConfigured = false;
-  while (!databaseConfigured) {
+// ── Étape 1 : Base de données ────────────────────────────────────────────────
+
+async function stepDatabase(answers) {
+  // Reset des clés gérées par cette étape
+  delete answers.databaseUser;
+  delete answers.databasePassword;
+  delete answers.databaseName;
+  delete answers.databaseUrl;
+  delete answers.skipAuth;
+
+  while (true) {
     showHeader(answers);
     const databaseType = await p.select({
       message: 'Configuration de la base de données',
       options: [
         { value: 'docker', label: '🐳 PostgreSQL local avec Docker', hint: 'Recommandé' },
         { value: 'remote', label: '   PostgreSQL distant', hint: 'Neon, Supabase, etc.' },
-        { value: 'mongodb-local', label: '🐳 MongoDB local avec Docker' },
-        { value: 'mongodb-remote', label: '   MongoDB distant', hint: 'Atlas, etc.' },
-        { value: 'sqlite', label: '   SQLite', hint: 'Fichier local' },
-        { value: 'skip', label: '   Ignorer pour l\'instant', hint: 'À configurer plus tard' }
+        { value: 'mongodb-local', label: '🐳 MongoDB — Coming Soon', hint: 'Disponible prochainement', disabled: true },
+        { value: 'mongodb-remote', label: '   MongoDB distant — Coming Soon', hint: 'Disponible prochainement', disabled: true },
+        { value: 'sqlite', label: '   SQLite — Coming Soon', hint: 'Disponible prochainement', disabled: true },
+        { value: 'skip', label: '   Ignorer pour l\'instant', hint: 'À configurer plus tard' },
+        { value: BACK, label: '◀  Étape précédente' },
       ],
       initialValue: 'docker'
     });
+    cancelIfCancel(databaseType);
+    if (databaseType === BACK) return BACK;
 
-    if (p.isCancel(databaseType)) {
-      p.cancel('Installation annulée.');
-      process.exit(0);
-    }
-
-    // Si skip, afficher avertissement et demander confirmation
     if (databaseType === 'skip') {
       showHeader(answers);
       console.log(chalk.yellow.bold('⚠️  ATTENTION'));
       console.log(chalk.yellow('Sans base de données, le système d\'authentification automatique'));
       console.log(chalk.yellow('ne pourra pas fonctionner. Vous devrez configurer cela plus tard.'));
       console.log('');
-
       const confirmSkip = await p.confirm({
         message: 'Confirmer et continuer sans base de données ?',
         initialValue: false
       });
-
-      if (p.isCancel(confirmSkip)) {
-        p.cancel('Installation annulée.');
-        process.exit(0);
-      }
-
+      cancelIfCancel(confirmSkip);
       if (confirmSkip) {
         answers.databaseType = databaseType;
         answers.skipAuth = true;
-        databaseConfigured = true;
+        return 'done';
       }
-      // Sinon on reboucle
-    } else {
-      answers.databaseType = databaseType;
-      databaseConfigured = true;
+      // Sinon reboucle
+      continue;
     }
-  }
 
-  // Questions DB selon le type
-  if (answers.databaseType === 'docker') {
-    showHeader(answers);
-    const databaseUser = await p.text({
-      message: 'Nom d\'utilisateur PostgreSQL',
-      placeholder: 'postgres',
-      initialValue: 'postgres',
-      validate: (value) => {
-        const result = validateDatabaseUser(value);
-        return result === true ? undefined : result;
-      }
-    });
+    answers.databaseType = databaseType;
 
-    if (p.isCancel(databaseUser)) {
-      p.cancel('Installation annulée.');
-      process.exit(0);
-    }
-    answers.databaseUser = databaseUser;
-
-    showHeader(answers);
-    p.note(chalk.gray('💡 Le mot de passe "postgres" est déjà saisi. Entrée = valider'), 'Astuce');
-
-    const databasePassword = await p.password({
-      message: 'Mot de passe PostgreSQL',
-      initialValue: 'postgres',
-      validate: (value) => {
-        // Si vide, utiliser "postgres" par défaut
-        if (!value || value.trim().length === 0) {
-          return undefined; // Accepter vide, on mettra "postgres" après
+    if (databaseType === 'docker') {
+      showHeader(answers);
+      const databaseUser = await p.text({
+        message: 'Nom d\'utilisateur PostgreSQL',
+        placeholder: 'postgres',
+        initialValue: 'postgres',
+        validate: (value) => {
+          const result = validateDatabaseUser(value);
+          return result === true ? undefined : result;
         }
-        const result = validatePassword(value);
-        return result === true ? undefined : result;
-      }
-    });
+      });
+      cancelIfCancel(databaseUser);
+      answers.databaseUser = databaseUser;
 
-    if (p.isCancel(databasePassword)) {
-      p.cancel('Installation annulée.');
-      process.exit(0);
-    }
-    // Si vide, utiliser "postgres" par défaut
-    answers.databasePassword = databasePassword || 'postgres';
-
-    showHeader(answers);
-    const databaseName = await p.text({
-      message: 'Nom de la base de données',
-      placeholder: answers.projectName.replace(/-/g, '_'),
-      initialValue: answers.projectName.replace(/-/g, '_'),
-      validate: (value) => {
-        const result = validateDatabaseName(value);
-        return result === true ? undefined : result;
-      }
-    });
-
-    if (p.isCancel(databaseName)) {
-      p.cancel('Installation annulée.');
-      process.exit(0);
-    }
-    answers.databaseName = databaseName;
-
-  } else if (answers.databaseType === 'remote') {
-    showHeader(answers);
-    p.note(
-      chalk.cyan('🔗 Neon:') + ' https://console.neon.tech/\n' +
-      chalk.cyan('🔗 Supabase:') + ' https://supabase.com/dashboard/project/_/settings/database',
-      'Liens utiles pour PostgreSQL distant'
-    );
-
-    const databaseUrl = await p.text({
-      message: 'URL de connexion PostgreSQL',
-      placeholder: 'postgresql://user:password@host:5432/database',
-      validate: (input) => {
-        if (!input || input.trim().length === 0) return 'URL requise';
-        if (!input.startsWith('postgresql://') && !input.startsWith('postgres://')) {
-          return 'L\'URL doit commencer par postgresql://';
+      showHeader(answers);
+      p.note(chalk.gray('💡 Le mot de passe "postgres" est déjà saisi. Entrée = valider'), 'Astuce');
+      const databasePassword = await p.password({
+        message: 'Mot de passe PostgreSQL',
+        initialValue: 'postgres',
+        validate: (value) => {
+          if (!value || value.trim().length === 0) return undefined;
+          const result = validatePassword(value);
+          return result === true ? undefined : result;
         }
-        return undefined;
-      }
-    });
+      });
+      cancelIfCancel(databasePassword);
+      answers.databasePassword = databasePassword || 'postgres';
 
-    if (p.isCancel(databaseUrl)) {
-      p.cancel('Installation annulée.');
-      process.exit(0);
-    }
-    answers.databaseUrl = databaseUrl;
-  } else if (answers.databaseType === 'mongodb-remote') {
-    showHeader(answers);
-    p.note(
-      chalk.cyan('🔗 MongoDB Atlas:') + ' https://cloud.mongodb.com/',
-      'Lien utile pour MongoDB distant'
-    );
-  }
+      showHeader(answers);
+      const databaseName = await p.text({
+        message: 'Nom de la base de données',
+        placeholder: answers.projectName.replace(/-/g, '_'),
+        initialValue: answers.projectName.replace(/-/g, '_'),
+        validate: (value) => {
+          const result = validateDatabaseName(value);
+          return result === true ? undefined : result;
+        }
+      });
+      cancelIfCancel(databaseName);
+      answers.databaseName = databaseName;
 
-  // 4. Authentification (sauf si base de données ignorée)
-  if (!answers.skipAuth) {
-    showHeader(answers);
-    p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout sélectionner • Entrée = valider'), 'Astuce');
-
-    const authMethods = await p.multiselect({
-      message: 'Authentification OAuth (optionnel — Entrée pour passer)',
-      options: [
-        { value: 'github', label: 'OAuth GitHub' },
-        { value: 'google', label: 'OAuth Google' }
-      ],
-      required: false
-    });
-
-    if (p.isCancel(authMethods)) {
-      p.cancel('Installation annulée.');
-      process.exit(0);
-    }
-    answers.authMethods = authMethods;
-
-    // Questions GitHub OAuth si sélectionné
-    if (authMethods.includes('github')) {
+    } else if (databaseType === 'remote') {
       showHeader(answers);
       p.note(
-        chalk.cyan('🔗 Créer une OAuth App:') + ' https://github.com/settings/developers\n' +
-        chalk.gray('Callback URL: http://localhost:3000/api/auth/callback/github'),
-        'Configuration GitHub OAuth'
+        chalk.cyan('🔗 Neon:') + ' https://console.neon.tech/\n' +
+        chalk.cyan('🔗 Supabase:') + ' https://supabase.com/dashboard/project/_/settings/database',
+        'Liens utiles pour PostgreSQL distant'
       );
-
-      const githubClientId = await p.text({
-        message: 'GitHub OAuth Client ID',
-        validate: (value) => {
-          const result = validateClientId(value);
-          return result === true ? undefined : result;
+      const databaseUrl = await p.text({
+        message: 'URL de connexion PostgreSQL',
+        placeholder: 'postgresql://user:password@host:5432/database',
+        validate: (input) => {
+          if (!input || input.trim().length === 0) return 'URL requise';
+          if (!input.startsWith('postgresql://') && !input.startsWith('postgres://')) {
+            return 'L\'URL doit commencer par postgresql://';
+          }
+          return undefined;
         }
       });
-
-      if (p.isCancel(githubClientId)) {
-        p.cancel('Installation annulée.');
-        process.exit(0);
-      }
-      answers.githubClientId = githubClientId;
-
-      showHeader(answers);
-      const githubClientSecret = await p.password({
-        message: 'GitHub OAuth Client Secret',
-        validate: (value) => {
-          const result = validateClientSecret(value);
-          return result === true ? undefined : result;
-        }
-      });
-
-      if (p.isCancel(githubClientSecret)) {
-        p.cancel('Installation annulée.');
-        process.exit(0);
-      }
-      answers.githubClientSecret = githubClientSecret;
+      cancelIfCancel(databaseUrl);
+      answers.databaseUrl = databaseUrl;
     }
 
-    // Questions Google OAuth si sélectionné
-    if (authMethods.includes('google')) {
-      showHeader(answers);
-      p.note(
-        chalk.cyan('🔗 Console Google Cloud:') + ' https://console.cloud.google.com/apis/credentials\n' +
-        chalk.gray('Callback URL: http://localhost:3000/api/auth/callback/google'),
-        'Configuration Google OAuth'
-      );
+    return 'done';
+  }
+}
 
-      const googleClientId = await p.text({
-        message: 'Google OAuth Client ID',
-        validate: (value) => {
-          const result = validateClientId(value);
-          return result === true ? undefined : result;
-        }
-      });
+// ── Étape 2 : Authentification OAuth ────────────────────────────────────────
 
-      if (p.isCancel(googleClientId)) {
-        p.cancel('Installation annulée.');
-        process.exit(0);
-      }
-      answers.googleClientId = googleClientId;
+async function stepAuth(answers) {
+  // Reset des clés OAuth gérées par cette étape
+  delete answers.githubClientId;
+  delete answers.githubClientSecret;
+  delete answers.googleClientId;
+  delete answers.googleClientSecret;
+  // Garder seulement les méthodes OAuth pré-existantes (pas email/magiclink/otp)
+  answers.authMethods = [];
 
-      showHeader(answers);
-      const googleClientSecret = await p.password({
-        message: 'Google OAuth Client Secret',
-        validate: (value) => {
-          const result = validateClientSecret(value);
-          return result === true ? undefined : result;
-        }
-      });
-
-      if (p.isCancel(googleClientSecret)) {
-        p.cancel('Installation annulée.');
-        process.exit(0);
-      }
-      answers.googleClientSecret = googleClientSecret;
-    }
-  } else {
-    answers.authMethods = [];
+  if (answers.skipAuth) {
+    return 'done';
   }
 
-  // 5. Stockage médias
+  showHeader(answers);
+  p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout sélectionner • Entrée = valider'), 'Astuce');
+
+  const authMethods = await p.multiselect({
+    message: 'Authentification OAuth (optionnel — Entrée pour passer)',
+    options: [
+      { value: 'github', label: 'OAuth GitHub' },
+      { value: 'google', label: 'OAuth Google' }
+    ],
+    required: false
+  });
+
+  if (p.isCancel(authMethods)) {
+    // Ctrl+C sur un multiselect = retour arrière
+    return BACK;
+  }
+  answers.authMethods = authMethods;
+
+  if (authMethods.includes('github')) {
+    showHeader(answers);
+    p.note(
+      chalk.cyan('🔗 Créer une OAuth App:') + ' https://github.com/settings/developers\n' +
+      chalk.gray('Callback URL: http://localhost:3000/api/auth/callback/github'),
+      'Configuration GitHub OAuth'
+    );
+    const githubClientId = await p.text({
+      message: 'GitHub OAuth Client ID',
+      validate: (value) => {
+        const result = validateClientId(value);
+        return result === true ? undefined : result;
+      }
+    });
+    cancelIfCancel(githubClientId);
+    answers.githubClientId = githubClientId;
+
+    showHeader(answers);
+    const githubClientSecret = await p.password({
+      message: 'GitHub OAuth Client Secret',
+      validate: (value) => {
+        const result = validateClientSecret(value);
+        return result === true ? undefined : result;
+      }
+    });
+    cancelIfCancel(githubClientSecret);
+    answers.githubClientSecret = githubClientSecret;
+  }
+
+  if (authMethods.includes('google')) {
+    showHeader(answers);
+    p.note(
+      chalk.cyan('🔗 Console Google Cloud:') + ' https://console.cloud.google.com/apis/credentials\n' +
+      chalk.gray('Callback URL: http://localhost:3000/api/auth/callback/google'),
+      'Configuration Google OAuth'
+    );
+    const googleClientId = await p.text({
+      message: 'Google OAuth Client ID',
+      validate: (value) => {
+        const result = validateClientId(value);
+        return result === true ? undefined : result;
+      }
+    });
+    cancelIfCancel(googleClientId);
+    answers.googleClientId = googleClientId;
+
+    showHeader(answers);
+    const googleClientSecret = await p.password({
+      message: 'Google OAuth Client Secret',
+      validate: (value) => {
+        const result = validateClientSecret(value);
+        return result === true ? undefined : result;
+      }
+    });
+    cancelIfCancel(googleClientSecret);
+    answers.googleClientSecret = googleClientSecret;
+  }
+
+  return 'done';
+}
+
+// ── Étape 3 : Stockage médias ────────────────────────────────────────────────
+
+async function stepStorage(answers) {
+  delete answers.storageType;
+  delete answers.s3AccessKey;
+  delete answers.s3SecretKey;
+  delete answers.s3Region;
+  delete answers.s3Bucket;
+
   showHeader(answers);
   const storageEnabled = await p.select({
     message: 'Activer le stockage de fichiers médias ?',
     options: [
       { value: false, label: 'Non' },
-      { value: true, label: 'Oui' }
+      { value: true, label: 'Oui' },
+      { value: BACK, label: '◀  Étape précédente' },
     ],
     initialValue: false
   });
-
-  if (p.isCancel(storageEnabled)) {
-    p.cancel('Installation annulée.');
-    process.exit(0);
-  }
+  cancelIfCancel(storageEnabled);
+  if (storageEnabled === BACK) return BACK;
   answers.storageEnabled = storageEnabled;
 
   if (storageEnabled) {
@@ -511,15 +464,13 @@ export async function askQuestions() {
       message: 'Type de stockage',
       options: [
         { value: 'minio', label: '🐳 MinIO local avec Docker', hint: 'Recommandé' },
-        { value: 's3', label: '☁️  AWS S3' }
+        { value: 's3', label: '☁️  AWS S3' },
+        { value: BACK, label: '◀  Étape précédente' },
       ],
       initialValue: 'minio'
     });
-
-    if (p.isCancel(storageType)) {
-      p.cancel('Installation annulée.');
-      process.exit(0);
-    }
+    cancelIfCancel(storageType);
+    if (storageType === BACK) return BACK;
     answers.storageType = storageType;
 
     if (storageType === 's3') {
@@ -531,11 +482,7 @@ export async function askQuestions() {
           return result === true ? undefined : result;
         }
       });
-
-      if (p.isCancel(s3AccessKey)) {
-        p.cancel('Installation annulée.');
-        process.exit(0);
-      }
+      cancelIfCancel(s3AccessKey);
       answers.s3AccessKey = s3AccessKey;
 
       showHeader(answers);
@@ -546,11 +493,7 @@ export async function askQuestions() {
           return result === true ? undefined : result;
         }
       });
-
-      if (p.isCancel(s3SecretKey)) {
-        p.cancel('Installation annulée.');
-        process.exit(0);
-      }
+      cancelIfCancel(s3SecretKey);
       answers.s3SecretKey = s3SecretKey;
 
       showHeader(answers);
@@ -559,11 +502,7 @@ export async function askQuestions() {
         placeholder: 'us-east-1',
         initialValue: 'us-east-1'
       });
-
-      if (p.isCancel(s3Region)) {
-        p.cancel('Installation annulée.');
-        process.exit(0);
-      }
+      cancelIfCancel(s3Region);
       answers.s3Region = s3Region;
 
       showHeader(answers);
@@ -571,31 +510,37 @@ export async function askQuestions() {
         message: 'Nom du bucket S3',
         validate: (input) => input.trim().length > 0 ? undefined : 'Nom requis'
       });
-
-      if (p.isCancel(s3Bucket)) {
-        p.cancel('Installation annulée.');
-        process.exit(0);
-      }
+      cancelIfCancel(s3Bucket);
       answers.s3Bucket = s3Bucket;
     }
   }
 
-  // 6. Emails
+  return 'done';
+}
+
+// ── Étape 4 : Service d'emails ───────────────────────────────────────────────
+
+async function stepEmail(answers) {
+  delete answers.resendApiKey;
+  delete answers.emailFrom;
+  delete answers.smtpHost;
+  delete answers.smtpPort;
+  delete answers.smtpUser;
+  delete answers.smtpPassword;
+
   showHeader(answers);
   const emailProvider = await p.select({
     message: 'Service d\'envoi d\'emails',
     options: [
-      { value: 'skip', label: 'Ignorer pour le moment', hint: 'À configurer plus tard' },
       { value: 'resend', label: 'Resend', hint: 'Recommandé' },
-      { value: 'smtp', label: 'SMTP personnalisé' }
+      { value: 'smtp', label: 'SMTP personnalisé' },
+      { value: 'skip', label: 'Ignorer pour le moment', hint: 'À configurer plus tard' },
+      { value: BACK, label: '◀  Étape précédente' },
     ],
-    initialValue: 'skip'
+    initialValue: 'resend'
   });
-
-  if (p.isCancel(emailProvider)) {
-    p.cancel('Installation annulée.');
-    process.exit(0);
-  }
+  cancelIfCancel(emailProvider);
+  if (emailProvider === BACK) return BACK;
   answers.emailProvider = emailProvider;
 
   if (emailProvider === 'resend') {
@@ -604,7 +549,6 @@ export async function askQuestions() {
       chalk.cyan('🔗 Récupérer votre clé API:') + ' https://resend.com/api-keys',
       'Configuration Resend'
     );
-
     const resendApiKey = await p.password({
       message: 'Clé API Resend',
       validate: (value) => {
@@ -612,11 +556,7 @@ export async function askQuestions() {
         return result === true ? undefined : result;
       }
     });
-
-    if (p.isCancel(resendApiKey)) {
-      p.cancel('Installation annulée.');
-      process.exit(0);
-    }
+    cancelIfCancel(resendApiKey);
     answers.resendApiKey = resendApiKey;
 
     showHeader(answers);
@@ -636,11 +576,7 @@ export async function askQuestions() {
         return result === true ? undefined : result;
       }
     });
-
-    if (p.isCancel(emailFrom)) {
-      p.cancel('Installation annulée.');
-      process.exit(0);
-    }
+    cancelIfCancel(emailFrom);
     answers.emailFrom = emailFrom;
 
   } else if (emailProvider === 'smtp') {
@@ -652,11 +588,7 @@ export async function askQuestions() {
         return result === true ? undefined : result;
       }
     });
-
-    if (p.isCancel(smtpHost)) {
-      p.cancel('Installation annulée.');
-      process.exit(0);
-    }
+    cancelIfCancel(smtpHost);
     answers.smtpHost = smtpHost;
 
     showHeader(answers);
@@ -669,11 +601,7 @@ export async function askQuestions() {
         return result === true ? undefined : result;
       }
     });
-
-    if (p.isCancel(smtpPort)) {
-      p.cancel('Installation annulée.');
-      process.exit(0);
-    }
+    cancelIfCancel(smtpPort);
     answers.smtpPort = smtpPort;
 
     showHeader(answers);
@@ -684,11 +612,7 @@ export async function askQuestions() {
         return result === true ? undefined : result;
       }
     });
-
-    if (p.isCancel(smtpUser)) {
-      p.cancel('Installation annulée.');
-      process.exit(0);
-    }
+    cancelIfCancel(smtpUser);
     answers.smtpUser = smtpUser;
 
     showHeader(answers);
@@ -699,77 +623,76 @@ export async function askQuestions() {
         return result === true ? undefined : result;
       }
     });
-
-    if (p.isCancel(smtpPassword)) {
-      p.cancel('Installation annulée.');
-      process.exit(0);
-    }
+    cancelIfCancel(smtpPassword);
     answers.smtpPassword = smtpPassword;
   }
 
-  // 6b. Méthode de connexion (l'inscription reste toujours email + mot de passe + vérification)
-  if (!answers.skipAuth) {
-    // Email/password toujours présent (inscription)
-    answers.authMethods.push('email');
+  return 'done';
+}
 
-    const hasEmailProvider = answers.emailProvider === 'resend' || answers.emailProvider === 'smtp';
+// ── Étape 5 : Méthode de connexion ──────────────────────────────────────────
 
-    if (hasEmailProvider) {
-      showHeader(answers);
-      const loginMethod = await p.select({
-        message: 'Méthode de connexion (après création de compte)',
-        options: [
-          {
-            value: 'email-password',
-            label: 'Email + Mot de passe',
-            hint: 'Formulaire email + mot de passe'
-          },
-          {
-            value: 'magiclink',
-            label: 'Magic Link',
-            hint: 'Lien de connexion envoyé par email'
-          },
-          {
-            value: 'otp',
-            label: 'Code OTP',
-            hint: 'Code à usage unique envoyé par email'
-          },
-        ],
-        initialValue: 'email-password'
-      });
+async function stepLoginMethod(answers) {
+  // Reset
+  delete answers.loginMethod;
+  // Garder uniquement les méthodes OAuth (supprimer email/magiclink/otp précédemment ajoutés)
+  answers.authMethods = (answers.authMethods || []).filter(m => m === 'github' || m === 'google');
 
-      if (p.isCancel(loginMethod)) {
-        p.cancel('Installation annulée.');
-        process.exit(0);
-      }
-
-      answers.loginMethod = loginMethod;
-
-      if (loginMethod === 'magiclink') {
-        answers.authMethods.push('magiclink');
-      } else if (loginMethod === 'otp') {
-        answers.authMethods.push('otp');
-      }
-    } else {
-      answers.loginMethod = 'email-password';
-    }
+  if (answers.skipAuth) {
+    return 'done';
   }
 
-  // 7. Paiements
+  // Email/password toujours présent pour l'inscription
+  if (!answers.authMethods.includes('email')) {
+    answers.authMethods.push('email');
+  }
+
+  const hasEmailProvider = answers.emailProvider === 'resend' || answers.emailProvider === 'smtp';
+
+  if (!hasEmailProvider) {
+    answers.loginMethod = 'email-password';
+    return 'done';
+  }
+
+  showHeader(answers);
+  const loginMethod = await p.select({
+    message: 'Méthode de connexion (après création de compte)',
+    options: [
+      { value: 'email-password', label: 'Email + Mot de passe', hint: 'Formulaire email + mot de passe' },
+      { value: 'magiclink', label: 'Magic Link', hint: 'Lien de connexion envoyé par email' },
+      { value: 'otp', label: 'Code OTP', hint: 'Code à usage unique envoyé par email' },
+      { value: BACK, label: '◀  Étape précédente' },
+    ],
+    initialValue: 'email-password'
+  });
+  cancelIfCancel(loginMethod);
+  if (loginMethod === BACK) return BACK;
+
+  answers.loginMethod = loginMethod;
+  if (loginMethod === 'magiclink') answers.authMethods.push('magiclink');
+  else if (loginMethod === 'otp') answers.authMethods.push('otp');
+
+  return 'done';
+}
+
+// ── Étape 6 : Paiements Stripe ───────────────────────────────────────────────
+
+async function stepPayments(answers) {
+  delete answers.stripePublicKey;
+  delete answers.stripeSecretKey;
+
   showHeader(answers);
   const paymentsEnabled = await p.select({
     message: 'Activer les paiements Stripe ?',
     options: [
       { value: false, label: 'Non' },
-      { value: true, label: 'Oui' }
+      { value: true, label: 'Oui' },
+      { value: BACK, label: '◀  Étape précédente' },
     ],
     initialValue: false
   });
-
-  if (p.isCancel(paymentsEnabled)) {
-    p.cancel('Installation annulée.');
-    process.exit(0);
-  }
+  cancelIfCancel(paymentsEnabled);
+  if (paymentsEnabled === BACK) return BACK;
   answers.paymentsEnabled = paymentsEnabled;
 
   if (paymentsEnabled) {
@@ -779,7 +702,6 @@ export async function askQuestions() {
       chalk.gray('Utiliser les clés de test pour le développement'),
       'Configuration Stripe'
     );
-
     const stripePublicKey = await p.password({
       message: 'Clé publique Stripe (pk_test_...)',
       validate: (input) => {
@@ -788,11 +710,7 @@ export async function askQuestions() {
         return undefined;
       }
     });
-
-    if (p.isCancel(stripePublicKey)) {
-      p.cancel('Installation annulée.');
-      process.exit(0);
-    }
+    cancelIfCancel(stripePublicKey);
     answers.stripePublicKey = stripePublicKey;
 
     showHeader(answers);
@@ -804,15 +722,18 @@ export async function askQuestions() {
         return undefined;
       }
     });
-
-    if (p.isCancel(stripeSecretKey)) {
-      p.cancel('Installation annulée.');
-      process.exit(0);
-    }
+    cancelIfCancel(stripeSecretKey);
     answers.stripeSecretKey = stripeSecretKey;
   }
 
-  // 8. Internationalisation - Langue par défaut
+  return 'done';
+}
+
+// ── Étape 7 : Internationalisation ──────────────────────────────────────────
+
+async function stepI18n(answers) {
+  delete answers.i18nLanguages;
+
   showHeader(answers);
   const i18nDefaultLanguage = await p.select({
     message: 'Langue par défaut',
@@ -820,166 +741,134 @@ export async function askQuestions() {
       { value: 'fr', label: '🇫🇷 Français' },
       { value: 'en', label: '🇺🇸 Anglais' },
       { value: 'es', label: '🇪🇸 Espagnol' },
-      { value: 'de', label: '🇩🇪 Allemand' }
+      { value: 'de', label: '🇩🇪 Allemand' },
+      { value: BACK, label: '◀  Étape précédente' },
     ],
     initialValue: 'fr'
   });
-
-  if (p.isCancel(i18nDefaultLanguage)) {
-    p.cancel('Installation annulée.');
-    process.exit(0);
-  }
+  cancelIfCancel(i18nDefaultLanguage);
+  if (i18nDefaultLanguage === BACK) return BACK;
   answers.i18nDefaultLanguage = i18nDefaultLanguage;
 
-  // 9. Langues supplémentaires - d'abord demander si l'utilisateur en veut
   showHeader(answers);
-
   const wantsMoreLanguages = await p.confirm({
     message: 'Voulez-vous ajouter d\'autres langues ?',
     initialValue: false
   });
-
-  if (p.isCancel(wantsMoreLanguages)) {
-    p.cancel('Installation annulée.');
-    process.exit(0);
-  }
+  cancelIfCancel(wantsMoreLanguages);
 
   if (wantsMoreLanguages) {
-    // Proposer les langues disponibles (sans la langue par défaut, sans option "Aucune")
     const allLanguages = [
       { value: 'en', label: '🇺🇸 Anglais' },
       { value: 'es', label: '🇪🇸 Espagnol' },
       { value: 'de', label: '🇩🇪 Allemand' },
       { value: 'fr', label: '🇫🇷 Français' }
     ];
-
     const availableLanguages = allLanguages.filter(lang => lang.value !== i18nDefaultLanguage);
-
-    // Pré-cocher US (Anglais) par défaut, sauf si c'est déjà la langue par défaut
     const defaultLanguages = i18nDefaultLanguage !== 'en' && availableLanguages.some(l => l.value === 'en')
-      ? ['en']
-      : [];
+      ? ['en'] : [];
 
     showHeader(answers);
     p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout sélectionner • Entrée = valider'), 'Astuce');
-
     const i18nLanguages = await p.multiselect({
       message: `Sélectionnez les langues supplémentaires (langue par défaut : ${i18nDefaultLanguage})`,
       options: availableLanguages,
       required: false,
       initialValues: defaultLanguages
     });
-
-    if (p.isCancel(i18nLanguages)) {
-      p.cancel('Installation annulée.');
-      process.exit(0);
-    }
-
+    if (p.isCancel(i18nLanguages)) return BACK;
     answers.i18nLanguages = i18nLanguages;
   } else {
-    // Pas de langues supplémentaires
     answers.i18nLanguages = [];
   }
 
-  // 10. IA pour utilisateurs finaux - d'abord demander si l'utilisateur en veut
-  showHeader(answers);
+  return 'done';
+}
 
+// ── Étape 8 : IA ─────────────────────────────────────────────────────────────
+
+async function stepAI(answers) {
+  delete answers.claudeApiKey;
+  delete answers.openaiApiKey;
+  delete answers.geminiApiKey;
+
+  showHeader(answers);
   const wantsAI = await p.confirm({
-    message: 'Souhaitez-vous proposer aux utilisateurs finaux de votre SAAS des fonctionnalités IA ?',
+    message: 'Souhaitez-vous proposer aux utilisateurs finaux des fonctionnalités IA ?',
     initialValue: false
   });
+  cancelIfCancel(wantsAI);
 
-  if (p.isCancel(wantsAI)) {
-    p.cancel('Installation annulée.');
-    process.exit(0);
-  }
-
-  if (wantsAI) {
-    // Proposer le choix des providers IA
-    showHeader(answers);
-    p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout sélectionner • Entrée = valider'), 'Astuce');
-
-    const aiProviders = await p.multiselect({
-      message: 'Sélectionnez les providers IA à intégrer',
-      options: [
-        { value: 'claude', label: 'Claude', hint: 'Anthropic' },
-        { value: 'openai', label: 'ChatGPT', hint: 'OpenAI' },
-        { value: 'gemini', label: 'Gemini', hint: 'Google' }
-      ],
-      required: true,
-      initialValues: ['claude']
-    });
-
-    if (p.isCancel(aiProviders)) {
-      p.cancel('Installation annulée.');
-      process.exit(0);
-    }
-
-    answers.aiProviders = Array.isArray(aiProviders) ? aiProviders : [];
-
-    // Demander les clés API pour chaque IA sélectionnée
-    if (answers.aiProviders.length > 0) {
-      for (const provider of answers.aiProviders) {
-        const providerName = provider === 'claude' ? 'Anthropic' : provider === 'openai' ? 'OpenAI' : 'Google';
-
-        showHeader(answers);
-
-        // Afficher le lien pour récupérer la clé API
-        if (provider === 'claude') {
-          p.note(
-            chalk.cyan('🔗 Récupérer votre clé API:') + ' https://console.anthropic.com/settings/keys',
-            'Configuration Claude (Anthropic)'
-          );
-        } else if (provider === 'openai') {
-          p.note(
-            chalk.cyan('🔗 Récupérer votre clé API:') + ' https://platform.openai.com/api-keys',
-            'Configuration ChatGPT (OpenAI)'
-          );
-        } else if (provider === 'gemini') {
-          p.note(
-            chalk.cyan('🔗 Récupérer votre clé API:') + ' https://aistudio.google.com/app/apikey',
-            'Configuration Gemini (Google)'
-          );
-        }
-
-        const apiKey = await p.password({
-          message: `Clé API ${providerName}`,
-          validate: (value) => {
-            const result = validateApiKey(value);
-            return result === true ? undefined : result;
-          }
-        });
-
-        if (p.isCancel(apiKey)) {
-          p.cancel('Installation annulée.');
-          process.exit(0);
-        }
-        answers[`${provider}ApiKey`] = apiKey;
-      }
-    }
-  } else {
-    // Pas de fonctionnalités IA
+  if (!wantsAI) {
     answers.aiProviders = [];
+    return 'done';
   }
 
-  // 11. Thème
+  showHeader(answers);
+  p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout sélectionner • Entrée = valider'), 'Astuce');
+  const aiProviders = await p.multiselect({
+    message: 'Sélectionnez les providers IA à intégrer',
+    options: [
+      { value: 'claude', label: 'Claude', hint: 'Anthropic' },
+      { value: 'openai', label: 'ChatGPT', hint: 'OpenAI' },
+      { value: 'gemini', label: 'Gemini', hint: 'Google' }
+    ],
+    required: true,
+    initialValues: ['claude']
+  });
+  if (p.isCancel(aiProviders)) return BACK;
+  answers.aiProviders = Array.isArray(aiProviders) ? aiProviders : [];
+
+  if (answers.aiProviders.length > 0) {
+    for (const provider of answers.aiProviders) {
+      showHeader(answers);
+      if (provider === 'claude') {
+        p.note(chalk.cyan('🔗 Récupérer votre clé API:') + ' https://console.anthropic.com/settings/keys', 'Configuration Claude (Anthropic)');
+      } else if (provider === 'openai') {
+        p.note(chalk.cyan('🔗 Récupérer votre clé API:') + ' https://platform.openai.com/api-keys', 'Configuration ChatGPT (OpenAI)');
+      } else if (provider === 'gemini') {
+        p.note(chalk.cyan('🔗 Récupérer votre clé API:') + ' https://aistudio.google.com/app/apikey', 'Configuration Gemini (Google)');
+      }
+      const providerName = provider === 'claude' ? 'Anthropic' : provider === 'openai' ? 'OpenAI' : 'Google';
+      const apiKey = await p.password({
+        message: `Clé API ${providerName}`,
+        validate: (value) => {
+          const result = validateApiKey(value);
+          return result === true ? undefined : result;
+        }
+      });
+      cancelIfCancel(apiKey);
+      answers[`${provider}ApiKey`] = apiKey;
+    }
+  }
+
+  return 'done';
+}
+
+// ── Étape 9 : Thème ──────────────────────────────────────────────────────────
+
+async function stepTheme(answers) {
   showHeader(answers);
   const theme = await p.select({
     message: 'Pour l\'interface du SAAS, quel thème désirez-vous par défaut ?',
     options: [
       { value: 'dark', label: '🌙 Sombre' },
-      { value: 'light', label: '☀️  Clair' }
+      { value: 'light', label: '☀️  Clair' },
+      { value: BACK, label: '◀  Étape précédente' },
     ],
     initialValue: 'dark'
   });
-
-  if (p.isCancel(theme)) {
-    p.cancel('Installation annulée.');
-    process.exit(0);
-  }
+  cancelIfCancel(theme);
+  if (theme === BACK) return BACK;
   answers.theme = theme;
+  return 'done';
+}
 
-  // 12. Super administrateur
+// ── Étape 10 : Super Administrateur ─────────────────────────────────────────
+
+async function stepAdmin(answers) {
+  delete answers.adminEmail;
+
   showHeader(answers);
   p.note(
     chalk.cyan('👤 Le super administrateur aura accès à un espace /admin dédié\n') +
@@ -989,15 +878,17 @@ export async function askQuestions() {
     'Super Administrateur'
   );
 
-  const wantsAdmin = await p.confirm({
+  const wantsAdmin = await p.select({
     message: 'Ajouter un compte super administrateur ?',
+    options: [
+      { value: true, label: 'Oui', hint: 'Recommandé' },
+      { value: false, label: 'Non' },
+      { value: BACK, label: '◀  Étape précédente' },
+    ],
     initialValue: true
   });
-
-  if (p.isCancel(wantsAdmin)) {
-    p.cancel('Installation annulée.');
-    process.exit(0);
-  }
+  cancelIfCancel(wantsAdmin);
+  if (wantsAdmin === BACK) return BACK;
   answers.wantsAdmin = wantsAdmin;
 
   if (wantsAdmin) {
@@ -1010,20 +901,21 @@ export async function askQuestions() {
         return result === true ? undefined : result;
       }
     });
-
-    if (p.isCancel(adminEmail)) {
-      p.cancel('Installation annulée.');
-      process.exit(0);
-    }
+    cancelIfCancel(adminEmail);
     answers.adminEmail = adminEmail;
   }
 
-  // 13. Type de SaaS
+  return 'done';
+}
+
+// ── Étape 11 : Type de SaaS ──────────────────────────────────────────────────
+
+async function stepSaasType(answers) {
   showHeader(answers);
   p.note(
     'Choisissez le type de SaaS à générer.\nLe mode Blog ajoute un système complet de publication d\'articles.',
     'Type de projet'
-  )
+  );
 
   const saasType = await p.select({
     message: 'Quel type de SaaS souhaitez-vous créer ?',
@@ -1031,24 +923,70 @@ export async function askQuestions() {
       { value: 'default', label: 'Default', hint: 'Plateforme SaaS standard' },
       { value: 'blog', label: 'Blog', hint: 'Système de publication d\'articles intégré' },
       { value: 'shop', label: 'Shop — Coming Soon', hint: 'Disponible dans une prochaine version', disabled: true },
+      { value: BACK, label: '◀  Étape précédente' },
     ],
     initialValue: 'default',
-  })
-  if (p.isCancel(saasType)) { p.cancel('Installation annulée.'); process.exit(0) }
+  });
+  cancelIfCancel(saasType);
+  if (saasType === BACK) return BACK;
   answers.saasType = saasType;
+  return 'done';
+}
 
-  // 14. Claude Code
+// ── Étape 12 : Claude Code ───────────────────────────────────────────────────
+
+async function stepClaudeCode(answers) {
   showHeader(answers);
-  const claudeCodeInstalled = await p.confirm({
+  const claudeCodeInstalled = await p.select({
     message: 'Avez-vous Claude Code CLI installé ?',
+    options: [
+      { value: true, label: 'Oui' },
+      { value: false, label: 'Non' },
+      { value: BACK, label: '◀  Étape précédente' },
+    ],
     initialValue: true
   });
-
-  if (p.isCancel(claudeCodeInstalled)) {
-    p.cancel('Installation annulée.');
-    process.exit(0);
-  }
+  cancelIfCancel(claudeCodeInstalled);
+  if (claudeCodeInstalled === BACK) return BACK;
   answers.claudeCodeInstalled = claudeCodeInstalled;
+  return 'done';
+}
+
+// ── Orchestrateur principal ──────────────────────────────────────────────────
+
+/**
+ * Pose toutes les questions avec l'interface moderne de @clack/prompts
+ * Navigation : sélectionnez "◀ Étape précédente" dans les menus à choix
+ */
+export async function askQuestions() {
+  const answers = {};
+
+  const steps = [
+    stepProjectName,    // 0 — pas de retour arrière possible
+    stepDatabase,       // 1
+    stepAuth,           // 2
+    stepStorage,        // 3
+    stepEmail,          // 4
+    stepLoginMethod,    // 5 — conditionnel selon email
+    stepPayments,       // 6
+    stepI18n,           // 7
+    stepAI,             // 8
+    stepTheme,          // 9
+    stepAdmin,          // 10
+    stepSaasType,       // 11
+    stepClaudeCode,     // 12
+  ];
+
+  let i = 0;
+  while (i < steps.length) {
+    const result = await steps[i](answers);
+    if (result === BACK) {
+      // Impossible de reculer avant l'étape 0
+      i = Math.max(0, i - 1);
+    } else {
+      i++;
+    }
+  }
 
   // Animation finale
   showHeader(answers);
