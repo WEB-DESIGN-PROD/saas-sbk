@@ -1,5 +1,7 @@
 // Templates d'emails HTML — design moderne, compatible dark mode email clients
 
+export { sendEmail } from './client'
+
 // Wrapper commun (outer + header)
 function emailWrapper(appName: string, content: string) {
   return `<!DOCTYPE html>

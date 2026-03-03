@@ -345,7 +345,7 @@ export async function sendInvitationEmail(to: string, role: string, appUrl: stri
       body,
       \`\${appUrl}/register\`,
       'Créer mon compte',
-      'Cette invitation expire dans 7 jours. Si vous n\'attendiez pas cet email, vous pouvez l\'ignorer.'
+      "Cette invitation expire dans 7 jours. Si vous n'attendiez pas cet email, vous pouvez l'ignorer."
     ),
   })
 }
@@ -372,7 +372,7 @@ export async function sendPendingReviewEmail(to: string, postTitle: string, post
       \`"\${postTitle}" par \${authorName}\`,
       body,
       \`\${appUrl}/admin/blog/\${postId}/edit\`,
-      'Voir et valider l\'article',
+      "Voir et valider l'article",
       'Vous recevez cet email car vous êtes administrateur ou co-administrateur de la plateforme.'
     ),
   })
