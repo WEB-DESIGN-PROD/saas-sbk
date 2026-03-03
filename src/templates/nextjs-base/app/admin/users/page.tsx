@@ -1,10 +1,10 @@
-import { verifyAdmin } from "@/lib/dal"
+import { verifyRole } from "@/lib/dal"
 import { prisma } from "@/lib/db/client"
 import { UsersTable } from "@/components/admin/users-table"
 import { InviteUserButton } from "@/components/admin/invite-user-button"
 
 export default async function AdminUsersPage() {
-  await verifyAdmin()
+  const { role } = await verifyRole(['admin', 'co-admin'])
 
   const [users, invitations] = await Promise.all([
     prisma.user.findMany({
@@ -55,7 +55,7 @@ export default async function AdminUsersPage() {
               {users.length} compte{users.length !== 1 ? "s" : ""} enregistré{users.length !== 1 ? "s" : ""}
             </p>
           </div>
-          <InviteUserButton />
+          {role === 'admin' && <InviteUserButton />}
         </div>
         <div className="px-4 lg:px-6">
           <UsersTable users={serializedUsers} invitations={serializedInvitations} />
