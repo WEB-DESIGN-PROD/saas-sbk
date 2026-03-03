@@ -149,6 +149,8 @@ function copyConfigFiles(projectPath, config, templatesDir) {
     conditionalCopy.push(
       'app/admin/layout.tsx',
       'app/admin/page.tsx',
+      'app/admin/account/page.tsx',
+      'app/admin/settings/page.tsx',
       'app/admin/users/page.tsx',
       'components/admin/section-cards-admin.tsx',
       'components/admin/admin-chart-signups.tsx',

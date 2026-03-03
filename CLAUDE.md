@@ -169,6 +169,12 @@ STRIPE_SECRET_KEY=...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=...
 ```
 
+## Règles de workflow GIT
+
+- **JAMAIS** faire de `git push` sans que Jerome le demande explicitement
+- **JAMAIS** créer de PR sans demande explicite
+- Commits locaux OK à tout moment, push uniquement sur instruction
+
 ## Principes de sécurité CRITIQUES
 
 - **TOUJOURS** valider les entrées utilisateur avec regex strictes

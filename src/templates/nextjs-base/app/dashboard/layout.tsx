@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { ImpersonationBanner } from "@/components/impersonation-banner"
@@ -12,8 +13,13 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { user, userId, impersonatedBy } = await verifySession()
+  const { user, userId, role, impersonatedBy } = await verifySession()
   const plan = await getUserPlan(userId)
+
+  // L'admin est redirigé vers /admin sauf s'il est en train d'impersonner un user
+  if (role === "admin" && !impersonatedBy) {
+    redirect("/admin")
+  }
 
   return (
     <SidebarProvider

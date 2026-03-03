@@ -113,11 +113,11 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => router.push("/dashboard/account")}>
+              <DropdownMenuItem onClick={() => router.push(mode === "admin" ? "/admin/account" : "/dashboard/account")}>
                 <UserCircle />
                 Compte
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/dashboard/settings")}>
+              <DropdownMenuItem onClick={() => router.push(mode === "admin" ? "/admin/settings" : "/dashboard/settings")}>
                 <Settings />
                 Paramètres
               </DropdownMenuItem>
@@ -127,7 +127,7 @@ export function NavUser({
                   Facturation
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem onClick={() => router.push("/dashboard/settings#notifications")}>
+              <DropdownMenuItem onClick={() => router.push(mode === "admin" ? "/admin/settings#notifications" : "/dashboard/settings#notifications")}>
                 <Bell />
                 Notifications
               </DropdownMenuItem>
