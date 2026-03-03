@@ -84,6 +84,18 @@ export const verifyStaff = cache(async () => {
 })
 
 /**
+ * Récupère la session sans redirection — pour pages publiques.
+ * Retourne null si non authentifié.
+ */
+export const getOptionalSession = cache(async () => {
+  const requestHeaders = await headers()
+  const session = await auth.api.getSession({ headers: requestHeaders })
+  if (!session?.user) return null
+  const role = ((session.user as any).role ?? 'member') as Role
+  return { userId: session.user.id, role }
+})
+
+/**
  * Récupère le plan et les crédits d'un utilisateur depuis la base de données.
  * Mémorisée pendant le render pass.
  */

@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
@@ -11,7 +12,19 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 export function ThemeToggle() {
+  const [mounted, setMounted] = useState(false)
   const { setTheme } = useTheme()
+
+  useEffect(() => setMounted(true), [])
+
+  // Rendu identique côté serveur et lors de l'hydration — évite le mismatch Radix useId()
+  if (!mounted) {
+    return (
+      <Button variant="outline" size="icon" aria-label="Changer le thème">
+        <Sun className="h-[1.2rem] w-[1.2rem]" />
+      </Button>
+    )
+  }
 
   return (
     <DropdownMenu>
