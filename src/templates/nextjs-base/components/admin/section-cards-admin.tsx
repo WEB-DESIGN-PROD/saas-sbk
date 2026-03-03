@@ -9,20 +9,38 @@ import {
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
+const ROLE_LABELS: Record<string, { singular: string; plural: string }> = {
+  'co-admin':    { singular: 'Co-Admin',    plural: 'Co-Admins' },
+  'editor':      { singular: 'Éditeur',     plural: 'Éditeurs' },
+  'contributor': { singular: 'Contributeur',plural: 'Contributeurs' },
+}
+
+function formatActiveStaff(activeStaff: Record<string, number>): string {
+  const parts = Object.entries(activeStaff)
+    .filter(([, count]) => count > 0)
+    .map(([role, count]) => {
+      const labels = ROLE_LABELS[role]
+      const label = labels ? (count > 1 ? labels.plural : labels.singular) : role
+      return `${count} ${label}`
+    })
+  return parts.length > 0 ? parts.join(' · ') : 'Aucun collaborateur'
+}
+
 interface AdminStatsProps {
   totalUsers: number
   newToday: number
-  activeSessions: number
+  activeStaff: Record<string, number>
   verifiedUsers: number
 }
 
 export function SectionCardsAdmin({
   totalUsers,
   newToday,
-  activeSessions,
+  activeStaff,
   verifiedUsers,
 }: AdminStatsProps) {
   const verifiedRate = totalUsers > 0 ? Math.round((verifiedUsers / totalUsers) * 100) : 0
+  const totalActiveStaff = Object.values(activeStaff).reduce((a, b) => a + b, 0)
 
   return (
     <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
@@ -75,20 +93,20 @@ export function SectionCardsAdmin({
       <Card className="@container/card">
         <CardHeader>
           <CardDescription className="flex items-center gap-1.5">
-            <Activity className="h-3.5 w-3.5" /> Sessions actives
+            <Activity className="h-3.5 w-3.5" /> Collaborateurs actifs
           </CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {activeSessions.toLocaleString("fr-FR")}
+            {totalActiveStaff.toLocaleString("fr-FR")}
           </CardTitle>
           <CardAction>
-            {activeSessions > 0 ? (
+            {totalActiveStaff > 0 ? (
               <Badge variant="outline" className="text-green-600 border-green-500/40">
                 <span className="mr-1 h-2 w-2 rounded-full bg-green-500 inline-block" />
                 En ligne
               </Badge>
             ) : (
-              <Badge variant="outline" className="text-red-500 border-red-500/40">
-                <span className="mr-1 h-2 w-2 rounded-full bg-red-500 inline-block" />
+              <Badge variant="outline" className="text-muted-foreground border-border">
+                <span className="mr-1 h-2 w-2 rounded-full bg-muted-foreground/40 inline-block" />
                 Hors ligne
               </Badge>
             )}
@@ -96,9 +114,9 @@ export function SectionCardsAdmin({
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Sessions en cours
+            {formatActiveStaff(activeStaff)}
           </div>
-          <div className="text-muted-foreground">Sessions non expirées</div>
+          <div className="text-muted-foreground">Accès /admin — hors super admin</div>
         </CardFooter>
       </Card>
 
