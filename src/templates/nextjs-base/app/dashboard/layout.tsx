@@ -16,8 +16,9 @@ export default async function DashboardLayout({
   const { user, userId, role, impersonatedBy } = await verifySession()
   const plan = await getUserPlan(userId)
 
-  // L'admin est redirigé vers /admin sauf s'il est en train d'impersonner un user
-  if (role === "admin" && !impersonatedBy) {
+  // Tous les rôles staff sont redirigés vers /admin sauf impersonation
+  const staffRoles = ["admin", "co-admin", "editor", "contributor"]
+  if (staffRoles.includes(role) && !impersonatedBy) {
     redirect("/admin")
   }
 
