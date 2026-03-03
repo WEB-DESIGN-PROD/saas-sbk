@@ -155,10 +155,13 @@ function copyConfigFiles(projectPath, config, templatesDir) {
       'components/admin/section-cards-admin.tsx',
       'components/admin/admin-chart-signups.tsx',
       'components/admin/users-table.tsx',
+      'components/admin/invite-user-button.tsx',
       'components/admin/auto-refresh.tsx',
       'components/impersonation-banner.tsx',
       'app/api/admin/stats/route.ts',
       'app/api/admin/users/route.ts',
+      'app/api/admin/invitations/route.ts',
+      'app/api/admin/invitations/[id]/route.ts',
     );
   }
 
