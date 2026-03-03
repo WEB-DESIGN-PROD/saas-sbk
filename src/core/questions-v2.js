@@ -382,11 +382,13 @@ async function stepAuth(answers) {
   p.note(chalk.gray('💡 Espace = cocher/décocher • a = tout sélectionner • Entrée = valider'), 'Astuce');
 
   const authMethods = await p.multiselect({
-    message: 'Authentification OAuth (optionnel — Entrée pour passer)',
+    message: 'Méthodes d\'authentification',
     options: [
-      { value: 'github', label: 'OAuth GitHub' },
-      { value: 'google', label: 'OAuth Google' }
+      { value: 'email', label: 'Email + mot de passe (Better Auth)', hint: 'Toujours inclus' },
+      { value: 'github', label: 'OAuth GitHub', hint: 'Optionnel' },
+      { value: 'google', label: 'OAuth Google', hint: 'Optionnel' }
     ],
+    initialValues: ['email'],
     required: false
   });
 
@@ -889,7 +891,8 @@ async function stepAdmin(answers) {
     chalk.cyan('👤 Le super administrateur aura accès à un espace /admin dédié\n') +
     chalk.gray('   pour monitorer les inscriptions, suivre les sessions actives\n') +
     chalk.gray('   et se connecter temporairement en tant qu\'utilisateur pour du support.\n') +
-    chalk.yellow('   ⚠  Cet accès est exclusif — aucun autre compte ne peut y accéder.'),
+    chalk.yellow('   ⚠  Cet accès est exclusif — Uniquement les membres avec un rôle\n') +
+    chalk.yellow('   spécifique ajoutés par le super admin pourront y accéder.'),
     'Super Administrateur'
   );
 
