@@ -94,8 +94,6 @@ function showHeader(answers = {}) {
   const baseline1 = chalk.gray(`Générateur de SAAS Next.js • v${version}`);
   console.log(centerText(baseline1));
   console.log('');
-  console.log(centerText(chalk.dim('Les informations saisies serviront à générer votre fichier .env')));
-  console.log('');
 
   // Afficher les réponses validées sur 2 colonnes
   if (Object.keys(answers).length > 0) {
@@ -235,6 +233,11 @@ async function selectWithBack(options) {
 
 async function stepProjectName(answers) {
   showHeader(answers);
+  p.note(
+    chalk.cyan('Les informations saisies serviront à générer votre fichier ') + chalk.bold('.env') + '\n' +
+    chalk.gray('Vous pourrez les modifier à tout moment dans ce fichier après génération.'),
+    'ℹ️  À savoir'
+  );
   const projectName = await p.text({
     message: 'Nom du projet',
     placeholder: 'my-saas',
