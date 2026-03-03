@@ -192,7 +192,7 @@ function showHeader(answers = {}) {
     console.log(chalk.gray(bottomBorder));
 
     // Hint de navigation court et centré
-    console.log(centerText(chalk.dim('← retour  •  Ctrl+C : annuler')));
+    console.log(centerText(chalk.dim('← Étape précédente  •  Ctrl+C : Revenir au début')));
     console.log('');
   }
 }
