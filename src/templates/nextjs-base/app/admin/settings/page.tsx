@@ -91,15 +91,6 @@ export default function AdminSettingsPage() {
                 </div>
                 <Button variant="outline" size="sm" className="text-green-600 border-green-600/40 bg-green-50 dark:bg-green-950/20">Activé</Button>
               </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Notifications par email</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Recevoir des notifications système par email
-                  </p>
-                </div>
-                <Button variant="outline" size="sm">Activé</Button>
-              </div>
             </CardContent>
           </Card>
         </div>
