@@ -191,19 +191,42 @@ function showHeader(answers = {}) {
     const bottomBorder = '─'.repeat(terminalWidth);
     console.log(chalk.gray(bottomBorder));
 
-    // Hint de navigation persistant
-    console.log(chalk.dim('  ◀ Sélectionnez "◀ Étape précédente" dans les menus à choix pour revenir  •  Ctrl+C : annuler'));
+    // Hint de navigation court et centré
+    console.log(centerText(chalk.dim('← retour  •  Ctrl+C : annuler')));
     console.log('');
   }
 }
 
-// ── Helpers annulation ──────────────────────────────────────────────────────
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
 function cancelIfCancel(value) {
   if (p.isCancel(value)) {
     p.cancel('Installation annulée.');
     process.exit(0);
   }
+}
+
+/**
+ * Wrapper autour de p.select qui intercepte la flèche gauche (←) pour déclencher un retour arrière.
+ * La flèche gauche injecte un Ctrl+C dans stdin, ce qui annule le prompt @clack.
+ * Un flag `backTriggered` distingue ce retour d'un vrai Ctrl+C utilisateur.
+ *
+ * ⚠️  Ne PAS utiliser avec p.confirm — la flèche gauche/droite y sert à basculer Oui/Non.
+ */
+async function selectWithBack(options) {
+  let backTriggered = false;
+  const onData = (chunk) => {
+    if (backTriggered) return;
+    if (chunk.toString() === '\x1b[D') {
+      backTriggered = true;
+      process.stdin.push(Buffer.from('\x03')); // injecte Ctrl+C → annule le prompt
+    }
+  };
+  process.stdin.prependListener('data', onData);
+  const result = await p.select(options);
+  process.stdin.removeListener('data', onData);
+  if (backTriggered && p.isCancel(result)) return BACK;
+  return result;
 }
 
 // ── Étape 0 : Nom du projet ──────────────────────────────────────────────────
@@ -236,7 +259,7 @@ async function stepDatabase(answers) {
 
   while (true) {
     showHeader(answers);
-    const databaseType = await p.select({
+    const databaseType = await selectWithBack({
       message: 'Configuration de la base de données',
       options: [
         { value: 'docker', label: '🐳 PostgreSQL local avec Docker', hint: 'Recommandé' },
@@ -245,7 +268,6 @@ async function stepDatabase(answers) {
         { value: 'mongodb-remote', label: '   MongoDB distant — Coming Soon', hint: 'Disponible prochainement', disabled: true },
         { value: 'sqlite', label: '   SQLite — Coming Soon', hint: 'Disponible prochainement', disabled: true },
         { value: 'skip', label: '   Ignorer pour l\'instant', hint: 'À configurer plus tard' },
-        { value: BACK, label: '◀  Étape précédente' },
       ],
       initialValue: 'docker'
     });
@@ -445,12 +467,11 @@ async function stepStorage(answers) {
   delete answers.s3Bucket;
 
   showHeader(answers);
-  const storageEnabled = await p.select({
+  const storageEnabled = await selectWithBack({
     message: 'Activer le stockage de fichiers médias ?',
     options: [
       { value: false, label: 'Non' },
       { value: true, label: 'Oui' },
-      { value: BACK, label: '◀  Étape précédente' },
     ],
     initialValue: false
   });
@@ -460,12 +481,11 @@ async function stepStorage(answers) {
 
   if (storageEnabled) {
     showHeader(answers);
-    const storageType = await p.select({
+    const storageType = await selectWithBack({
       message: 'Type de stockage',
       options: [
         { value: 'minio', label: '🐳 MinIO local avec Docker', hint: 'Recommandé' },
         { value: 's3', label: '☁️  AWS S3' },
-        { value: BACK, label: '◀  Étape précédente' },
       ],
       initialValue: 'minio'
     });
@@ -529,13 +549,12 @@ async function stepEmail(answers) {
   delete answers.smtpPassword;
 
   showHeader(answers);
-  const emailProvider = await p.select({
+  const emailProvider = await selectWithBack({
     message: 'Service d\'envoi d\'emails',
     options: [
       { value: 'resend', label: 'Resend', hint: 'Recommandé' },
       { value: 'smtp', label: 'SMTP personnalisé' },
       { value: 'skip', label: 'Ignorer pour le moment', hint: 'À configurer plus tard' },
-      { value: BACK, label: '◀  Étape précédente' },
     ],
     initialValue: 'resend'
   });
@@ -655,13 +674,12 @@ async function stepLoginMethod(answers) {
   }
 
   showHeader(answers);
-  const loginMethod = await p.select({
+  const loginMethod = await selectWithBack({
     message: 'Méthode de connexion (après création de compte)',
     options: [
       { value: 'email-password', label: 'Email + Mot de passe', hint: 'Formulaire email + mot de passe' },
       { value: 'magiclink', label: 'Magic Link', hint: 'Lien de connexion envoyé par email' },
       { value: 'otp', label: 'Code OTP', hint: 'Code à usage unique envoyé par email' },
-      { value: BACK, label: '◀  Étape précédente' },
     ],
     initialValue: 'email-password'
   });
@@ -682,12 +700,11 @@ async function stepPayments(answers) {
   delete answers.stripeSecretKey;
 
   showHeader(answers);
-  const paymentsEnabled = await p.select({
+  const paymentsEnabled = await selectWithBack({
     message: 'Activer les paiements Stripe ?',
     options: [
       { value: false, label: 'Non' },
       { value: true, label: 'Oui' },
-      { value: BACK, label: '◀  Étape précédente' },
     ],
     initialValue: false
   });
@@ -735,14 +752,13 @@ async function stepI18n(answers) {
   delete answers.i18nLanguages;
 
   showHeader(answers);
-  const i18nDefaultLanguage = await p.select({
+  const i18nDefaultLanguage = await selectWithBack({
     message: 'Langue par défaut',
     options: [
       { value: 'fr', label: '🇫🇷 Français' },
       { value: 'en', label: '🇺🇸 Anglais' },
       { value: 'es', label: '🇪🇸 Espagnol' },
       { value: 'de', label: '🇩🇪 Allemand' },
-      { value: BACK, label: '◀  Étape précédente' },
     ],
     initialValue: 'fr'
   });
@@ -849,12 +865,11 @@ async function stepAI(answers) {
 
 async function stepTheme(answers) {
   showHeader(answers);
-  const theme = await p.select({
+  const theme = await selectWithBack({
     message: 'Pour l\'interface du SAAS, quel thème désirez-vous par défaut ?',
     options: [
       { value: 'dark', label: '🌙 Sombre' },
       { value: 'light', label: '☀️  Clair' },
-      { value: BACK, label: '◀  Étape précédente' },
     ],
     initialValue: 'dark'
   });
@@ -878,12 +893,11 @@ async function stepAdmin(answers) {
     'Super Administrateur'
   );
 
-  const wantsAdmin = await p.select({
+  const wantsAdmin = await selectWithBack({
     message: 'Ajouter un compte super administrateur ?',
     options: [
       { value: true, label: 'Oui', hint: 'Recommandé' },
       { value: false, label: 'Non' },
-      { value: BACK, label: '◀  Étape précédente' },
     ],
     initialValue: true
   });
@@ -917,13 +931,12 @@ async function stepSaasType(answers) {
     'Type de projet'
   );
 
-  const saasType = await p.select({
+  const saasType = await selectWithBack({
     message: 'Quel type de SaaS souhaitez-vous créer ?',
     options: [
       { value: 'default', label: 'Default', hint: 'Plateforme SaaS standard' },
       { value: 'blog', label: 'Blog', hint: 'Système de publication d\'articles intégré' },
       { value: 'shop', label: 'Shop — Coming Soon', hint: 'Disponible dans une prochaine version', disabled: true },
-      { value: BACK, label: '◀  Étape précédente' },
     ],
     initialValue: 'default',
   });
@@ -937,12 +950,11 @@ async function stepSaasType(answers) {
 
 async function stepClaudeCode(answers) {
   showHeader(answers);
-  const claudeCodeInstalled = await p.select({
+  const claudeCodeInstalled = await selectWithBack({
     message: 'Avez-vous Claude Code CLI installé ?',
     options: [
       { value: true, label: 'Oui' },
       { value: false, label: 'Non' },
-      { value: BACK, label: '◀  Étape précédente' },
     ],
     initialValue: true
   });
@@ -956,7 +968,7 @@ async function stepClaudeCode(answers) {
 
 /**
  * Pose toutes les questions avec l'interface moderne de @clack/prompts
- * Navigation : sélectionnez "◀ Étape précédente" dans les menus à choix
+ * Navigation : flèche gauche (←) pour revenir à l'étape précédente
  */
 export async function askQuestions() {
   const answers = {};
