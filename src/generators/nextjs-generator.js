@@ -294,6 +294,37 @@ function generateEmailClient(projectPath, config) {
   let content;
 
   const sharedFunctions = `
+function emailLayout(title: string, preheader: string, body: string, buttonUrl: string, buttonLabel: string, footer: string): string {
+  return \`<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
+  <div style="display:none;max-height:0;overflow:hidden">\${preheader}</div>
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 16px">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:12px;border:1px solid #e4e4e7;overflow:hidden">
+        <tr><td style="background-color:#18181b;padding:20px 32px">
+          <span style="color:#ffffff;font-size:16px;font-weight:700;letter-spacing:-0.01em">{{PROJECT_NAME}}</span>
+        </td></tr>
+        <tr><td style="padding:40px 32px 32px">
+          <h1 style="margin:0 0 16px;color:#09090b;font-size:22px;font-weight:700;line-height:1.3">\${title}</h1>
+          \${body}
+          <table cellpadding="0" cellspacing="0" style="margin-top:32px">
+            <tr><td style="border-radius:8px;background-color:#18181b">
+              <a href="\${buttonUrl}" style="display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;border-radius:8px;letter-spacing:0.01em">\${buttonLabel}</a>
+            </td></tr>
+          </table>
+          <p style="margin:20px 0 0;color:#71717a;font-size:12px;line-height:1.5">Ou copiez ce lien dans votre navigateur :<br><a href="\${buttonUrl}" style="color:#71717a;word-break:break-all">\${buttonUrl}</a></p>
+        </td></tr>
+        <tr><td style="padding:20px 32px;background-color:#fafafa;border-top:1px solid #f4f4f5">
+          <p style="margin:0;color:#a1a1aa;font-size:12px;line-height:1.6">\${footer}</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>\`
+}
+
 export async function sendInvitationEmail(to: string, role: string, appUrl: string) {
   const roleLabels: Record<string, string> = {
     'co-admin': 'Co-Admin',
@@ -301,27 +332,49 @@ export async function sendInvitationEmail(to: string, role: string, appUrl: stri
     'contributor': 'Contributeur',
   }
   const roleLabel = roleLabels[role] || role
+  const body = \`
+    <p style="margin:0 0 8px;color:#3f3f46;font-size:15px;line-height:1.6">Vous avez été invité(e) à rejoindre l'équipe en tant que <strong style="color:#09090b">\${roleLabel}</strong>.</p>
+    <p style="margin:0;color:#3f3f46;font-size:15px;line-height:1.6">Créez votre compte en cliquant sur le bouton ci-dessous. Votre rôle sera attribué automatiquement à l'inscription.</p>
+  \`
   await sendEmail({
     to,
-    subject: \`Vous avez été invité(e) en tant que \${roleLabel}\`,
-    html: \`<h2>Invitation à rejoindre la plateforme</h2>
-<p>Vous avez été invité(e) avec le rôle <strong>\${roleLabel}</strong>.</p>
-<p>Créez votre compte en cliquant sur le lien ci-dessous. Votre rôle sera attribué automatiquement.</p>
-<p><a href="\${appUrl}/register" style="background:#000;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;margin-top:8px">Créer mon compte</a></p>
-<p style="color:#888;font-size:12px;margin-top:16px">Ce lien expire dans 7 jours. Si vous n'attendiez pas cette invitation, ignorez cet email.</p>\`,
+    subject: \`Invitation à rejoindre l'équipe — rôle \${roleLabel}\`,
+    html: emailLayout(
+      'Vous avez été invité(e)',
+      \`Invitation avec le rôle \${roleLabel}\`,
+      body,
+      \`\${appUrl}/register\`,
+      'Créer mon compte',
+      'Cette invitation expire dans 7 jours. Si vous n\'attendiez pas cet email, vous pouvez l\'ignorer.'
+    ),
   })
 }
 
 export async function sendPendingReviewEmail(to: string, postTitle: string, postId: string, authorName: string, appUrl: string) {
+  const body = \`
+    <p style="margin:0 0 16px;color:#3f3f46;font-size:15px;line-height:1.6">Un article est en attente de validation.</p>
+    <table cellpadding="0" cellspacing="0" style="border:1px solid #e4e4e7;border-radius:8px;overflow:hidden;width:100%">
+      <tr><td style="padding:12px 16px;background-color:#fafafa;border-bottom:1px solid #e4e4e7">
+        <span style="color:#71717a;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em">Titre</span>
+        <p style="margin:4px 0 0;color:#09090b;font-size:14px;font-weight:600">\${postTitle}</p>
+      </td></tr>
+      <tr><td style="padding:12px 16px">
+        <span style="color:#71717a;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em">Auteur</span>
+        <p style="margin:4px 0 0;color:#09090b;font-size:14px">\${authorName}</p>
+      </td></tr>
+    </table>
+  \`
   await sendEmail({
     to,
-    subject: \`Article en attente de validation — \${postTitle}\`,
-    html: \`<h2>Un article est en attente de validation</h2>
-<ul>
-  <li><strong>Titre</strong> : \${postTitle}</li>
-  <li><strong>Auteur</strong> : \${authorName}</li>
-</ul>
-<p><a href="\${appUrl}/admin/blog/\${postId}/edit" style="background:#000;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;margin-top:8px">Voir et valider l'article</a></p>\`,
+    subject: \`Article en attente — \${postTitle}\`,
+    html: emailLayout(
+      'Article en attente de validation',
+      \`"\${postTitle}" par \${authorName}\`,
+      body,
+      \`\${appUrl}/admin/blog/\${postId}/edit\`,
+      'Voir et valider l\'article',
+      'Vous recevez cet email car vous êtes administrateur ou co-administrateur de la plateforme.'
+    ),
   })
 }
 `;

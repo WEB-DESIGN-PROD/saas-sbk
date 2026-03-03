@@ -51,7 +51,9 @@ export const verifySession = cache(async () => {
 export const verifyAdmin = cache(async () => {
   const session = await verifySession()
   if (session.role !== 'admin') {
-    redirect('/dashboard')
+    // Redirige vers /admin (et non /dashboard) pour éviter une boucle
+    // de redirections avec les rôles staff qui sont renvoyés vers /admin
+    redirect(STAFF_ROLES.includes(session.role) ? '/admin' : '/dashboard')
   }
   return session
 })

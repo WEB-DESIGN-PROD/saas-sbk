@@ -1,11 +1,11 @@
-import { verifyAdmin } from "@/lib/dal"
+import { verifyStaff } from "@/lib/dal"
 import { prisma } from "@/lib/db/client"
 import { SectionCardsAdmin } from "@/components/admin/section-cards-admin"
 import { AdminChartSignups } from "@/components/admin/admin-chart-signups"
 import { AutoRefresh } from "@/components/admin/auto-refresh"
 
 export default async function AdminPage() {
-  await verifyAdmin()
+  await verifyStaff()
 
   const now = new Date()
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
