@@ -35,12 +35,14 @@ import {
 
 export function NavUser({
   user,
+  mode = "dashboard",
 }: {
   user: {
     name: string | null
     email: string
     image: string | null
   }
+  mode?: "dashboard" | "admin"
 }) {
   const { isMobile } = useSidebar()
   const router = useRouter()
@@ -119,10 +121,12 @@ export function NavUser({
                 <Settings />
                 Paramètres
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/dashboard/billing")}>
-                <CreditCard />
-                Facturation
-              </DropdownMenuItem>
+              {mode !== "admin" && (
+                <DropdownMenuItem onClick={() => router.push("/dashboard/billing")}>
+                  <CreditCard />
+                  Facturation
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={() => router.push("/dashboard/settings#notifications")}>
                 <Bell />
                 Notifications

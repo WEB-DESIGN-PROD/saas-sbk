@@ -102,7 +102,7 @@ export function AppSidebar({
             </Link>
           </div>
         )}
-        <NavUser user={user} />
+        <NavUser user={user} mode={mode} />
       </SidebarFooter>
     </Sidebar>
   )
