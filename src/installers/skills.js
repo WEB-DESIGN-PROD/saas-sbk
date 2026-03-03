@@ -17,6 +17,7 @@ function getSkillsForConfig(config) {
   skills.push('prisma-expert.md');
   skills.push('better-auth-best-practices.md');
   skills.push('shadcn-ui.md');
+  skills.push('generate-features.md');
 
   // Skills conditionnels
   if (config.payments.enabled) {
@@ -33,6 +34,30 @@ function getSkillsForConfig(config) {
   }
 
   return skills;
+}
+
+/**
+ * Copie les agents depuis les templates vers le projet généré
+ * Tous les agents sont copiés quel que soit le type de SaaS
+ */
+export async function installAgents(projectPath) {
+  const templatesAgentsDir = path.join(__dirname, '../../templates/nextjs-base/.claude/agents');
+  const projectAgentsDir = path.join(projectPath, '.claude/agents');
+
+  fs.mkdirSync(projectAgentsDir, { recursive: true });
+
+  if (!fs.existsSync(templatesAgentsDir)) {
+    logger.warn('Dossier agents introuvable dans les templates');
+    return;
+  }
+
+  const agentFiles = fs.readdirSync(templatesAgentsDir).filter(f => f.endsWith('.md'));
+  for (const fileName of agentFiles) {
+    fs.copyFileSync(
+      path.join(templatesAgentsDir, fileName),
+      path.join(projectAgentsDir, fileName)
+    );
+  }
 }
 
 /**
