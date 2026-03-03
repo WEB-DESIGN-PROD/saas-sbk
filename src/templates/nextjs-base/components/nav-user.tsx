@@ -127,10 +127,12 @@ export function NavUser({
                   Facturation
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem onClick={() => router.push(mode === "admin" ? "/admin/settings#notifications" : "/dashboard/settings#notifications")}>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
+              {mode !== "admin" && (
+                <DropdownMenuItem onClick={() => router.push("/dashboard/settings#notifications")}>
+                  <Bell />
+                  Notifications
+                </DropdownMenuItem>
+              )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
