@@ -136,6 +136,7 @@ function showHeader(answers = {}) {
       let storageDisplay = 'Désactivé';
       if (answers.storageEnabled) {
         if (answers.storageType === 'minio') storageDisplay = 'MinIO 🐳';
+        else if (answers.storageType === 'vercel-blob') storageDisplay = 'Vercel Blob';
         else if (answers.storageType === 's3') storageDisplay = 'AWS S3 ☁️';
       }
       leftChoices.push(chalk.green(figures.tick) + ' Stockage      : ' + chalk.cyan(storageDisplay));
@@ -192,7 +193,7 @@ function showHeader(answers = {}) {
     console.log(chalk.gray(bottomBorder));
 
     // Hint de navigation court et centré
-    console.log(centerText(chalk.dim('← Étape précédente  •  Ctrl+C : Revenir au début')));
+    console.log(centerText(chalk.dim('← Étape précédente  •  Ctrl+C : Quitter')));
     console.log('');
   }
 }
@@ -234,9 +235,9 @@ async function selectWithBack(options) {
 async function stepProjectName(answers) {
   showHeader(answers);
   p.note(
-    chalk.cyan('Les informations saisies serviront à générer votre fichier ') + chalk.bold('.env') + '\n' +
-    chalk.gray('Vous pourrez les modifier à tout moment dans ce fichier après génération.'),
-    'ℹ️  À savoir'
+    'Les informations saisies serviront à générer votre fichier .env\n' +
+    'Vous pourrez les modifier à tout moment dans ce fichier après génération.',
+    'Info'
   );
   const projectName = await p.text({
     message: 'Nom du projet',
@@ -468,10 +469,6 @@ async function stepAuth(answers) {
 
 async function stepStorage(answers) {
   delete answers.storageType;
-  delete answers.s3AccessKey;
-  delete answers.s3SecretKey;
-  delete answers.s3Region;
-  delete answers.s3Bucket;
 
   showHeader(answers);
   const storageEnabled = await selectWithBack({
@@ -492,54 +489,14 @@ async function stepStorage(answers) {
       message: 'Type de stockage',
       options: [
         { value: 'minio', label: '🐳 MinIO local avec Docker', hint: 'Recommandé' },
-        { value: 's3', label: '☁️  AWS S3' },
+        { value: 'vercel-blob', label: '   Vercel Blob — Coming Soon', hint: 'Disponible prochainement', disabled: true },
+        { value: 's3', label: '   AWS S3 — Coming Soon', hint: 'Disponible prochainement', disabled: true },
       ],
       initialValue: 'minio'
     });
     cancelIfCancel(storageType);
     if (storageType === BACK) return BACK;
     answers.storageType = storageType;
-
-    if (storageType === 's3') {
-      showHeader(answers);
-      const s3AccessKey = await p.text({
-        message: 'AWS Access Key ID',
-        validate: (value) => {
-          const result = validateApiKey(value);
-          return result === true ? undefined : result;
-        }
-      });
-      cancelIfCancel(s3AccessKey);
-      answers.s3AccessKey = s3AccessKey;
-
-      showHeader(answers);
-      const s3SecretKey = await p.password({
-        message: 'AWS Secret Access Key',
-        validate: (value) => {
-          const result = validateApiKey(value);
-          return result === true ? undefined : result;
-        }
-      });
-      cancelIfCancel(s3SecretKey);
-      answers.s3SecretKey = s3SecretKey;
-
-      showHeader(answers);
-      const s3Region = await p.text({
-        message: 'AWS Region',
-        placeholder: 'us-east-1',
-        initialValue: 'us-east-1'
-      });
-      cancelIfCancel(s3Region);
-      answers.s3Region = s3Region;
-
-      showHeader(answers);
-      const s3Bucket = await p.text({
-        message: 'Nom du bucket S3',
-        validate: (input) => input.trim().length > 0 ? undefined : 'Nom requis'
-      });
-      cancelIfCancel(s3Bucket);
-      answers.s3Bucket = s3Bucket;
-    }
   }
 
   return 'done';
