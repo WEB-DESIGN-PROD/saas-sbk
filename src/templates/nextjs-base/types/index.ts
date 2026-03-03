@@ -36,6 +36,9 @@ export type StaffRole = 'admin' | 'co-admin' | 'editor' | 'contributor'
 
 export const STAFF_ROLES: Role[] = ['admin', 'co-admin', 'editor', 'contributor']
 
+// Rôles pouvant modifier des articles via le bouton public (excl. contributeur)
+export const BLOG_EDITOR_ROLES: Role[] = ['admin', 'co-admin', 'editor']
+
 export const ROLE_LABELS: Record<Role, string> = {
   'admin':       'Super Admin',
   'co-admin':    'Co-Admin',
