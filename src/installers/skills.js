@@ -41,7 +41,7 @@ function getSkillsForConfig(config) {
  * Tous les agents sont copiés quel que soit le type de SaaS
  */
 export async function installAgents(projectPath) {
-  const templatesAgentsDir = path.join(__dirname, '../../templates/nextjs-base/.claude/agents');
+  const templatesAgentsDir = path.join(__dirname, '../templates/nextjs-base/.claude/agents');
   const projectAgentsDir = path.join(projectPath, '.claude/agents');
 
   fs.mkdirSync(projectAgentsDir, { recursive: true });
@@ -67,7 +67,7 @@ export async function installAgents(projectPath) {
  */
 export async function installSkills(projectPath, config) {
   const skillFiles = getSkillsForConfig(config);
-  const templatesSkillsDir = path.join(__dirname, '../../templates/nextjs-base/.claude/skills');
+  const templatesSkillsDir = path.join(__dirname, '../templates/nextjs-base/.claude/skills');
   const projectSkillsDir = path.join(projectPath, '.claude/skills');
 
   // S'assurer que le dossier destination existe
