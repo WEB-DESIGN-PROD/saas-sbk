@@ -641,11 +641,11 @@ async function stepLoginMethod(answers) {
   const loginMethod = await selectWithBack({
     message: 'Méthode de connexion (après création de compte)',
     options: [
-      { value: 'email-password', label: 'Email + Mot de passe', hint: 'Formulaire email + mot de passe' },
       { value: 'magiclink', label: 'Magic Link', hint: 'Lien de connexion envoyé par email' },
       { value: 'otp', label: 'Code OTP', hint: 'Code à usage unique envoyé par email' },
+      { value: 'email-password', label: 'Email + Mot de passe', hint: 'Formulaire email + mot de passe' },
     ],
-    initialValue: 'email-password'
+    initialValue: 'magiclink'
   });
   cancelIfCancel(loginMethod);
   if (loginMethod === BACK) return BACK;
