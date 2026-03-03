@@ -11,7 +11,7 @@ import { generateClaudeReadme } from './generators/claude-generator.js';
 import { generatePackageJson } from './generators/package-generator.js';
 import { generateNextjsProject } from './generators/nextjs-generator.js';
 import { installDependencies } from './installers/dependencies.js';
-import { installSkills } from './installers/skills.js';
+import { installSkills, installAgents } from './installers/skills.js';
 import { initClaude } from './installers/claude-init.js';
 import { writeFile } from './utils/file-utils.js';
 import chalk from 'chalk';
@@ -65,7 +65,7 @@ export async function main() {
 
   // --version ou -v
   if (args.includes('--version') || args.includes('-v')) {
-    console.log('v0.4.5');
+    console.log('v0.11.0-dev');
     return;
   }
 
@@ -168,22 +168,25 @@ export async function main() {
       logger.successWithComment('docker-compose.yml créé', 'Configuration PostgreSQL');
     }
 
-    // 5. Générer .claude/README.md et créer les dossiers skills/agents
+    // 5. Générer .claude/README.md et copier skills + agents
     const claudeReadme = generateClaudeReadme(config);
     writeFile(path.join(projectPath, '.claude/README.md'), claudeReadme);
-
-    // Créer les dossiers skills et agents pour Claude Code
-    fs.mkdirSync(path.join(projectPath, '.claude/skills'), { recursive: true });
-    fs.mkdirSync(path.join(projectPath, '.claude/agents'), { recursive: true });
-
     logger.successWithComment('.claude/README.md créé', 'Documentation pour Claude Code');
 
-    // 6. Récupérer la liste des skills (déjà copiés avec les templates)
+    // 6. Copier les skills Claude Code selon la configuration
     const installedSkills = await installSkills(projectPath, config);
-    logger.successWithComment('Skills Claude Code générés', 'Guides de développement IA');
+    logger.successWithComment('Skills Claude Code copiés', `${installedSkills.length} guide(s) de développement`);
 
-    // 7. Installer les dépendances
+    // 7a. Copier les agents Claude Code (tous types de SaaS)
+    await installAgents(projectPath);
+    logger.successWithComment('Agents Claude Code copiés', 'full-stack-dev, code-reviewer');
+
+    // 7b. Installer les dépendances
     logger.newline();
+    p.note(
+      'Cela peut prendre quelques minutes...\nMerci de bien vouloir patienter jusqu\'à la fin de l\'installation.',
+      'Génération du projet'
+    );
     await installDependencies(projectPath);
 
     // 8. Générer CLAUDE.md avec les skills installés

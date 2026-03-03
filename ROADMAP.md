@@ -1,6 +1,50 @@
 # 🗺️ Roadmap - create-saas-sbk
 
-## ✅ v0.10.0 - 2 mars 2026 (ACTUELLE)
+## 🚧 v0.11.0 - mars 2026 (EN COURS)
+
+### 🔐 RBAC complet sur le blog
+
+- ✅ **5 rôles** — `admin`, `co-admin`, `editor`, `contributor`, `member`
+- ✅ **API sécurisée** — PATCH/DELETE vérifient rôle ET propriété de l'article
+- ✅ **Éditeur** — modifie tous les articles, supprime uniquement les siens
+- ✅ **Contributeur** — modifie uniquement ses articles (statuts Draft/PendingReview)
+- ✅ **Catégories** — création/édition/suppression réservée aux rôles editor+
+- ✅ **Bouton "Modifier l'article"** sur le blog public — masqué aux contributeurs et visiteurs anonymes
+- ✅ **`BLOG_EDITOR_ROLES`** — constante dédiée dans `types/index.ts`
+- ✅ **Guard serveur** — `notFound()` si contributeur tente d'éditer l'article d'un autre
+
+### 👤 Administration améliorée
+
+- ✅ **Changement de rôle inline** — select dans `/admin/users` (admin uniquement, sauf soi-même)
+- ✅ **Section rôles & permissions** — accordéon sur `/admin/users` avec tableau des droits par rôle
+- ✅ **Médias liés aux articles** — badge cliquable vers l'article associé sur `/admin/media`
+
+### ⌨️ CLI — Navigation et UX
+
+- ✅ **Navigation retour** — option "◀ Étape précédente" dans chaque menu à choix
+- ✅ **State machine** — refactorisation en step functions avec sentinel `BACK`
+- ✅ **Hint persistant** — affiché sur chaque écran : "◀ Sélectionnez... pour revenir"
+- ✅ **DB — COMING SOON** — MongoDB et SQLite désactivés (`disabled: true`)
+- ✅ **Email — Resend par défaut** — Resend en premier, `initialValue: 'resend'`
+- ✅ **Récap réordonné** — Gauche : Projet, BDD, Auth, Stockage, Email, Paiements · Droite : Thème, I18n, IA, Super Admin, Type SaaS, Claude Code
+
+### 🤖 Claude Code — Génération complète
+
+- ✅ **Skills copiés effectivement** — `skills.js` copie réellement les fichiers `.md` (était une liste vide)
+- ✅ **Nouveaux agents** — `full-stack-dev.md` et `code-reviewer.md` dans `.claude/agents/`
+- ✅ **Skill `generate-features`** — guide `/generate-features` inclus dans chaque projet
+- ✅ **`CLAUDE.md` enrichi** — méthode de connexion, super admin, type SaaS, RBAC blog, `/generate-features`
+- ✅ **Copie inconditionnelle** — skills, agents et CLAUDE.md générés pour **tous** les types de SaaS
+
+### 🐛 Corrections
+
+- ✅ Fix `config.ai.provider` (inexistant) → `config.ai.providers` (array) dans `claude-init.js`
+- ✅ Fix hydration `ThemeToggle` — pattern `mounted`
+- ✅ Fix emails dark mode — `color-scheme: light only`
+
+---
+
+## ✅ v0.10.0 - 2 mars 2026
 
 ### 📝 Système de blog complet
 
@@ -252,8 +296,9 @@
 ## 🚀 Phase 3 - Génération IA (À VENIR)
 
 ### 🤖 Commande /generate-features
-- [ ] Analyse du projet existant
-- [ ] Génération de features par IA
+- [x] Skill `generate-features.md` créé et copié dans chaque projet
+- [ ] Implémentation complète de l'agent de génération
+- [ ] Analyse intelligente du projet existant
 - [ ] Templates de features prêts à l'emploi
   - [ ] Blog avec CMS
   - [ ] E-commerce basique
@@ -263,7 +308,8 @@
   - [ ] Notifications push
 
 ### 👥 Agents spécialisés
-- [ ] Agent développement
+- [x] Agent développement (`full-stack-dev`)
+- [x] Agent revue de code (`code-reviewer`)
 - [ ] Agent sécurité
 - [ ] Agent SEO
 - [ ] Agent performance
@@ -293,9 +339,9 @@
 
 ## 📊 Métriques de progression
 
-**Phase 1 :** 100% ✅ (CLI fonctionnel avec @clack/prompts)
-**Phase 2 :** 90% 🚧 (Templates complets + blog + admin + médias + emails + facturation)
-**Phase 3 :** 0% 📅 (Planifié)
+**Phase 1 :** 100% ✅ (CLI fonctionnel + navigation retour)
+**Phase 2 :** 95% 🚧 (Templates + RBAC blog + admin avancé + CLI amélioré)
+**Phase 3 :** 20% 🚧 (Skills/agents déployés, /generate-features à implémenter)
 **Phase 4 :** 0% 💭 (Vision)
 
 ---
@@ -304,19 +350,20 @@
 
 1. ✅ Migration Next.js 16 - **FAIT**
 2. ✅ Migration vers @clack/prompts - **FAIT**
-3. ✅ UX du CLI améliorée - **FAIT**
-4. ✅ OAuth Google - **FAIT**
-5. ✅ Magic Link / OTP - **FAIT**
-6. ✅ Architecture templates statique (shadcn-base) - **FAIT**
-7. ✅ Navbar + Dashboard UX finalisés - **FAIT**
-8. ✅ Page Médias MinIO complète - **FAIT**
-9. ✅ Emails transactionnels complets (vérification, reset, magic link, OTP) - **FAIT**
-10. ✅ Système super administrateur avec impersonation - **FAIT**
-11. ✅ Système de blog complet (éditeur, admin, public, RSS) - **FAIT**
-12. 🚧 Templates multilingues complets
-13. 📅 Configuration MongoDB/SQLite
-14. 📅 Dashboard analytics
+3. ✅ UX du CLI améliorée + navigation retour - **FAIT**
+4. ✅ OAuth Google, Magic Link / OTP - **FAIT**
+5. ✅ Architecture templates statique (shadcn-base) - **FAIT**
+6. ✅ Navbar + Dashboard UX finalisés - **FAIT**
+7. ✅ Page Médias MinIO complète - **FAIT**
+8. ✅ Emails transactionnels complets - **FAIT**
+9. ✅ Système super administrateur avec impersonation - **FAIT**
+10. ✅ Système de blog complet (éditeur, admin, public, RSS) - **FAIT**
+11. ✅ RBAC complet blog (5 rôles, API, UI) - **FAIT**
+12. ✅ Skills et agents Claude Code copiés effectivement - **FAIT**
+13. 🚧 Templates multilingues complets
+14. 📅 Implémentation `/generate-features`
+15. 📅 Configuration MongoDB/SQLite
 
 ---
 
-Dernière mise à jour : 2 mars 2026
+Dernière mise à jour : 3 mars 2026
