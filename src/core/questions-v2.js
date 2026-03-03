@@ -853,8 +853,8 @@ async function stepAdmin(answers) {
     chalk.cyan('👤 Le super administrateur aura accès à un espace /admin dédié\n') +
     chalk.gray('   pour monitorer les inscriptions, suivre les sessions actives\n') +
     chalk.gray('   et se connecter temporairement en tant qu\'utilisateur pour du support.\n') +
-    chalk.yellow('   ⚠  Cet accès est exclusif — Uniquement les membres avec un rôle\n') +
-    chalk.yellow('   spécifique ajoutés par le super admin pourront y accéder.'),
+    chalk.yellow('   ⚠  Cet accès /admin est exclusif — Uniquement les membres invités\n') +
+    chalk.yellow('   par le super admin pourront y accéder.'),
     'Super Administrateur'
   );
 
