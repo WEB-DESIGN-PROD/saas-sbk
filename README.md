@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-0.10.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.11.0--dev-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-16+-black.svg)
@@ -43,7 +43,7 @@ npx create-saas-sbk@latest
 ### Base de données
 - **PostgreSQL** - Local Docker ou distant (Neon, Supabase)
 - **Prisma** - ORM TypeScript avec migrations
-- _MongoDB et SQLite à venir dans une prochaine version_
+- _MongoDB et SQLite — Coming Soon (désactivés dans le CLI)_
 
 ### Abonnements & Facturation
 - **Types d'utilisateurs** — `Free` / `Freemium` (crédits) / `Paid` (abonnement actif)
@@ -57,8 +57,10 @@ npx create-saas-sbk@latest
 - **Rôle admin** — assigné automatiquement si l'email correspond à `ADMIN_EMAIL`
 - **`/admin`** — espace protégé avec stats (total membres, inscriptions, sessions, vérification)
 - **`/admin/users`** — tableau de gestion : plan, crédits, suppression, impersonation, recherche
+- **Changement de rôle inline** — sélecteur direct dans la table (admin uniquement)
+- **Section rôles & permissions** — récapitulatif des droits par rôle en accordéon
 - **`/admin/blog`** — gestion complète des articles (si blog activé)
-- **`/admin/media`** — gestion des médias (si stockage activé)
+- **`/admin/media`** — gestion des médias avec lien vers l'article associé (si stockage activé)
 - **Impersonation** — l'admin peut se connecter en tant qu'utilisateur avec bannière de retour
 - **Plugin Better Auth `admin`** — ban, impersonation, gestion des rôles
 - **Auto-refresh 30s** — les compteurs se mettent à jour automatiquement
@@ -70,6 +72,10 @@ npx create-saas-sbk@latest
 - **Interface admin** — gestion complète des articles, catégories, tags
 - **`@tailwindcss/typography`** — rendu Markdown avec classes `prose`
 - **SEO intégré** — meta title/description pré-remplis, keywords auto depuis les tags
+- **RBAC complet** — 5 rôles (`admin`, `co-admin`, `editor`, `contributor`, `member`) avec permissions granulaires
+  - Éditeur : modifier tous les articles, supprimer uniquement les siens
+  - Contributeur : créer/modifier uniquement ses propres articles (Draft/PendingReview), pas de suppression
+  - Bouton "Modifier l'article" sur le blog public : masqué aux contributeurs et visiteurs
 
 ### Emails
 - **Resend** - Service moderne (recommandé)
@@ -201,9 +207,19 @@ Le CLI applique des validations strictes sur toutes les entrées :
 ## Claude Code
 
 Si vous avez Claude Code CLI installé, le projet sera automatiquement initialisé avec :
-- Skills adaptés à votre stack (nextjs, better-auth, prisma, stripe, etc.)
-- Agents spécialisés pour le développement
-- Commande `/generate-features` pour générer des fonctionnalités
+
+- **Skills copiés** dans `.claude/skills/` selon votre stack :
+  - `next-best-practices`, `prisma-expert`, `better-auth-best-practices`, `shadcn-ui`
+  - `generate-features` (toujours présent)
+  - `stripe-best-practices`, `email-best-practices`, `react-email`, `minio` (selon configuration)
+- **Agents copiés** dans `.claude/agents/` :
+  - `full-stack-dev` — patterns, DAL, API routes, composants
+  - `code-reviewer` — revue sécurité, architecture, TypeScript
+- **`CLAUDE.md`** généré à la racine avec la stack, les rôles, les commandes et la doc du projet
+- **`.claude/README.md`** avec la documentation technique complète
+- **Commande `/generate-features`** pour étendre le projet après génération
+
+> Tous les fichiers `.claude/` sont créés quel que soit le type de SaaS choisi (default ou blog).
 
 Pour installer Claude Code : https://claude.ai/docs/cli
 
@@ -212,40 +228,38 @@ Pour installer Claude Code : https://claude.ai/docs/cli
 <details>
 <summary><strong>🗺️ Roadmap</strong></summary>
 
-📍 **Version actuelle : v0.10.0** (2 mars 2026)
+📍 **Version en cours : v0.11.0-dev** (mars 2026)
 
 ### ✅ Phase 1 - CLI Interactif (TERMINÉE)
 - ✅ CLI interactif avec @clack/prompts en français
 - ✅ Logo persistant et liens cliquables vers services externes
 - ✅ Génération de projet Next.js 16+ fonctionnel
-- ✅ Installation automatique des skills Claude Code
-- ✅ PostgreSQL (Docker ou distant)
-- ✅ OAuth GitHub + Google
-- ✅ Magic Link / OTP avec Resend
+- ✅ PostgreSQL (Docker ou distant), OAuth GitHub/Google, Magic Link/OTP
 - ✅ Docker Compose pour services locaux
-- ✅ Interface UX optimisée avec récapitulatif en colonnes
+- ✅ Interface UX avec récapitulatif en colonnes
+- ✅ **Navigation retour** — option "◀ Étape précédente" dans chaque menu à choix
 
-### 🚧 Phase 2 - Templates Complets (EN COURS - 90%)
+### 🚧 Phase 2 - Templates Complets (EN COURS - 95%)
 - ✅ Architecture templates statique (`shadcn-base` + overlay `nextjs-base`)
-- ✅ Dashboard UX finalisé (Navbar, SiteHeader, Sidebar, padding)
-- ✅ Templates Next.js complets (landing, dashboard, auth)
-- ✅ Page Médias MinIO (upload, liste, édition, lightbox, recherche)
-- ✅ Système de facturation & types d'utilisateurs (v0.8.0)
-- ✅ Système super administrateur avec impersonation (v0.9.0)
-- ✅ Système de blog complet (éditeur, admin, public, RSS) (v0.10.0)
+- ✅ Dashboard UX finalisé, auth emails complets, facturation Stripe (v0.8.0)
+- ✅ Système super administrateur avec impersonation et changement de rôle inline (v0.9.0)
+- ✅ Blog complet avec RBAC 5 rôles (éditeur, admin, public, RSS) (v0.10.0)
+- ✅ Contrôle d'accès granulaire par rôle sur articles, catégories, bouton public (v0.11.0-dev)
 - 🚧 Templates multilingues (FR, EN, ES, DE)
 - 📅 Configuration MongoDB et SQLite
 - 📅 Template sans système de connexion
 
-### 📅 Phase 3 - Génération IA (PLANIFIÉE)
-- Commande `/generate-features` pour génération IA
-- Agents spécialisés (dev, sécurité, SEO, perf)
-- Templates de features (blog, e-commerce, CRM, chat)
+### 🚧 Phase 3 - Génération IA (EN DÉMARRAGE - 20%)
+- ✅ Skill `/generate-features` inclus dans chaque projet généré
+- ✅ Agents `full-stack-dev` et `code-reviewer` inclus dans chaque projet
+- ✅ Skills et agents réellement copiés dans `.claude/` (fix v0.11.0-dev)
+- 📅 Implémentation complète de la commande `/generate-features`
+- 📅 Agents sécurité, SEO, performance
+- 📅 Templates de features (e-commerce, CRM, chat)
 
 ### 💭 Phase 4 - Écosystème (VISION)
 - Interface web pour la configuration
 - Marketplace de features communautaires
-- Templates personnalisables
 - Intégrations tierces (Vercel, GitHub Actions, monitoring)
 
 📄 **Voir [ROADMAP.md](./ROADMAP.md) pour les détails complets**

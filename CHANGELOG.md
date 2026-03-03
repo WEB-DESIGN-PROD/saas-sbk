@@ -5,7 +5,74 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
-## [Non publié]
+## [Non publié] — v0.11.0-dev
+
+### 🔐 RBAC complet sur le blog (templates)
+
+#### Sécurité API
+- `PATCH /api/blog/posts/[id]` — vérification rôle + propriété avant modification ; contributeur limité aux statuts `Draft`/`PendingReview`
+- `DELETE /api/blog/posts/[id]` — seuls admin/co-admin peuvent supprimer n'importe quel article ; éditeur uniquement les siens ; contributeur bloqué (403)
+- `POST/PATCH/DELETE /api/blog/categories/*` — création/modification réservée aux rôles editor+
+
+#### UI & pages
+- `app/admin/blog/[id]/edit/page.tsx` — guard serveur : contributeur → `notFound()` si article d'un autre auteur
+- `app/admin/blog/page.tsx` — `authorId` dans la requête, `currentUserId` et `userRole` transmis aux composants
+- `components/blog/articles-table.tsx` — `canEditPost()` et `canDeletePost()` par rôle et propriété
+- `components/blog/categories-card.tsx` — boutons création/édition masqués pour les contributeurs
+- `components/blog/article-editor.tsx` — bouton "+ Nouvelle catégorie" masqué pour les contributeurs
+- `app/blog/[slug]/page.tsx` — bouton "Modifier l'article" visible uniquement pour `BLOG_EDITOR_ROLES` (admin, co-admin, editor)
+- `types/index.ts` — ajout de la constante `BLOG_EDITOR_ROLES`
+
+### 👤 Administration
+
+- `components/admin/users-table.tsx` — sélecteur de rôle inline (admin uniquement, exclut soi-même et les admins)
+- `app/api/admin/users/[id]/route.ts` — PATCH accepte `role` (impossible d'attribuer `admin`)
+- `components/admin/roles-permissions-card.tsx` — nouveau composant accordéon récapitulatif des permissions par rôle (12 permissions × 5 rôles)
+- `app/admin/users/page.tsx` — intègre `RolesPermissionsCard` en haut de page
+- `app/admin/media/page.tsx` — badge cliquable vers l'article associé à chaque média (image de couverture)
+- `app/api/media/route.ts` — enrichit chaque média avec `associatedPost` (article utilisant ce média comme couverture)
+
+### ⌨️ CLI — Navigation et UX (`src/core/questions-v2.js`)
+
+- **Navigation retour** — refactorisation en state machine (step functions + sentinel `BACK`)
+  - Option "◀ Étape précédente" dans chaque `p.select`
+  - Hint persistant affiché sur chaque écran
+  - Retour impossible depuis l'étape 0 (nom du projet)
+- **DB** — MongoDB local/distant et SQLite marqués `disabled: true` (Coming Soon)
+- **Email** — Resend en premier, `initialValue: 'resend'`
+- **Récap 2 colonnes réordonné** :
+  - Gauche : Projet, Base de données, Auth, Stockage, Email, Paiements
+  - Droite : Thème, I18n, IA, Super Admin, Type SaaS, Claude Code
+- Super Admin : affiche "Activé" au lieu de l'email dans le récap
+
+### 🤖 Claude Code — Génération complète
+
+#### Agents (nouveaux)
+- `.claude/agents/full-stack-dev.md` — patterns, DAL, API routes, composants
+- `.claude/agents/code-reviewer.md` — checklist sécurité, arch, TypeScript, UX
+
+#### Skills (nouveaux/corrigés)
+- `.claude/skills/generate-features.md` — skill `/generate-features` pour étendre le projet
+- `src/installers/skills.js` — copie réelle des fichiers (était une liste vide, aucun fichier n'était copié)
+- `src/installers/skills.js` — nouvelle fonction `installAgents()` copiant tous les agents
+- `src/index.js` — appels `installSkills()` et `installAgents()` avec logs explicites
+
+#### CLAUDE.md enrichi (`src/installers/claude-init.js`)
+- Méthode de connexion (Email+Mdp / Magic Link / OTP)
+- Super admin activé (sans l'email)
+- Type SaaS : section Blog avec rôles, permissions, pages, API, règles métier
+- Commande `/generate-features` documentée
+- Fix : `config.ai.provider` (inexistant) → `config.ai.providers` (array)
+
+### 🐛 Corrections
+
+- `components/theme-toggle.tsx` — fix hydration mismatch (pattern `mounted`)
+- `lib/email/templates.ts` — force `color-scheme: light only` pour éviter le mode sombre dans les emails
+- `lib/dal.ts` — ajout `getOptionalSession()` pour les pages publiques avec auth optionnelle
+
+---
+
+## [Non publié] — future
 
 ### Phase 4 - Futur (optionnel)
 - Tests unitaires et end-to-end
