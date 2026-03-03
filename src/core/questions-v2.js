@@ -94,6 +94,8 @@ function showHeader(answers = {}) {
   const baseline1 = chalk.gray(`Générateur de SAAS Next.js • v${version}`);
   console.log(centerText(baseline1));
   console.log('');
+  console.log(centerText(chalk.dim('Les informations saisies serviront à générer votre fichier .env')));
+  console.log('');
 
   // Afficher les réponses validées sur 2 colonnes
   if (Object.keys(answers).length > 0) {

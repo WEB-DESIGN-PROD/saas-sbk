@@ -65,7 +65,7 @@ export async function main() {
 
   // --version ou -v
   if (args.includes('--version') || args.includes('-v')) {
-    console.log('v0.4.5');
+    console.log('v0.11.0-dev');
     return;
   }
 
