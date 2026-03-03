@@ -183,6 +183,10 @@ export async function main() {
 
     // 7b. Installer les dépendances
     logger.newline();
+    p.note(
+      'Cela peut prendre quelques minutes...\nMerci de bien vouloir patienter jusqu\'à la fin de l\'installation.',
+      'Génération du projet'
+    );
     await installDependencies(projectPath);
 
     // 8. Générer CLAUDE.md avec les skills installés
