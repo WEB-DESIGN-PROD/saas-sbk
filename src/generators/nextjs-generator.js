@@ -160,6 +160,7 @@ function copyConfigFiles(projectPath, config, templatesDir) {
       'components/impersonation-banner.tsx',
       'app/api/admin/stats/route.ts',
       'app/api/admin/users/route.ts',
+      'app/api/admin/users/[id]/route.ts',
       'app/api/admin/invitations/route.ts',
       'app/api/admin/invitations/[id]/route.ts',
     );
