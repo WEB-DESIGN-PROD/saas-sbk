@@ -49,7 +49,7 @@ export default async function PricingPage() {
                   className={`flex flex-col overflow-hidden ${plan.popular ? "border-primary shadow-lg" : ""}`}
                 >
                   {plan.popular && (
-                    <div className="bg-primary px-3 py-1.5 text-center text-sm font-medium text-primary-foreground">
+                    <div className="rounded-t-[11px] bg-primary px-3 py-1.5 text-center text-sm font-medium text-primary-foreground">
                       Plus populaire
                     </div>
                   )}
@@ -142,11 +142,8 @@ export default async function PricingPage() {
                       <p className="text-sm text-muted-foreground">{pack.description}</p>
 
                       <div className="mt-auto space-y-3">
-                        <div className="flex items-baseline justify-between">
+                        <div>
                           <span className="text-2xl font-bold">{formatPackPrice(pack.price)}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {((pricePerCredit / 100) * 100).toFixed(1)}c / crédit
-                          </span>
                         </div>
                         <Button className="w-full" variant={pack.popular ? "default" : "outline"} asChild>
                           <Link href="/register">Acheter</Link>
