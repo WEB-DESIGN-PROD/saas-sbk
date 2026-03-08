@@ -49,6 +49,20 @@ async function main() {
     ],
   })
 
+  // Credit Packs
+  const creditPacksData = [
+    { name: "Starter", credits: 100,  price: 490,  description: "100 crédits pour démarrer", sortOrder: 0 },
+    { name: "Growth",  credits: 500,  price: 1990, description: "500 crédits — meilleur rapport qualité/prix", sortOrder: 1 },
+    { name: "Scale",   credits: 2000, price: 6990, description: "2000 crédits pour les équipes", sortOrder: 2 },
+  ]
+  for (const pack of creditPacksData) {
+    await prisma.creditPack.upsert({
+      where: { id: pack.name.toLowerCase() },
+      update: pack,
+      create: { id: pack.name.toLowerCase(), ...pack },
+    })
+  }
+
   // Features
   await prisma.feature.deleteMany()
   await prisma.feature.createMany({

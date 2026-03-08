@@ -5,8 +5,18 @@ import { PricingManager } from "@/components/admin/pricing-manager"
 export default async function AdminPricingPage() {
   const { role } = await verifyStaff()
 
-  const plans = await prisma.plan.findMany({ orderBy: { sortOrder: "asc" } })
-  const serialized = plans.map(p => ({
+  const [plans, creditPacks] = await Promise.all([
+    prisma.plan.findMany({ orderBy: { sortOrder: "asc" } }),
+    prisma.creditPack.findMany({ orderBy: { sortOrder: "asc" } }),
+  ])
+
+  const serializedPlans = plans.map(p => ({
+    ...p,
+    createdAt: p.createdAt.toISOString(),
+    updatedAt: p.updatedAt.toISOString(),
+  }))
+
+  const serializedPacks = creditPacks.map(p => ({
     ...p,
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
@@ -20,14 +30,18 @@ export default async function AdminPricingPage() {
             <div>
               <h1 className="text-2xl font-semibold">Tarifs</h1>
               <p className="text-muted-foreground text-sm">
-                Plans affichés sur la page publique /pricing
+                Plans et packs de crédits affichés sur la page publique /pricing
                 {role !== "admin" && " — lecture seule"}
               </p>
             </div>
           </div>
         </div>
         <div className="px-4 lg:px-6">
-          <PricingManager initialPlans={serialized} isAdmin={role === "admin"} />
+          <PricingManager
+            initialPlans={serializedPlans}
+            initialCreditPacks={serializedPacks}
+            isAdmin={role === "admin"}
+          />
         </div>
       </div>
     </div>
