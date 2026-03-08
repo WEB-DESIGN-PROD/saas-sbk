@@ -102,7 +102,7 @@ export default async function PricingPage() {
                 </p>
               </div>
 
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="flex flex-wrap justify-center gap-6">
                 {creditPacks.map((pack) => {
                   const pricePerCredit = pack.price / pack.credits
                   const discount = basePricePerCredit && basePricePerCredit !== pricePerCredit
@@ -112,7 +112,7 @@ export default async function PricingPage() {
                   return (
                     <div
                       key={pack.id}
-                      className={`relative rounded-xl border bg-card p-6 flex flex-col gap-4 ${pack.popular ? "border-primary shadow-lg" : ""}`}
+                      className={`relative rounded-xl border bg-card p-6 flex flex-col gap-4 w-full sm:w-64 ${pack.popular ? "border-primary shadow-lg" : ""}`}
                     >
                       {pack.popular && (
                         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
