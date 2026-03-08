@@ -1,4 +1,5 @@
 import { verifySession, getUserPlan } from '@/lib/dal'
+import { prisma } from '@/lib/db/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -12,42 +13,30 @@ import {
   isPaid,
 } from '@/lib/subscription/helpers'
 import { BuyCreditsDialog } from '@/components/billing/buy-credits-dialog'
-import { CreditCard, Zap, Users, Building2, Coins } from 'lucide-react'
+import { CreditCard, Zap, Coins } from 'lucide-react'
 
-const PLANS = [
-  {
-    key: 'Pro',
-    icon: Zap,
-    label: 'Pro',
-    price: '29€ / mois',
-    description: 'Pour les indépendants et les petites équipes.',
-    features: ['Accès complet à toutes les fonctionnalités', 'Support prioritaire', 'Jusqu\'à 5 utilisateurs', 'Crédits mensuels inclus'],
-  },
-  {
-    key: 'Team',
-    icon: Users,
-    label: 'Team',
-    price: '79€ / mois',
-    description: 'Collaborez efficacement en équipe.',
-    features: ['Tout le plan Pro', 'Jusqu\'à 20 utilisateurs', 'Gestion des rôles', 'Tableau de bord équipe', 'Crédits partagés'],
-  },
-  {
-    key: 'Enterprise',
-    icon: Building2,
-    label: 'Enterprise',
-    price: 'Sur devis',
-    description: 'Pour les grandes organisations.',
-    features: ['Tout le plan Team', 'Utilisateurs illimités', 'SLA garanti', 'Support dédié', 'Déploiement sur site possible'],
-  },
-]
+function formatPlanPrice(price: number, period: string | null) {
+  if (price === -1) return 'Sur devis'
+  if (price === 0) return 'Gratuit'
+  const euros = (price / 100).toFixed(2).replace('.00', '') + '€'
+  if (!period) return euros
+  return `${euros} / ${period === 'month' ? 'mois' : 'an'}`
+}
 
 export default async function BillingPage() {
   const { userId } = await verifySession()
-  const plan = await getUserPlan(userId)
 
-  const planLabel = getFullPlanLabel(plan.accountType, plan.subscriptionPlan)
+  const [plan, availablePlans, creditPacks] = await Promise.all([
+    getUserPlan(userId),
+    prisma.plan.findMany({ where: { active: true }, orderBy: { sortOrder: 'asc' } }),
+    prisma.creditPack.findMany({ where: { active: true }, orderBy: { sortOrder: 'asc' } }),
+  ])
+
   const accountBadgeClass = getAccountTypeBadgeClass(plan.accountType)
   const planBadgeClass = plan.subscriptionPlan ? getPlanBadgeClass(plan.subscriptionPlan) : ''
+
+  // Exclure le plan gratuit (price === 0) de la section "Passer à un plan supérieur"
+  const upgradePlans = availablePlans.filter(p => p.price !== 0)
 
   return (
     <div className="@container/main flex flex-1 flex-col gap-2">
@@ -83,11 +72,11 @@ export default async function BillingPage() {
                   <p>Vous avez des crédits supplémentaires actifs. Abonnez-vous pour un accès illimité.</p>
                 )}
                 {isPaid(plan.accountType) && (
-                  <p>Vous bénéficiez d'un accès complet à toutes les fonctionnalités de votre plan <strong>{plan.subscriptionPlan}</strong>.</p>
+                  <p>Vous bénéficiez d&apos;un accès complet à toutes les fonctionnalités de votre plan <strong>{plan.subscriptionPlan}</strong>.</p>
                 )}
               </div>
               {isPaid(plan.accountType) && (
-                <Button variant="outline" size="sm">Gérer l'abonnement</Button>
+                <Button variant="outline" size="sm">Gérer l&apos;abonnement</Button>
               )}
             </CardContent>
           </Card>
@@ -107,9 +96,9 @@ export default async function BillingPage() {
                 <span className="text-muted-foreground text-sm">crédit{plan.extraCredits !== 1 ? 's' : ''} disponible{plan.extraCredits !== 1 ? 's' : ''}</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Les crédits s'ajoutent à votre quota mensuel et n'expirent pas.
+                Les crédits s&apos;ajoutent à votre quota mensuel et n&apos;expirent pas.
               </p>
-              <BuyCreditsDialog />
+              <BuyCreditsDialog packs={creditPacks} />
             </CardContent>
           </Card>
         </div>
@@ -117,50 +106,59 @@ export default async function BillingPage() {
         <Separator />
 
         {/* ── Plans disponibles ── */}
-        <div>
-          <h2 className="text-lg font-semibold mb-1">Passer à un plan supérieur</h2>
-          <p className="text-sm text-muted-foreground mb-4">Choisissez le plan adapté à vos besoins</p>
+        {upgradePlans.length > 0 && (
+          <div>
+            <h2 className="text-lg font-semibold mb-1">Passer à un plan supérieur</h2>
+            <p className="text-sm text-muted-foreground mb-4">Choisissez le plan adapté à vos besoins</p>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            {PLANS.map((p) => {
-              const Icon = p.icon
-              const isCurrentPlan = isPaid(plan.accountType) && plan.subscriptionPlan === p.key
+            <div className="grid gap-4 md:grid-cols-3">
+              {upgradePlans.map((p) => {
+                const isCurrentPlan = isPaid(plan.accountType) && plan.subscriptionPlan === p.name
 
-              return (
-                <Card key={p.key} className={isCurrentPlan ? 'border-primary ring-1 ring-primary' : ''}>
-                  <CardHeader>
-                    <div className="flex items-center gap-2">
-                      <Icon className="h-5 w-5 text-muted-foreground" />
-                      <CardTitle className="text-base">{p.label}</CardTitle>
-                      {isCurrentPlan && (
-                        <Badge variant="outline" className="ml-auto text-xs">Plan actuel</Badge>
-                      )}
-                    </div>
-                    <div className="text-2xl font-bold">{p.price}</div>
-                    <CardDescription>{p.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <ul className="space-y-1.5">
-                      {p.features.map((feature) => (
-                        <li key={feature} className="flex items-start gap-2 text-sm">
-                          <span className="text-green-500 mt-0.5">✓</span>
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Button
-                      className="w-full"
-                      variant={isCurrentPlan ? 'outline' : 'default'}
-                      disabled={isCurrentPlan}
-                    >
-                      {isCurrentPlan ? 'Plan actuel' : `Passer au plan ${p.label}`}
-                    </Button>
-                  </CardContent>
-                </Card>
-              )
-            })}
+                return (
+                  <Card key={p.id} className={`${isCurrentPlan ? 'border-primary ring-1 ring-primary' : ''} ${p.popular ? 'border-primary shadow-md' : ''}`}>
+                    <CardHeader>
+                      <div className="flex items-center gap-2">
+                        <Zap className="h-5 w-5 text-muted-foreground" />
+                        <CardTitle className="text-base">{p.name}</CardTitle>
+                        {p.popular && !isCurrentPlan && (
+                          <Badge className="ml-auto text-xs">Populaire</Badge>
+                        )}
+                        {isCurrentPlan && (
+                          <Badge variant="outline" className="ml-auto text-xs">Plan actuel</Badge>
+                        )}
+                      </div>
+                      <div className="text-2xl font-bold">{formatPlanPrice(p.price, p.period)}</div>
+                      <CardDescription>{p.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <ul className="space-y-1.5">
+                        {p.features.map((feature) => (
+                          <li key={feature} className="flex items-start gap-2 text-sm">
+                            <span className="text-green-500 mt-0.5">✓</span>
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <Button
+                        className="w-full"
+                        variant={isCurrentPlan ? 'outline' : 'default'}
+                        disabled={isCurrentPlan}
+                        asChild={!isCurrentPlan}
+                      >
+                        {isCurrentPlan ? (
+                          <span>Plan actuel</span>
+                        ) : (
+                          <a href={p.href}>{p.cta}</a>
+                        )}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
           </div>
-        </div>
+        )}
 
       </div>
     </div>
