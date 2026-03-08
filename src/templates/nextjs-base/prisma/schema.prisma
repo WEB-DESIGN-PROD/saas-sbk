@@ -175,3 +175,61 @@ model Invitation {
 
   @@map("invitation")
 }
+
+model Plan {
+  id          String   @id @default(cuid())
+  name        String
+  price       Int      // centimes (0 = gratuit)
+  currency    String   @default("EUR")
+  period      String?  // "month" | "year" | null
+  description String
+  features    String[] // liste de features texte
+  cta         String
+  href        String
+  popular     Boolean  @default(false)
+  active      Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("plan")
+}
+
+model Feature {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  icon        String?
+  active      Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("feature")
+}
+
+model Faq {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("faq")
+}
+
+model Page {
+  id        String   @id @default(cuid())
+  title     String
+  slug      String   @unique
+  content   String
+  inHeader  Boolean  @default(false)
+  inFooter  Boolean  @default(false)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("page")
+}

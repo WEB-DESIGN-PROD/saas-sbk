@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { LayoutDashboard, Home, Zap, Users, FileText, HardDrive } from "lucide-react"
+import { LayoutDashboard, Home, Zap, Users, FileText, HardDrive, DollarSign, Sparkles, HelpCircle, Globe } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
@@ -52,6 +52,10 @@ export function AppSidebar({
     ...(canManageUsers ? [{ title: "Utilisateurs", url: "/admin/users", icon: Users }] : []),
     ...(hasBlog ? [{ title: "Articles", url: "/admin/blog", icon: FileText }] : []),
     ...(hasStorage && canManageMedia ? [{ title: "Médias", url: "/admin/media", icon: HardDrive }] : []),
+    { title: "Tarifs", url: "/admin/pricing", icon: DollarSign },
+    { title: "Features", url: "/admin/features", icon: Sparkles },
+    { title: "FAQ", url: "/admin/faq", icon: HelpCircle },
+    ...(role === "admin" ? [{ title: "Pages", url: "/admin/pages", icon: Globe }] : []),
   ]
   const items = mode === "admin" ? adminItems : dashboardItems
   const showUpgradeCard = mode === "dashboard" && accountType !== "Paid"
