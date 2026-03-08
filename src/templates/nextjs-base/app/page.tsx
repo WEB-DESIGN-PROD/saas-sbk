@@ -36,36 +36,41 @@ export default async function Home() {
     <div className="flex min-h-screen flex-col">
       <Navbar />
 
-      {/* Hero */}
+      {/* Hero + Marquee = 100vh */}
       <main className="flex-1">
-        <section className="container mx-auto px-4 py-24 text-center">
-          <h1 className="mb-6 text-5xl font-bold tracking-tight">
-            Bienvenue sur {{PROJECT_NAME}}
-          </h1>
-          <p className="mb-8 text-xl text-muted-foreground max-w-2xl mx-auto">
-            Votre SAAS est prêt à démarrer. Commencez à construire votre application.
-          </p>
-          <div className="flex items-center justify-center gap-4">
-            <Link href="{{AUTH_ENTRY_URL}}">
-              <Button size="lg">Commencer gratuitement</Button>
-            </Link>
-            <Link href="/about">
-              <Button size="lg" variant="outline">En savoir plus</Button>
-            </Link>
-          </div>
-        </section>
-
-        {/* Marquee — logos tech */}
-        <section className="border-y bg-muted/30 py-8 overflow-hidden">
-          <div className="flex gap-12 animate-marquee whitespace-nowrap">
-            {[...TECH_LOGOS, ...TECH_LOGOS].map((logo, i) => (
-              <div key={i} className="flex items-center gap-2 text-muted-foreground shrink-0">
-                <span className="opacity-70">{logo.svg}</span>
-                <span className="text-sm font-medium">{logo.name}</span>
+        <div className="flex flex-col h-[calc(100vh-4rem)]">
+          {/* Hero */}
+          <section className="flex-1 flex items-center justify-center">
+            <div className="container mx-auto px-4 text-center">
+              <h1 className="mb-6 text-5xl font-bold tracking-tight">
+                Bienvenue sur {{PROJECT_NAME}}
+              </h1>
+              <p className="mb-8 text-xl text-muted-foreground max-w-2xl mx-auto">
+                Votre SAAS est prêt à démarrer. Commencez à construire votre application.
+              </p>
+              <div className="flex items-center justify-center gap-4">
+                <Link href="{{AUTH_ENTRY_URL}}">
+                  <Button size="lg">Commencer gratuitement</Button>
+                </Link>
+                <Link href="/about">
+                  <Button size="lg" variant="outline">En savoir plus</Button>
+                </Link>
               </div>
-            ))}
-          </div>
-        </section>
+            </div>
+          </section>
+
+          {/* Marquee — logos tech */}
+          <section className="border-y bg-muted/30 py-8 overflow-hidden shrink-0">
+            <div className="flex gap-12 animate-marquee whitespace-nowrap">
+              {[...TECH_LOGOS, ...TECH_LOGOS].map((logo, i) => (
+                <div key={i} className="flex items-center gap-2 text-muted-foreground shrink-0">
+                  <span className="opacity-70">{logo.svg}</span>
+                  <span className="text-sm font-medium">{logo.name}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
 
         {/* Features */}
         {features.length > 0 && (
