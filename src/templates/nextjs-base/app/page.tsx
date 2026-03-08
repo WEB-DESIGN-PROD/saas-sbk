@@ -14,9 +14,15 @@ const TESTIMONIALS = [
   { name: "Sophie M.", role: "Fondatrice, StartupX", text: "Ce starter kit m'a fait gagner des semaines de développement. L'architecture est propre et extensible.", avatar: "SM" },
   { name: "Thomas L.", role: "CTO, DevAgency", text: "L'intégration Better Auth + Prisma est au top. Exactement ce dont j'avais besoin pour démarrer rapidement.", avatar: "TL" },
   { name: "Clara B.", role: "Développeuse indépendante", text: "La dashboard est magnifique out-of-the-box et les composants Shadcn UI sont parfaitement intégrés.", avatar: "CB" },
+  { name: "Marc D.", role: "Lead Dev, FinTech Solutions", text: "Le système de facturation Stripe est déjà configuré. J'ai pu lancer mon SaaS en production en moins d'une semaine.", avatar: "MD" },
+  { name: "Léa R.", role: "CEO, ContentFlow", text: "Le module blog avec RBAC est exactement ce qu'il me fallait. Les rôles éditeur et contributeur fonctionnent parfaitement.", avatar: "LR" },
+  { name: "Antoine V.", role: "Développeur fullstack", text: "MinIO intégré dès le départ, emails transactionnels Resend prêts à l'emploi. Rien à configurer, tout fonctionne.", avatar: "AV" },
 ];
 
 const TECH_LOGOS = [
+  { name: "Docker", svg: null },
+  { name: "Shadcn UI", svg: null },
+  { name: "MinIO", svg: null },
   { name: "Next.js", svg: <svg viewBox="0 0 180 180" fill="currentColor" className="h-7 w-7"><path d="M90 0C40.3 0 0 40.3 0 90s40.3 90 90 90 90-40.3 90-90S139.7 0 90 0zm39.6 129.3L54.3 51H42v78.1h10.9V63.8l68.8 71.7c2.7-1.9 5.3-4 7.9-6.2zm-30.6-78.4h10.8V129H99V50.9z"/></svg> },
   { name: "React", svg: <svg viewBox="0 0 841.9 595.3" fill="#61DAFB" className="h-7 w-auto"><g><circle cx="420.9" cy="296.5" r="45.7"/><path d="M420.9 128.3c-20.1 0-39.3 1.4-56.6 3.9C324.8 97 279.3 75 251 75c-10.9 0-20.3 2.4-27.7 7.5-16.1 11-22.3 33.1-17.4 62.1 1.3 7.8 3.5 16 6.4 24.4C194.3 182.9 185 198 185 213c0 15 9.2 30.1 27.2 44 -2.9 8.4-5 16.6-6.4 24.4-4.9 29 1.3 51.1 17.4 62.1 7.4 5.1 16.8 7.5 27.7 7.5 28.3 0 73.8-22 113.3-57.2 17.3 2.5 36.5 3.9 56.6 3.9 20.1 0 39.3-1.4 56.6-3.9 39.5 35.2 85 57.2 113.3 57.2 10.9 0 20.3-2.4 27.7-7.5 16.1-11 22.3-33.1 17.4-62.1-1.3-7.8-3.5-16-6.4-24.4 18-13.9 27.2-29 27.2-44 0-15-9.2-30.1-27.2-44 2.9-8.4 5-16.6 6.4-24.4 4.9-29-1.3-51.1-17.4-62.1C611.2 77.4 601.8 75 590.9 75c-28.3 0-73.8 22-113.3 57.2-17.4-2.5-36.6-3.9-56.7-3.9zm0 45.8c10.2 0 20.3.5 30.1 1.4-9.7 13.1-19.2 27.8-28 43.9-8.8 16.1-16.5 32.2-23.1 48-6.6-15.8-14.3-31.9-23.1-48-8.8-16.1-18.4-30.8-28-43.9 9.8-.9 19.9-1.4 30.1-1.4h42zm-128.5 20.3c3.7 4.6 7.4 9.5 11 14.7-4.5-.2-9-.3-13.4-.3-4.5 0-9 .1-13.4.3 3.6-5.2 7.3-10.1 11-14.7zm257 0c3.7 4.6 7.4 9.5 11 14.7-4.4-.2-8.9-.3-13.4-.3-4.5 0-9 .1-13.4.3 3.7-5.2 7.4-10.1 10.8-14.7zM247.4 238.5c2 4.7 4.1 9.4 6.3 14-2.2 4.6-4.3 9.3-6.3 14-10.5-4.6-19.7-9.5-27.3-14.5 7.6-4.9 16.8-9.8 27.3-13.5zm347.1 0c10.5 3.8 19.7 8.7 27.3 13.5-7.6 5.1-16.8 9.9-27.3 14.5-2-4.7-4.1-9.4-6.3-14 2.2-4.6 4.3-9.3 6.3-14zM420.9 302c7.3 0 14.4-.3 21.3-.8-3.6 6.1-7.2 12-10.8 17.6-3.5 5.5-7 10.8-10.5 15.8-3.5-5-7-10.3-10.5-15.8-3.6-5.6-7.2-11.5-10.8-17.6 6.9.5 14 .8 21.3.8zm80.6-10.5c-2 4.7-4.1 9.4-6.3 14 2.2 4.6 4.3 9.3 6.3 14 10.5-4.6 19.7-9.5 27.3-14.5-7.6-4.9-16.8-9.8-27.3-13.5zm-161.2 0c-10.5 3.8-19.7 8.7-27.3 13.5 7.6 5.1 16.8 9.9 27.3 14.5 2-4.7 4.1-9.4 6.3-14-2.2-4.6-4.3-9.3-6.3-14z"/></g></svg> },
   { name: "TypeScript", svg: <svg viewBox="0 0 400 400" className="h-7 w-7"><rect width="400" height="400" rx="50" fill="#3178C6"/><path d="M87.6 200.5v22.4h35.7v101h27.2v-101h35.7v-22.4H87.6zm162.3 0v123.4h27.3v-51.3h2.7l27.3 51.3h31.7l-29-52.3c13.7-4.2 22.2-15.7 22.2-30.7 0-20-13.6-40.4-44.4-40.4h-37.8zm27.3 22.4h8.5c13.4 0 19.2 6.5 19.2 17.2 0 10.6-5.8 17.2-19.2 17.2h-8.5v-34.4z" fill="white"/></svg> },
@@ -59,15 +65,19 @@ export default async function Home() {
             </div>
           </section>
 
-          {/* Marquee — logos tech */}
+          {/* Marquee — noms tech avec fondu sur les bords */}
           <section className="border-y bg-muted/30 py-8 overflow-hidden shrink-0">
-            <div className="flex gap-12 animate-marquee whitespace-nowrap">
-              {[...TECH_LOGOS, ...TECH_LOGOS].map((logo, i) => (
-                <div key={i} className="flex items-center gap-2 text-muted-foreground shrink-0">
-                  <span className="opacity-70">{logo.svg}</span>
-                  <span className="text-sm font-medium">{logo.name}</span>
-                </div>
-              ))}
+            <div
+              className="relative"
+              style={{ maskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)" }}
+            >
+              <div className="flex gap-16 animate-marquee whitespace-nowrap">
+                {[...TECH_LOGOS, ...TECH_LOGOS, ...TECH_LOGOS, ...TECH_LOGOS].map((logo, i) => (
+                  <span key={i} className="text-sm font-semibold tracking-wide text-muted-foreground shrink-0">
+                    {logo.name}
+                  </span>
+                ))}
+              </div>
             </div>
           </section>
         </div>
