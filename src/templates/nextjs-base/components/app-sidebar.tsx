@@ -53,6 +53,8 @@ export function AppSidebar({
   const adminItems = [
     { title: "Vue d'ensemble", url: "/admin", icon: LayoutDashboard },
     ...(canManageUsers ? [{ title: "Utilisateurs", url: "/admin/users", icon: Users }] : []),
+  ]
+  const adminSaasItems = [
     ...(role === "admin" ? [{ title: "Pages", url: "/admin/pages", icon: Globe }] : []),
     { title: "Features", url: "/admin/features", icon: Sparkles },
     { title: "FAQ", url: "/admin/faq", icon: HelpCircle },
@@ -84,6 +86,25 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={items} />
+        {mode === "admin" && adminSaasItems.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Gestion du SaaS</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {adminSaasItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild tooltip={item.title}>
+                      <Link href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
         {mode === "admin" && adminBlogItems.length > 0 && (
           <SidebarGroup>
             <SidebarGroupLabel>Gestion du blog</SidebarGroupLabel>
