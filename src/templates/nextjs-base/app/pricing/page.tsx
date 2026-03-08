@@ -40,16 +40,16 @@ export default async function PricingPage() {
           </div>
 
           {/* Plans d'abonnement */}
-          <div className="grid gap-8 md:grid-cols-3">
+          <div className="grid gap-8 md:grid-cols-3 items-stretch">
             {plans.map((plan) => {
               const { amount, period } = formatPlanPrice(plan.price, plan.period)
               return (
                 <Card
                   key={plan.id}
-                  className={plan.popular ? "border-primary shadow-lg" : ""}
+                  className={`flex flex-col overflow-hidden ${plan.popular ? "border-primary shadow-lg" : ""}`}
                 >
                   {plan.popular && (
-                    <div className="bg-primary px-3 py-1 text-center text-sm text-primary-foreground rounded-t-xl">
+                    <div className="bg-primary px-3 py-1.5 text-center text-sm font-medium text-primary-foreground">
                       Plus populaire
                     </div>
                   )}
@@ -61,7 +61,7 @@ export default async function PricingPage() {
                       {period && <span className="text-muted-foreground">{period}</span>}
                     </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="flex-1">
                     <ul className="space-y-3">
                       {plan.features.map((feature, i) => (
                         <li key={i} className="flex items-start gap-2">
