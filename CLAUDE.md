@@ -98,6 +98,10 @@ mon-saas/
 │   │   ├── layout.tsx              # Layout admin protégé
 │   │   ├── page.tsx                # Stats & graphiques
 │   │   ├── users/page.tsx          # Gestion utilisateurs + impersonation
+│   │   ├── pages/page.tsx          # Pages dynamiques (Mentions, CGU…)
+│   │   ├── features/page.tsx       # Features landing (drag-and-drop)
+│   │   ├── faq/page.tsx            # FAQ landing (drag-and-drop)
+│   │   ├── pricing/page.tsx        # Plans & packs de crédits
 │   │   ├── blog/                   # Gestion blog admin (si blog activé)
 │   │   └── media/page.tsx          # Gestion médias admin (si storage activé)
 │   ├── blog/                       # Blog public (si blog activé)
@@ -238,12 +242,14 @@ npm run docker:up    # Démarrer les services Docker
 - Installation automatique des skills Claude Code
 - PostgreSQL (Docker ou distant), OAuth GitHub/Google, Magic Link/OTP
 
-### Phase 2 🚧 — Templates Complets (90%)
+### Phase 2 🚧 — Templates Complets (98%)
 - Architecture templates statique (shadcn-base + nextjs-base overlay)
 - Dashboard UX finalisé, auth emails complets
 - Facturation & types d'utilisateurs (v0.8.0)
 - Système super administrateur avec impersonation (v0.9.0)
 - Système de blog complet — éditeur, admin, public, RSS (v0.10.0)
+- Gestion contenu admin : Pages, Features, FAQ, Tarifs/Crédits depuis DB (v0.12.0-dev)
+- Drag-and-drop réordonnement Features/FAQ/Pages, pages dynamiques navbar/footer
 
 ### Phase 3 📅 — Génération IA (À VENIR)
 - Commande `/generate-features` dans Claude Code

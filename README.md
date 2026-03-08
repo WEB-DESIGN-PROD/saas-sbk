@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-0.11.0--dev-blue.svg)
+![Version](https://img.shields.io/badge/version-0.12.0--dev-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-16+-black.svg)
@@ -59,11 +59,16 @@ npx create-saas-sbk@latest
 - **`/admin/users`** — tableau de gestion : plan, crédits, suppression, impersonation, recherche
 - **Changement de rôle inline** — sélecteur direct dans la table (admin uniquement)
 - **Section rôles & permissions** — récapitulatif des droits par rôle en accordéon
+- **`/admin/pages`** — pages dynamiques (Mentions légales, CGU…) avec éditeur Markdown, header/footer
+- **`/admin/features`** — features affichées sur la landing page, réordonnables par drag-and-drop
+- **`/admin/faq`** — FAQ affichée sur la landing page, réordonnables par drag-and-drop
+- **`/admin/pricing`** — plans d'abonnement et packs de crédits gérés en base de données
 - **`/admin/blog`** — gestion complète des articles (si blog activé)
 - **`/admin/media`** — gestion des médias avec lien vers l'article associé (si stockage activé)
 - **Impersonation** — l'admin peut se connecter en tant qu'utilisateur avec bannière de retour
 - **Plugin Better Auth `admin`** — ban, impersonation, gestion des rôles
 - **Auto-refresh 30s** — les compteurs se mettent à jour automatiquement
+- **Sidebar organisée** — séparateurs "Gestion du SAAS" et "Gestion du blog"
 
 ### Blog (optionnel)
 - **Type de SaaS** — choix entre SaaS classique et Blog SaaS à la génération
@@ -228,7 +233,7 @@ Pour installer Claude Code : https://claude.ai/docs/cli
 <details>
 <summary><strong>🗺️ Roadmap</strong></summary>
 
-📍 **Version en cours : v0.11.0-dev** (mars 2026)
+📍 **Version en cours : v0.12.0-dev** (mars 2026)
 
 ### ✅ Phase 1 - CLI Interactif (TERMINÉE)
 - ✅ CLI interactif avec @clack/prompts en français
@@ -239,12 +244,17 @@ Pour installer Claude Code : https://claude.ai/docs/cli
 - ✅ Interface UX avec récapitulatif en colonnes
 - ✅ **Navigation retour** — option "◀ Étape précédente" dans chaque menu à choix
 
-### 🚧 Phase 2 - Templates Complets (EN COURS - 95%)
+### 🚧 Phase 2 - Templates Complets (EN COURS - 98%)
 - ✅ Architecture templates statique (`shadcn-base` + overlay `nextjs-base`)
 - ✅ Dashboard UX finalisé, auth emails complets, facturation Stripe (v0.8.0)
 - ✅ Système super administrateur avec impersonation et changement de rôle inline (v0.9.0)
 - ✅ Blog complet avec RBAC 5 rôles (éditeur, admin, public, RSS) (v0.10.0)
-- ✅ Contrôle d'accès granulaire par rôle sur articles, catégories, bouton public (v0.11.0-dev)
+- ✅ Contrôle d'accès granulaire par rôle sur articles, catégories, bouton public (v0.11.0)
+- ✅ **Gestion du contenu admin** — Pages, Features, FAQ, Tarifs/Crédits depuis la DB (v0.12.0-dev)
+- ✅ **Drag-and-drop** — réordonnement des Features, FAQ et Pages dans l'admin
+- ✅ **Pages dynamiques** — Navbar et Footer injectent les pages DB (inHeader / inFooter)
+- ✅ **Page `/contact`** — formulaire envoyant un email au super admin via Resend
+- ✅ Sidebar admin organisée avec séparateurs "Gestion du SAAS" et "Gestion du blog"
 - 🚧 Templates multilingues (FR, EN, ES, DE)
 - 📅 Configuration MongoDB et SQLite
 - 📅 Template sans système de connexion
@@ -252,7 +262,7 @@ Pour installer Claude Code : https://claude.ai/docs/cli
 ### 🚧 Phase 3 - Génération IA (EN DÉMARRAGE - 20%)
 - ✅ Skill `/generate-features` inclus dans chaque projet généré
 - ✅ Agents `full-stack-dev` et `code-reviewer` inclus dans chaque projet
-- ✅ Skills et agents réellement copiés dans `.claude/` (fix v0.11.0-dev)
+- ✅ Skills et agents réellement copiés dans `.claude/` (fix v0.11.0)
 - 📅 Implémentation complète de la commande `/generate-features`
 - 📅 Agents sécurité, SEO, performance
 - 📅 Templates de features (e-commerce, CRM, chat)

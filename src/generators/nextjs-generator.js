@@ -99,6 +99,7 @@ function copyConfigFiles(projectPath, config, templatesDir) {
     'components/nav-main.tsx',
     'components/nav-secondary.tsx',
     'components/navbar.tsx',
+    'components/navbar-client.tsx',
     'components/footer.tsx',
     'components/theme-provider.tsx',
     'components/theme-toggle.tsx',
@@ -109,6 +110,9 @@ function copyConfigFiles(projectPath, config, templatesDir) {
     'components/billing/buy-credits-dialog.tsx',
     'app/dashboard/billing/page.tsx',
     'app/api/user/plan/route.ts',
+    'app/contact/page.tsx',
+    'app/contact/layout.tsx',
+    'app/[slug]/page.tsx',
     'DEVELOPMENT.md',
   ];
 
@@ -164,6 +168,29 @@ function copyConfigFiles(projectPath, config, templatesDir) {
       'app/api/admin/users/[id]/route.ts',
       'app/api/admin/invitations/route.ts',
       'app/api/admin/invitations/[id]/route.ts',
+      // Gestion du SAAS (pages, features, FAQ, tarifs)
+      'app/admin/pages/page.tsx',
+      'app/admin/features/page.tsx',
+      'app/admin/faq/page.tsx',
+      'app/admin/pricing/page.tsx',
+      'components/admin/pages-manager.tsx',
+      'components/admin/features-manager.tsx',
+      'components/admin/faq-manager.tsx',
+      'components/admin/pricing-manager.tsx',
+      'app/api/admin/pages/route.ts',
+      'app/api/admin/pages/[id]/route.ts',
+      'app/api/admin/pages/reorder/route.ts',
+      'app/api/admin/features/route.ts',
+      'app/api/admin/features/[id]/route.ts',
+      'app/api/admin/features/reorder/route.ts',
+      'app/api/admin/faq/route.ts',
+      'app/api/admin/faq/[id]/route.ts',
+      'app/api/admin/faq/reorder/route.ts',
+      'app/api/admin/pricing/route.ts',
+      'app/api/admin/pricing/[id]/route.ts',
+      'app/api/admin/credit-packs/route.ts',
+      'app/api/admin/credit-packs/[id]/route.ts',
+      'app/api/public/credit-packs/route.ts',
     );
   }
 
