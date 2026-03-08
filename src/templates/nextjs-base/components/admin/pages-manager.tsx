@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Pencil, Trash2, Globe, ExternalLink } from "lucide-react"
+import { Plus, Pencil, Trash2, Globe, ExternalLink, CheckCircle2, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -123,9 +123,10 @@ export function PagesManager({ initialPages }: PagesManagerProps) {
                 <code className="text-xs text-muted-foreground">/{page.slug}</code>
                 {page.inHeader && <Badge variant="outline" className="text-xs">Header</Badge>}
                 {page.inFooter && <Badge variant="outline" className="text-xs">Footer</Badge>}
-                <Badge variant={page.active ? "default" : "secondary"} className="text-xs">
-                  {page.active ? "Active" : "Inactive"}
-                </Badge>
+                {page.active
+                  ? <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+                  : <XCircle className="h-4 w-4 text-muted-foreground shrink-0" />
+                }
               </div>
             </div>
             <a href={`/${page.slug}`} target="_blank" rel="noopener noreferrer">

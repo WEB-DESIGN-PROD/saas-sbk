@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Pencil, Trash2, GripVertical } from "lucide-react"
+import { Plus, Pencil, Trash2, GripVertical, CheckCircle2, XCircle } from "lucide-react"
 import {
   DndContext,
   closestCenter,
@@ -79,9 +79,10 @@ function SortableRow({
         </button>
       )}
       <span className="flex-1 font-medium text-sm truncate">{faq.question}</span>
-      <Badge variant={faq.active ? "default" : "secondary"} className="text-xs shrink-0">
-        {faq.active ? "Actif" : "Inactif"}
-      </Badge>
+      {faq.active
+        ? <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+        : <XCircle className="h-4 w-4 text-muted-foreground shrink-0" />
+      }
       {isAdmin && (
         <div className="flex gap-1 shrink-0">
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onEdit}>
