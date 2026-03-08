@@ -40,11 +40,12 @@ export function AppSidebar({
   ...props
 }: AppSidebarProps & Omit<React.ComponentProps<typeof Sidebar>, keyof AppSidebarProps>) {
   const canManageUsers = ["admin", "co-admin"].includes(role)
+  const canManageBlog  = ["admin", "co-admin", "editor", "contributor"].includes(role)
   const canManageMedia = ["admin", "co-admin", "editor"].includes(role)
 
   const dashboardItems = [
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-    ...(hasBlog ? [{ title: "Articles", url: "/dashboard/blog", icon: FileText }] : []),
+    ...(hasBlog && canManageBlog ? [{ title: "Articles", url: "/dashboard/blog", icon: FileText }] : []),
   ]
   const adminItems = [
     { title: "Vue d'ensemble", url: "/admin", icon: LayoutDashboard },

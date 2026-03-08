@@ -35,6 +35,7 @@ export default async function DashboardLayout({
         variant="inset"
         user={user}
         accountType={plan.accountType}
+        role={role}
         hasBlog={process.env.NEXT_PUBLIC_HAS_BLOG === "true"}
       />
       <SidebarInset>
