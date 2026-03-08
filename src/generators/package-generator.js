@@ -26,6 +26,7 @@ export function generatePackageJson(config, projectPath = null) {
     'db:migrate': 'prisma migrate dev',
     'db:studio': 'prisma studio',
     'db:generate': 'prisma generate',
+    'db:seed': 'tsx prisma/seed.ts',
   };
 
   // Docker scripts si nécessaire
