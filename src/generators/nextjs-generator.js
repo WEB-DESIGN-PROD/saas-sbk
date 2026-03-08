@@ -113,7 +113,17 @@ function copyConfigFiles(projectPath, config, templatesDir) {
     'app/contact/page.tsx',
     'app/contact/layout.tsx',
     'app/[slug]/page.tsx',
+    'app/loading.tsx',
     'DEVELOPMENT.md',
+    // API Contact (formulaire de contact)
+    'app/api/contact/route.ts',
+    // API publiques (landing page : features, FAQ, tarifs, pages)
+    'app/api/public/faq/route.ts',
+    'app/api/public/features/route.ts',
+    'app/api/public/pricing/route.ts',
+    'app/api/public/pages/[slug]/route.ts',
+    // Seed Prisma (données initiales)
+    'prisma/seed.ts',
   ];
 
   // Fichiers conditionnels
@@ -159,6 +169,9 @@ function copyConfigFiles(projectPath, config, templatesDir) {
       'components/admin/section-cards-admin.tsx',
       'components/admin/admin-chart-signups.tsx',
       'components/admin/users-table.tsx',
+      'components/section-cards.tsx',
+      'components/chart-area-interactive.tsx',
+      'components/data-table.tsx',
       'components/admin/invite-user-button.tsx',
       'components/admin/roles-permissions-card.tsx',
       'components/admin/auto-refresh.tsx',

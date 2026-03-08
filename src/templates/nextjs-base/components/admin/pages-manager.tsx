@@ -32,6 +32,7 @@ interface Page {
   inHeader: boolean
   inFooter: boolean
   active: boolean
+  isDefault: boolean
   sortOrder: number
 }
 
@@ -39,7 +40,7 @@ interface PagesManagerProps {
   initialPages: Page[]
 }
 
-const EMPTY: Omit<Page, "id" | "sortOrder"> = {
+const EMPTY: Omit<Page, "id" | "sortOrder" | "isDefault"> = {
   title: "", slug: "", content: "", inHeader: false, inFooter: false, active: true,
 }
 
@@ -48,8 +49,20 @@ function toSlug(text: string) {
     .replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").trim()
 }
 
-function SortableRow({ page, onEdit, onDelete }: {
-  page: Page; onEdit: () => void; onDelete: () => void
+async function patchPage(id: string, data: Partial<Page>) {
+  await fetch(`/api/admin/pages/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  })
+}
+
+// Ligne mixte : défaut = toggles seulement, custom = CRUD complet
+function SortableRow({ page, onEdit, onDelete, onToggle }: {
+  page: Page
+  onEdit: () => void
+  onDelete: () => void
+  onToggle: (field: "inHeader" | "inFooter", value: boolean) => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: page.id })
@@ -64,28 +77,53 @@ function SortableRow({ page, onEdit, onDelete }: {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <p className="font-medium text-sm">{page.title}</p>
-          <code className="text-xs text-muted-foreground">/{page.slug}</code>
-          {page.inHeader && <Badge variant="outline" className="text-xs">Header</Badge>}
-          {page.inFooter && <Badge variant="outline" className="text-xs">Footer</Badge>}
-          {page.active
+          {page.isDefault && <Badge variant="secondary" className="text-xs">Par défaut</Badge>}
+          {!page.isDefault && (page.active
             ? <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
             : <XCircle className="h-4 w-4 text-muted-foreground shrink-0" />
-          }
+          )}
         </div>
       </div>
+
+      {/* Pages par défaut : toggles Header/Footer */}
+      {page.isDefault && (
+        <div className="flex items-center gap-4 shrink-0">
+          <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer">
+            <Switch checked={page.inHeader} onCheckedChange={(v) => onToggle("inHeader", v)} className="scale-75" />
+            Header
+          </label>
+          <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer">
+            <Switch checked={page.inFooter} onCheckedChange={(v) => onToggle("inFooter", v)} className="scale-75" />
+            Footer
+          </label>
+        </div>
+      )}
+
       <a href={`/${page.slug}`} target="_blank" rel="noopener noreferrer">
         <Button variant="ghost" size="icon" className="h-7 w-7">
           <ExternalLink className="h-3.5 w-3.5" />
         </Button>
       </a>
-      <div className="flex gap-1 shrink-0">
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onEdit}>
-          <Pencil className="h-3.5 w-3.5" />
-        </Button>
-        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={onDelete}>
-          <Trash2 className="h-3.5 w-3.5" />
-        </Button>
-      </div>
+
+      {/* Pages custom : édition et suppression */}
+      {!page.isDefault && (
+        <div className="flex gap-1 shrink-0">
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onEdit}>
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={onDelete}>
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function SectionLabel({ label }: { label: string }) {
+  return (
+    <div className="px-4 py-2 bg-muted/40 border-b">
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{label}</p>
     </div>
   )
 }
@@ -101,26 +139,34 @@ export function PagesManager({ initialPages }: PagesManagerProps) {
 
   const sensors = useSensors(useSensor(PointerSensor))
 
-  async function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event
-    if (!over || active.id === over.id) return
-    const oldIndex = pages.findIndex(p => p.id === active.id)
-    const newIndex = pages.findIndex(p => p.id === over.id)
-    const reordered = arrayMove(pages, oldIndex, newIndex)
-    setPages(reordered)
-    await fetch("/api/admin/pages/reorder", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ order: reordered.map(p => p.id) }),
-    })
+  // Sections unifiées : header = toutes les pages inHeader (défaut + custom)
+  const headerPages = pages.filter(p => p.inHeader)
+  const footerPages = pages.filter(p => p.inFooter && !p.inHeader)
+  const otherPages  = pages.filter(p => !p.inHeader && !p.inFooter && !p.isDefault)
+
+  function makeDragEnd(group: Page[]) {
+    return async (event: DragEndEvent) => {
+      const { active, over } = event
+      if (!over || active.id === over.id) return
+      const oldIndex = group.findIndex(p => p.id === active.id)
+      const newIndex = group.findIndex(p => p.id === over.id)
+      const reordered = arrayMove(group, oldIndex, newIndex)
+      const reorderedIds = new Set(reordered.map(p => p.id))
+      setPages(prev => [...prev.filter(p => !reorderedIds.has(p.id)), ...reordered])
+      await fetch("/api/admin/pages/reorder", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order: reordered.map(p => p.id) }),
+      })
+    }
   }
 
-  function openCreate() {
-    setEditing(null)
-    setForm(EMPTY)
-    setPreview(false)
-    setDialogOpen(true)
+  async function handleToggle(id: string, field: "inHeader" | "inFooter", value: boolean) {
+    await patchPage(id, { [field]: value })
+    setPages(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p))
   }
+
+  function openCreate() { setEditing(null); setForm(EMPTY); setPreview(false); setDialogOpen(true) }
 
   function openEdit(page: Page) {
     setEditing(page)
@@ -130,11 +176,7 @@ export function PagesManager({ initialPages }: PagesManagerProps) {
   }
 
   function handleTitleChange(title: string) {
-    setForm(f => ({
-      ...f,
-      title,
-      ...(!editing ? { slug: toSlug(title) } : {}),
-    }))
+    setForm(f => ({ ...f, title, ...(!editing ? { slug: toSlug(title) } : {}) }))
   }
 
   async function handleSave() {
@@ -142,20 +184,17 @@ export function PagesManager({ initialPages }: PagesManagerProps) {
     try {
       if (editing) {
         const res = await fetch(`/api/admin/pages/${editing.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
+          method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form),
         })
         const updated = await res.json()
-        setPages(pages.map(p => p.id === editing.id ? updated : p))
+        setPages(pages.map(p => p.id === editing.id ? { ...updated, isDefault: editing.isDefault } : p))
       } else {
         const res = await fetch("/api/admin/pages", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...form, sortOrder: pages.length }),
         })
         const created = await res.json()
-        setPages([...pages, created])
+        setPages([...pages, { ...created, isDefault: false }])
       }
       setDialogOpen(false)
     } finally {
@@ -169,6 +208,33 @@ export function PagesManager({ initialPages }: PagesManagerProps) {
     setDeleteId(null)
   }
 
+  function renderSection(label: string, group: Page[], dndId: string) {
+    return (
+      <div>
+        <SectionLabel label={label} />
+        {group.length === 0 ? (
+          <p className="px-4 py-4 text-center text-sm text-muted-foreground">Aucune page dans cette section.</p>
+        ) : (
+          <DndContext id={dndId} sensors={sensors} collisionDetection={closestCenter} modifiers={[restrictToVerticalAxis]} onDragEnd={makeDragEnd(group)}>
+            <SortableContext items={group.map(p => p.id)} strategy={verticalListSortingStrategy}>
+              <div className="divide-y">
+                {group.map(page => (
+                  <SortableRow
+                    key={page.id}
+                    page={page}
+                    onEdit={() => openEdit(page)}
+                    onDelete={() => setDeleteId(page.id)}
+                    onToggle={(field, value) => handleToggle(page.id, field, value)}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
@@ -177,17 +243,10 @@ export function PagesManager({ initialPages }: PagesManagerProps) {
         </Button>
       </div>
 
-      <div className="rounded-xl border divide-y">
-        {pages.length === 0 && (
-          <p className="px-4 py-8 text-center text-sm text-muted-foreground">Aucune page. Créez-en une.</p>
-        )}
-        <DndContext sensors={sensors} collisionDetection={closestCenter} modifiers={[restrictToVerticalAxis]} onDragEnd={handleDragEnd}>
-          <SortableContext items={pages.map(p => p.id)} strategy={verticalListSortingStrategy}>
-            {pages.map((page) => (
-              <SortableRow key={page.id} page={page} onEdit={() => openEdit(page)} onDelete={() => setDeleteId(page.id)} />
-            ))}
-          </SortableContext>
-        </DndContext>
+      <div className="rounded-xl border overflow-hidden divide-y">
+        {renderSection("Dans le header", headerPages, "dnd-header")}
+        {renderSection("Dans le footer", footerPages, "dnd-footer")}
+        {otherPages.length > 0 && renderSection("Autres pages", otherPages, "dnd-other")}
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -199,26 +258,16 @@ export function PagesManager({ initialPages }: PagesManagerProps) {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label>Titre</Label>
-                <Input
-                  value={form.title}
-                  onChange={e => handleTitleChange(e.target.value)}
-                  placeholder="Mentions légales"
-                />
+                <Input value={form.title} onChange={e => handleTitleChange(e.target.value)} placeholder="Mentions légales" />
               </div>
               <div className="space-y-1.5">
                 <Label>Slug (URL)</Label>
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm text-muted-foreground">/</span>
-                  <Input
-                    value={form.slug}
-                    onChange={e => setForm(f => ({ ...f, slug: toSlug(e.target.value) }))}
-                    placeholder="mentions-legales"
-                  />
+                  <Input value={form.slug} onChange={e => setForm(f => ({ ...f, slug: toSlug(e.target.value) }))} placeholder="mentions-legales" />
                 </div>
               </div>
             </div>
-
-            {/* Contenu Markdown */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <Label>Contenu (Markdown)</Label>
@@ -231,17 +280,9 @@ export function PagesManager({ initialPages }: PagesManagerProps) {
                   <pre className="whitespace-pre-wrap text-sm font-sans">{form.content || <span className="text-muted-foreground italic">Aucun contenu</span>}</pre>
                 </div>
               ) : (
-                <Textarea
-                  rows={10}
-                  value={form.content}
-                  onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
-                  placeholder="# Titre&#10;&#10;Votre contenu en **Markdown**..."
-                  className="font-mono text-sm"
-                />
+                <Textarea rows={10} value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} placeholder="# Titre&#10;&#10;Votre contenu en **Markdown**..." className="font-mono text-sm" />
               )}
             </div>
-
-            {/* Options */}
             <div className="grid grid-cols-3 gap-4">
               <label className="flex items-center gap-2 text-sm cursor-pointer">
                 <input type="checkbox" checked={form.inHeader} onChange={e => setForm(f => ({ ...f, inHeader: e.target.checked }))} />
@@ -252,12 +293,8 @@ export function PagesManager({ initialPages }: PagesManagerProps) {
                 Menu footer
               </label>
               <div className="flex items-center gap-3">
-                <Switch
-                  id="page-active"
-                  checked={form.active}
-                  onCheckedChange={v => setForm(f => ({ ...f, active: v }))}
-                />
-                <Label htmlFor="page-active" className="cursor-pointer">Visible (page publique)</Label>
+                <Switch id="page-active" checked={form.active} onCheckedChange={v => setForm(f => ({ ...f, active: v }))} />
+                <Label htmlFor="page-active" className="cursor-pointer">Visible</Label>
               </div>
             </div>
           </div>
@@ -274,9 +311,7 @@ export function PagesManager({ initialPages }: PagesManagerProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Supprimer cette page ?</AlertDialogTitle>
-            <AlertDialogDescription>
-              La page sera supprimée et son URL ne sera plus accessible.
-            </AlertDialogDescription>
+            <AlertDialogDescription>La page sera supprimée et son URL ne sera plus accessible.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>

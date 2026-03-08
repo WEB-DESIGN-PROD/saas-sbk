@@ -87,6 +87,20 @@ async function main() {
     ],
   })
 
+  // Pages par défaut
+  const defaultPagesData = [
+    { id: "page-about",   title: "À propos", slug: "about",   content: "# À propos\n\nDécouvrez notre équipe et notre mission.", inHeader: true,  inFooter: false, active: true, isDefault: true, sortOrder: 0 },
+    { id: "page-pricing", title: "Tarifs",   slug: "pricing", content: "# Tarifs\n\nDécouvrez nos offres.",                    inHeader: true,  inFooter: false, active: true, isDefault: true, sortOrder: 1 },
+    { id: "page-blog",    title: "Blog",     slug: "blog",    content: "# Blog\n\nNos derniers articles.",                     inHeader: true,  inFooter: false, active: true, isDefault: true, sortOrder: 2 },
+  ]
+  for (const page of defaultPagesData) {
+    await prisma.page.upsert({
+      where: { slug: page.slug },
+      update: { isDefault: true, sortOrder: page.sortOrder },
+      create: page,
+    })
+  }
+
   console.log("✅ Seed terminé")
 }
 

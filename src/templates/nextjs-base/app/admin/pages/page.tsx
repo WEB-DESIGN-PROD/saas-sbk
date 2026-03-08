@@ -5,7 +5,7 @@ import { PagesManager } from "@/components/admin/pages-manager"
 export default async function AdminPagesPage() {
   await verifyAdmin()
 
-  const pages = await prisma.page.findMany({ orderBy: { createdAt: "desc" } })
+  const pages = await prisma.page.findMany({ orderBy: { sortOrder: "asc" } })
   const serialized = pages.map(p => ({
     ...p,
     createdAt: p.createdAt.toISOString(),
