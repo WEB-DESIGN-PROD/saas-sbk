@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
+import { Switch } from "@/components/ui/switch"
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog"
@@ -151,10 +152,14 @@ export function FeaturesManager({ initialFeatures, isAdmin }: FeaturesManagerPro
                 <Input type="number" value={form.sortOrder} onChange={e => setForm(f => ({ ...f, sortOrder: Number(e.target.value) }))} />
               </div>
             </div>
-            <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" checked={form.active} onChange={e => setForm(f => ({ ...f, active: e.target.checked }))} />
-              Active (visible sur la homepage)
-            </label>
+            <div className="flex items-center gap-3">
+              <Switch
+                id="feature-active"
+                checked={form.active}
+                onCheckedChange={v => setForm(f => ({ ...f, active: v }))}
+              />
+              <Label htmlFor="feature-active" className="cursor-pointer">Visible sur la homepage</Label>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>

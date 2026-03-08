@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Plus, Pencil, Trash2, Globe, ExternalLink, CheckCircle2, XCircle } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -207,10 +208,14 @@ export function PagesManager({ initialPages }: PagesManagerProps) {
                 <input type="checkbox" checked={form.inFooter} onChange={e => setForm(f => ({ ...f, inFooter: e.target.checked }))} />
                 Menu footer
               </label>
-              <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input type="checkbox" checked={form.active} onChange={e => setForm(f => ({ ...f, active: e.target.checked }))} />
-                Active
-              </label>
+              <div className="flex items-center gap-3">
+                <Switch
+                  id="page-active"
+                  checked={form.active}
+                  onCheckedChange={v => setForm(f => ({ ...f, active: v }))}
+                />
+                <Label htmlFor="page-active" className="cursor-pointer">Visible (page publique)</Label>
+              </div>
             </div>
           </div>
           <DialogFooter>

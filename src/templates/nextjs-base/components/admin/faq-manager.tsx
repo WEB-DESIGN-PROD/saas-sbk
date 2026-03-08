@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
+import { Switch } from "@/components/ui/switch"
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog"
@@ -215,10 +215,14 @@ export function FaqManager({ initialFaqs, isAdmin }: FaqManagerProps) {
               <Label>Réponse</Label>
               <Textarea rows={4} value={form.answer} onChange={e => setForm(f => ({ ...f, answer: e.target.value }))} />
             </div>
-            <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" checked={form.active} onChange={e => setForm(f => ({ ...f, active: e.target.checked }))} />
-              Active (visible sur la homepage)
-            </label>
+            <div className="flex items-center gap-3">
+              <Switch
+                id="faq-active"
+                checked={form.active}
+                onCheckedChange={v => setForm(f => ({ ...f, active: v }))}
+              />
+              <Label htmlFor="faq-active" className="cursor-pointer">Visible sur la homepage</Label>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
