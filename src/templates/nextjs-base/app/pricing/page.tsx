@@ -46,10 +46,10 @@ export default async function PricingPage() {
               return (
                 <Card
                   key={plan.id}
-                  className={`flex flex-col overflow-hidden ${plan.popular ? "border-primary shadow-lg" : ""}`}
+                  className={plan.popular ? "border-primary shadow-lg" : ""}
                 >
                   {plan.popular && (
-                    <div className="rounded-t-[11px] bg-primary px-3 py-1.5 text-center text-sm font-medium text-primary-foreground">
+                    <div className="-mt-4 bg-primary px-3 py-1.5 text-center text-sm font-medium text-primary-foreground">
                       Plus populaire
                     </div>
                   )}
