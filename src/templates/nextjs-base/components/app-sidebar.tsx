@@ -10,6 +10,9 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -50,12 +53,14 @@ export function AppSidebar({
   const adminItems = [
     { title: "Vue d'ensemble", url: "/admin", icon: LayoutDashboard },
     ...(canManageUsers ? [{ title: "Utilisateurs", url: "/admin/users", icon: Users }] : []),
-    ...(hasBlog ? [{ title: "Articles", url: "/admin/blog", icon: FileText }] : []),
-    ...(hasStorage && canManageMedia ? [{ title: "Médias", url: "/admin/media", icon: HardDrive }] : []),
-    { title: "Tarifs", url: "/admin/pricing", icon: DollarSign },
+    ...(role === "admin" ? [{ title: "Pages", url: "/admin/pages", icon: Globe }] : []),
     { title: "Features", url: "/admin/features", icon: Sparkles },
     { title: "FAQ", url: "/admin/faq", icon: HelpCircle },
-    ...(role === "admin" ? [{ title: "Pages", url: "/admin/pages", icon: Globe }] : []),
+    { title: "Tarifs", url: "/admin/pricing", icon: DollarSign },
+  ]
+  const adminBlogItems = [
+    ...(hasBlog ? [{ title: "Articles", url: "/admin/blog", icon: FileText }] : []),
+    ...(hasStorage && canManageMedia ? [{ title: "Médias", url: "/admin/media", icon: HardDrive }] : []),
   ]
   const items = mode === "admin" ? adminItems : dashboardItems
   const showUpgradeCard = mode === "dashboard" && accountType !== "Paid"
@@ -79,6 +84,25 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={items} />
+        {mode === "admin" && adminBlogItems.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Gestion du blog</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {adminBlogItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild tooltip={item.title}>
+                      <Link href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       <SidebarFooter>
         {showUpgradeCard && (

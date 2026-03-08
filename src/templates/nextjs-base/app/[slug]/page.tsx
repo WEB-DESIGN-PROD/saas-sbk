@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 import { prisma } from "@/lib/db/client"
 import { Navbar } from "@/components/navbar"
+import { Footer } from "@/components/footer"
 
 export async function generateStaticParams() {
   const pages = await prisma.page.findMany({ where: { active: true }, select: { slug: true } })
@@ -40,11 +41,7 @@ export default async function DynamicPage({ params }: { params: Promise<{ slug: 
           />
         </div>
       </main>
-      <footer className="border-t py-6">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © 2026 {{PROJECT_NAME}}. Tous droits réservés.
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

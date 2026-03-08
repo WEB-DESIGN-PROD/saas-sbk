@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -46,10 +45,7 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar />
-      <main className="flex-1">
-        <section className="container mx-auto max-w-xl px-4 py-24">
+    <section className="container mx-auto max-w-xl px-4 py-24">
           <div className="mb-10 text-center">
             <h1 className="mb-3 text-4xl font-bold tracking-tight">Contactez-nous</h1>
             <p className="text-muted-foreground">
@@ -131,13 +127,6 @@ export default function ContactPage() {
               </Button>
             </form>
           )}
-        </section>
-      </main>
-      <footer className="border-t py-6">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © 2026 {{PROJECT_NAME}}. Tous droits réservés.
-        </div>
-      </footer>
-    </div>
+    </section>
   )
 }

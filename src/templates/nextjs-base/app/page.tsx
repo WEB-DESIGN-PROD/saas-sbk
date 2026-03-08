@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 import { prisma } from "@/lib/db/client";
 import { Shield, Database, Layers, CreditCard, Mail, HardDrive, type LucideIcon } from "lucide-react";
 
@@ -138,12 +139,7 @@ export default async function Home() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © 2026 {{PROJECT_NAME}}. Tous droits réservés.
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

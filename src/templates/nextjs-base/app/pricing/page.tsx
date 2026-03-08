@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Navbar } from "@/components/navbar"
+import { Footer } from "@/components/footer"
 import { prisma } from "@/lib/db/client"
 import { Coins } from "lucide-react"
 
@@ -157,11 +158,7 @@ export default async function PricingPage() {
           )}
         </section>
       </main>
-      <footer className="border-t py-6">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © 2026 {{PROJECT_NAME}}. Tous droits réservés.
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

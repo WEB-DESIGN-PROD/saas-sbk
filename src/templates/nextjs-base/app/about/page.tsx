@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Navbar } from "@/components/navbar"
+import { Footer } from "@/components/footer"
 
 export default function AboutPage() {
   return (
@@ -124,12 +125,7 @@ export default function AboutPage() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t py-6">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © 2026 {{PROJECT_NAME}}. Tous droits réservés.
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
