@@ -1,7 +1,23 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Pencil, Trash2, ChevronDown } from "lucide-react"
+import { Plus, Pencil, Trash2, ChevronDown, GripVertical } from "lucide-react"
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core"
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from "@dnd-kit/sortable"
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
+import { CSS } from "@dnd-kit/utilities"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -28,8 +44,69 @@ interface FaqManagerProps {
   isAdmin: boolean
 }
 
-const EMPTY: Omit<Faq, "id"> = {
-  question: "", answer: "", active: true, sortOrder: 0,
+const EMPTY: Omit<Faq, "id" | "sortOrder"> = {
+  question: "", answer: "", active: true,
+}
+
+function SortableRow({
+  faq, isAdmin, expanded, onToggle, onEdit, onDelete,
+}: {
+  faq: Faq
+  isAdmin: boolean
+  expanded: boolean
+  onToggle: () => void
+  onEdit: () => void
+  onDelete: () => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: faq.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 10 : undefined,
+  }
+
+  return (
+    <div ref={setNodeRef} style={style} className="px-4 py-3 space-y-2">
+      <div className="flex items-center gap-3">
+        {isAdmin && (
+          <button
+            {...attributes}
+            {...listeners}
+            className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground shrink-0 touch-none"
+            tabIndex={-1}
+          >
+            <GripVertical className="h-4 w-4" />
+          </button>
+        )}
+        <button
+          className="flex-1 flex items-center justify-between text-left gap-2 min-w-0"
+          onClick={onToggle}
+        >
+          <span className="font-medium text-sm truncate">{faq.question}</span>
+          <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${expanded ? "rotate-180" : ""}`} />
+        </button>
+        <Badge variant={faq.active ? "default" : "secondary"} className="text-xs shrink-0">
+          {faq.active ? "Actif" : "Inactif"}
+        </Badge>
+        {isAdmin && (
+          <div className="flex gap-1 shrink-0">
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onEdit}>
+              <Pencil className="h-3.5 w-3.5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={onDelete}>
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        )}
+      </div>
+      {expanded && (
+        <p className="text-sm text-muted-foreground pb-1 pl-7">{faq.answer}</p>
+      )}
+    </div>
+  )
 }
 
 export function FaqManager({ initialFaqs, isAdmin }: FaqManagerProps) {
@@ -41,6 +118,24 @@ export function FaqManager({ initialFaqs, isAdmin }: FaqManagerProps) {
   const [saving, setSaving] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null)
 
+  const sensors = useSensors(useSensor(PointerSensor))
+
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const oldIndex = faqs.findIndex(f => f.id === active.id)
+    const newIndex = faqs.findIndex(f => f.id === over.id)
+    const reordered = arrayMove(faqs, oldIndex, newIndex)
+    setFaqs(reordered)
+
+    await fetch("/api/admin/faq/reorder", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ order: reordered.map(f => f.id) }),
+    })
+  }
+
   function openCreate() {
     setEditing(null)
     setForm(EMPTY)
@@ -49,7 +144,7 @@ export function FaqManager({ initialFaqs, isAdmin }: FaqManagerProps) {
 
   function openEdit(faq: Faq) {
     setEditing(faq)
-    setForm({ ...faq })
+    setForm({ question: faq.question, answer: faq.answer, active: faq.active })
     setDialogOpen(true)
   }
 
@@ -68,7 +163,7 @@ export function FaqManager({ initialFaqs, isAdmin }: FaqManagerProps) {
         const res = await fetch("/api/admin/faq", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
+          body: JSON.stringify({ ...form, sortOrder: faqs.length }),
         })
         const created = await res.json()
         setFaqs([...faqs, created])
@@ -99,35 +194,26 @@ export function FaqManager({ initialFaqs, isAdmin }: FaqManagerProps) {
         {faqs.length === 0 && (
           <p className="px-4 py-8 text-center text-sm text-muted-foreground">Aucune FAQ. Créez-en une.</p>
         )}
-        {faqs.map((faq) => (
-          <div key={faq.id} className="px-4 py-3 space-y-2">
-            <div className="flex items-center gap-3">
-              <button
-                className="flex-1 flex items-center justify-between text-left gap-2 min-w-0"
-                onClick={() => setExpanded(expanded === faq.id ? null : faq.id)}
-              >
-                <span className="font-medium text-sm truncate">{faq.question}</span>
-                <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${expanded === faq.id ? "rotate-180" : ""}`} />
-              </button>
-              <Badge variant={faq.active ? "default" : "secondary"} className="text-xs shrink-0">
-                {faq.active ? "Actif" : "Inactif"}
-              </Badge>
-              {isAdmin && (
-                <div className="flex gap-1 shrink-0">
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(faq)}>
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => setDeleteId(faq.id)}>
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              )}
-            </div>
-            {expanded === faq.id && (
-              <p className="text-sm text-muted-foreground pl-0 pb-1">{faq.answer}</p>
-            )}
-          </div>
-        ))}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          modifiers={[restrictToVerticalAxis]}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={faqs.map(f => f.id)} strategy={verticalListSortingStrategy}>
+            {faqs.map((faq) => (
+              <SortableRow
+                key={faq.id}
+                faq={faq}
+                isAdmin={isAdmin}
+                expanded={expanded === faq.id}
+                onToggle={() => setExpanded(expanded === faq.id ? null : faq.id)}
+                onEdit={() => openEdit(faq)}
+                onDelete={() => setDeleteId(faq.id)}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -144,18 +230,10 @@ export function FaqManager({ initialFaqs, isAdmin }: FaqManagerProps) {
               <Label>Réponse</Label>
               <Textarea rows={4} value={form.answer} onChange={e => setForm(f => ({ ...f, answer: e.target.value }))} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label>Ordre</Label>
-                <Input type="number" value={form.sortOrder} onChange={e => setForm(f => ({ ...f, sortOrder: Number(e.target.value) }))} />
-              </div>
-              <div className="flex items-end pb-1">
-                <label className="flex items-center gap-2 text-sm cursor-pointer">
-                  <input type="checkbox" checked={form.active} onChange={e => setForm(f => ({ ...f, active: e.target.checked }))} />
-                  Active (visible sur la homepage)
-                </label>
-              </div>
-            </div>
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="checkbox" checked={form.active} onChange={e => setForm(f => ({ ...f, active: e.target.checked }))} />
+              Active (visible sur la homepage)
+            </label>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
