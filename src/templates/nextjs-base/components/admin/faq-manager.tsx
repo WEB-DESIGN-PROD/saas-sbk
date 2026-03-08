@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Pencil, Trash2, ChevronDown, GripVertical } from "lucide-react"
+import { Plus, Pencil, Trash2, GripVertical } from "lucide-react"
 import {
   DndContext,
   closestCenter,
@@ -49,12 +49,10 @@ const EMPTY: Omit<Faq, "id" | "sortOrder"> = {
 }
 
 function SortableRow({
-  faq, isAdmin, expanded, onToggle, onEdit, onDelete,
+  faq, isAdmin, onEdit, onDelete,
 }: {
   faq: Faq
   isAdmin: boolean
-  expanded: boolean
-  onToggle: () => void
   onEdit: () => void
   onDelete: () => void
 }) {
@@ -69,41 +67,30 @@ function SortableRow({
   }
 
   return (
-    <div ref={setNodeRef} style={style} className="px-4 py-3 space-y-2">
-      <div className="flex items-center gap-3">
-        {isAdmin && (
-          <button
-            {...attributes}
-            {...listeners}
-            className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground shrink-0 touch-none"
-            tabIndex={-1}
-          >
-            <GripVertical className="h-4 w-4" />
-          </button>
-        )}
+    <div ref={setNodeRef} style={style} className="px-4 py-3 flex items-center gap-3">
+      {isAdmin && (
         <button
-          className="flex-1 flex items-center justify-between text-left gap-2 min-w-0"
-          onClick={onToggle}
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground shrink-0 touch-none"
+          tabIndex={-1}
         >
-          <span className="font-medium text-sm truncate">{faq.question}</span>
-          <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${expanded ? "rotate-180" : ""}`} />
+          <GripVertical className="h-4 w-4" />
         </button>
-        <Badge variant={faq.active ? "default" : "secondary"} className="text-xs shrink-0">
-          {faq.active ? "Actif" : "Inactif"}
-        </Badge>
-        {isAdmin && (
-          <div className="flex gap-1 shrink-0">
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onEdit}>
-              <Pencil className="h-3.5 w-3.5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={onDelete}>
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        )}
-      </div>
-      {expanded && (
-        <p className="text-sm text-muted-foreground pb-1 pl-7">{faq.answer}</p>
+      )}
+      <span className="flex-1 font-medium text-sm truncate">{faq.question}</span>
+      <Badge variant={faq.active ? "default" : "secondary"} className="text-xs shrink-0">
+        {faq.active ? "Actif" : "Inactif"}
+      </Badge>
+      {isAdmin && (
+        <div className="flex gap-1 shrink-0">
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onEdit}>
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={onDelete}>
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       )}
     </div>
   )
@@ -116,7 +103,6 @@ export function FaqManager({ initialFaqs, isAdmin }: FaqManagerProps) {
   const [editing, setEditing] = useState<Faq | null>(null)
   const [form, setForm] = useState(EMPTY)
   const [saving, setSaving] = useState(false)
-  const [expanded, setExpanded] = useState<string | null>(null)
 
   const sensors = useSensors(useSensor(PointerSensor))
 
@@ -206,8 +192,6 @@ export function FaqManager({ initialFaqs, isAdmin }: FaqManagerProps) {
                 key={faq.id}
                 faq={faq}
                 isAdmin={isAdmin}
-                expanded={expanded === faq.id}
-                onToggle={() => setExpanded(expanded === faq.id ? null : faq.id)}
                 onEdit={() => openEdit(faq)}
                 onDelete={() => setDeleteId(faq.id)}
               />
