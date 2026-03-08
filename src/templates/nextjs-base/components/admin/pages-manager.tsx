@@ -1,7 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Pencil, Trash2, Globe, ExternalLink, CheckCircle2, XCircle } from "lucide-react"
+import { Plus, Pencil, Trash2, Globe, ExternalLink, CheckCircle2, XCircle, GripVertical } from "lucide-react"
+import {
+  DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent,
+} from "@dnd-kit/core"
+import {
+  SortableContext, verticalListSortingStrategy, useSortable, arrayMove,
+} from "@dnd-kit/sortable"
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
+import { CSS } from "@dnd-kit/utilities"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,19 +32,62 @@ interface Page {
   inHeader: boolean
   inFooter: boolean
   active: boolean
+  sortOrder: number
 }
 
 interface PagesManagerProps {
   initialPages: Page[]
 }
 
-const EMPTY: Omit<Page, "id"> = {
+const EMPTY: Omit<Page, "id" | "sortOrder"> = {
   title: "", slug: "", content: "", inHeader: false, inFooter: false, active: true,
 }
 
 function toSlug(text: string) {
   return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").trim()
+}
+
+function SortableRow({ page, onEdit, onDelete }: {
+  page: Page; onEdit: () => void; onDelete: () => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: page.id })
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1, zIndex: isDragging ? 10 : undefined }
+
+  return (
+    <div ref={setNodeRef} style={style} className="flex items-center gap-4 px-4 py-3">
+      <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground shrink-0 touch-none" tabIndex={-1}>
+        <GripVertical className="h-4 w-4" />
+      </button>
+      <Globe className="h-4 w-4 text-muted-foreground shrink-0" />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <p className="font-medium text-sm">{page.title}</p>
+          <code className="text-xs text-muted-foreground">/{page.slug}</code>
+          {page.inHeader && <Badge variant="outline" className="text-xs">Header</Badge>}
+          {page.inFooter && <Badge variant="outline" className="text-xs">Footer</Badge>}
+          {page.active
+            ? <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+            : <XCircle className="h-4 w-4 text-muted-foreground shrink-0" />
+          }
+        </div>
+      </div>
+      <a href={`/${page.slug}`} target="_blank" rel="noopener noreferrer">
+        <Button variant="ghost" size="icon" className="h-7 w-7">
+          <ExternalLink className="h-3.5 w-3.5" />
+        </Button>
+      </a>
+      <div className="flex gap-1 shrink-0">
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onEdit}>
+          <Pencil className="h-3.5 w-3.5" />
+        </Button>
+        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={onDelete}>
+          <Trash2 className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    </div>
+  )
 }
 
 export function PagesManager({ initialPages }: PagesManagerProps) {
@@ -48,6 +99,22 @@ export function PagesManager({ initialPages }: PagesManagerProps) {
   const [saving, setSaving] = useState(false)
   const [preview, setPreview] = useState(false)
 
+  const sensors = useSensors(useSensor(PointerSensor))
+
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIndex = pages.findIndex(p => p.id === active.id)
+    const newIndex = pages.findIndex(p => p.id === over.id)
+    const reordered = arrayMove(pages, oldIndex, newIndex)
+    setPages(reordered)
+    await fetch("/api/admin/pages/reorder", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ order: reordered.map(p => p.id) }),
+    })
+  }
+
   function openCreate() {
     setEditing(null)
     setForm(EMPTY)
@@ -57,7 +124,7 @@ export function PagesManager({ initialPages }: PagesManagerProps) {
 
   function openEdit(page: Page) {
     setEditing(page)
-    setForm({ ...page })
+    setForm({ title: page.title, slug: page.slug, content: page.content, inHeader: page.inHeader, inFooter: page.inFooter, active: page.active })
     setPreview(false)
     setDialogOpen(true)
   }
@@ -66,7 +133,6 @@ export function PagesManager({ initialPages }: PagesManagerProps) {
     setForm(f => ({
       ...f,
       title,
-      // Auto-génère le slug uniquement si pas encore édité manuellement
       ...(!editing ? { slug: toSlug(title) } : {}),
     }))
   }
@@ -86,7 +152,7 @@ export function PagesManager({ initialPages }: PagesManagerProps) {
         const res = await fetch("/api/admin/pages", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
+          body: JSON.stringify({ ...form, sortOrder: pages.length }),
         })
         const created = await res.json()
         setPages([...pages, created])
@@ -115,36 +181,13 @@ export function PagesManager({ initialPages }: PagesManagerProps) {
         {pages.length === 0 && (
           <p className="px-4 py-8 text-center text-sm text-muted-foreground">Aucune page. Créez-en une.</p>
         )}
-        {pages.map((page) => (
-          <div key={page.id} className="flex items-center gap-4 px-4 py-3">
-            <Globe className="h-4 w-4 text-muted-foreground shrink-0" />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <p className="font-medium text-sm">{page.title}</p>
-                <code className="text-xs text-muted-foreground">/{page.slug}</code>
-                {page.inHeader && <Badge variant="outline" className="text-xs">Header</Badge>}
-                {page.inFooter && <Badge variant="outline" className="text-xs">Footer</Badge>}
-                {page.active
-                  ? <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
-                  : <XCircle className="h-4 w-4 text-muted-foreground shrink-0" />
-                }
-              </div>
-            </div>
-            <a href={`/${page.slug}`} target="_blank" rel="noopener noreferrer">
-              <Button variant="ghost" size="icon" className="h-7 w-7">
-                <ExternalLink className="h-3.5 w-3.5" />
-              </Button>
-            </a>
-            <div className="flex gap-1 shrink-0">
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(page)}>
-                <Pencil className="h-3.5 w-3.5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => setDeleteId(page.id)}>
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          </div>
-        ))}
+        <DndContext sensors={sensors} collisionDetection={closestCenter} modifiers={[restrictToVerticalAxis]} onDragEnd={handleDragEnd}>
+          <SortableContext items={pages.map(p => p.id)} strategy={verticalListSortingStrategy}>
+            {pages.map((page) => (
+              <SortableRow key={page.id} page={page} onEdit={() => openEdit(page)} onDelete={() => setDeleteId(page.id)} />
+            ))}
+          </SortableContext>
+        </DndContext>
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

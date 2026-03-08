@@ -1,7 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Pencil, Trash2, CheckCircle2, XCircle } from "lucide-react"
+import { Plus, Pencil, Trash2, CheckCircle2, XCircle, GripVertical } from "lucide-react"
+import {
+  DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent,
+} from "@dnd-kit/core"
+import {
+  SortableContext, verticalListSortingStrategy, useSortable, arrayMove,
+} from "@dnd-kit/sortable"
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
+import { CSS } from "@dnd-kit/utilities"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -34,6 +42,45 @@ const EMPTY: Omit<Feature, "id"> = {
   title: "", description: "", icon: null, active: true, sortOrder: 0,
 }
 
+function SortableRow({ f, isAdmin, onEdit, onDelete }: {
+  f: Feature; isAdmin: boolean; onEdit: () => void; onDelete: () => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: f.id })
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1, zIndex: isDragging ? 10 : undefined }
+
+  return (
+    <div ref={setNodeRef} style={style} className="flex items-center gap-4 px-4 py-3">
+      {isAdmin && (
+        <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground shrink-0 touch-none" tabIndex={-1}>
+          <GripVertical className="h-4 w-4" />
+        </button>
+      )}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <p className="font-medium text-sm truncate">{f.title}</p>
+          {f.icon && <Badge variant="outline" className="text-xs">{f.icon}</Badge>}
+          {f.active
+            ? <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+            : <XCircle className="h-4 w-4 text-muted-foreground shrink-0" />
+          }
+        </div>
+        <p className="text-xs text-muted-foreground truncate mt-0.5">{f.description}</p>
+      </div>
+      {isAdmin && (
+        <div className="flex gap-1 shrink-0">
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onEdit}>
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={onDelete}>
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function FeaturesManager({ initialFeatures, isAdmin }: FeaturesManagerProps) {
   const [features, setFeatures] = useState<Feature[]>(initialFeatures)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -42,42 +89,39 @@ export function FeaturesManager({ initialFeatures, isAdmin }: FeaturesManagerPro
   const [form, setForm] = useState(EMPTY)
   const [saving, setSaving] = useState(false)
 
-  function openCreate() {
-    setEditing(null)
-    setForm(EMPTY)
-    setDialogOpen(true)
+  const sensors = useSensors(useSensor(PointerSensor))
+
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIndex = features.findIndex(f => f.id === active.id)
+    const newIndex = features.findIndex(f => f.id === over.id)
+    const reordered = arrayMove(features, oldIndex, newIndex)
+    setFeatures(reordered)
+    await fetch("/api/admin/features/reorder", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ order: reordered.map(f => f.id) }),
+    })
   }
 
-  function openEdit(f: Feature) {
-    setEditing(f)
-    setForm({ ...f })
-    setDialogOpen(true)
-  }
+  function openCreate() { setEditing(null); setForm(EMPTY); setDialogOpen(true) }
+  function openEdit(f: Feature) { setEditing(f); setForm({ ...f }); setDialogOpen(true) }
 
   async function handleSave() {
     setSaving(true)
     try {
       if (editing) {
-        const res = await fetch(`/api/admin/features/${editing.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
-        })
+        const res = await fetch(`/api/admin/features/${editing.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) })
         const updated = await res.json()
         setFeatures(features.map(f => f.id === editing.id ? updated : f))
       } else {
-        const res = await fetch("/api/admin/features", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
-        })
+        const res = await fetch("/api/admin/features", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, sortOrder: features.length }) })
         const created = await res.json()
         setFeatures([...features, created])
       }
       setDialogOpen(false)
-    } finally {
-      setSaving(false)
-    }
+    } finally { setSaving(false) }
   }
 
   async function handleDelete(id: string) {
@@ -90,49 +134,23 @@ export function FeaturesManager({ initialFeatures, isAdmin }: FeaturesManagerPro
     <div className="space-y-4">
       {isAdmin && (
         <div className="flex justify-end">
-          <Button onClick={openCreate} size="sm">
-            <Plus className="mr-2 h-4 w-4" /> Ajouter une feature
-          </Button>
+          <Button onClick={openCreate} size="sm"><Plus className="mr-2 h-4 w-4" /> Ajouter une feature</Button>
         </div>
       )}
-
       <div className="rounded-xl border divide-y">
-        {features.length === 0 && (
-          <p className="px-4 py-8 text-center text-sm text-muted-foreground">Aucune feature. Créez-en une.</p>
-        )}
-        {features.map((f) => (
-          <div key={f.id} className="flex items-center gap-4 px-4 py-3">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <p className="font-medium text-sm truncate">{f.title}</p>
-                {f.icon && <Badge variant="outline" className="text-xs">{f.icon}</Badge>}
-                {f.active
-                  ? <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
-                  : <XCircle className="h-4 w-4 text-muted-foreground shrink-0" />
-                }
-              </div>
-              <p className="text-xs text-muted-foreground truncate mt-0.5">{f.description}</p>
-            </div>
-            <span className="text-xs text-muted-foreground shrink-0">#{f.sortOrder}</span>
-            {isAdmin && (
-              <div className="flex gap-1 shrink-0">
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(f)}>
-                  <Pencil className="h-3.5 w-3.5" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => setDeleteId(f.id)}>
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            )}
-          </div>
-        ))}
+        {features.length === 0 && <p className="px-4 py-8 text-center text-sm text-muted-foreground">Aucune feature.</p>}
+        <DndContext sensors={sensors} collisionDetection={closestCenter} modifiers={[restrictToVerticalAxis]} onDragEnd={handleDragEnd}>
+          <SortableContext items={features.map(f => f.id)} strategy={verticalListSortingStrategy}>
+            {features.map(f => (
+              <SortableRow key={f.id} f={f} isAdmin={isAdmin} onEdit={() => openEdit(f)} onDelete={() => setDeleteId(f.id)} />
+            ))}
+          </SortableContext>
+        </DndContext>
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>{editing ? "Modifier la feature" : "Nouvelle feature"}</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>{editing ? "Modifier la feature" : "Nouvelle feature"}</DialogTitle></DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
               <Label>Titre</Label>
@@ -142,30 +160,18 @@ export function FeaturesManager({ initialFeatures, isAdmin }: FeaturesManagerPro
               <Label>Description</Label>
               <Textarea rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label>Icône Lucide (nom)</Label>
-                <Input value={form.icon ?? ""} onChange={e => setForm(f => ({ ...f, icon: e.target.value || null }))} placeholder="Shield" />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Ordre</Label>
-                <Input type="number" value={form.sortOrder} onChange={e => setForm(f => ({ ...f, sortOrder: Number(e.target.value) }))} />
-              </div>
+            <div className="space-y-1.5">
+              <Label>Icône Lucide (nom)</Label>
+              <Input value={form.icon ?? ""} onChange={e => setForm(f => ({ ...f, icon: e.target.value || null }))} placeholder="Shield" />
             </div>
             <div className="flex items-center gap-3">
-              <Switch
-                id="feature-active"
-                checked={form.active}
-                onCheckedChange={v => setForm(f => ({ ...f, active: v }))}
-              />
+              <Switch id="feature-active" checked={form.active} onCheckedChange={v => setForm(f => ({ ...f, active: v }))} />
               <Label htmlFor="feature-active" className="cursor-pointer">Visible sur la homepage</Label>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
-            <Button onClick={handleSave} disabled={saving || !form.title}>
-              {saving ? "Enregistrement…" : "Enregistrer"}
-            </Button>
+            <Button onClick={handleSave} disabled={saving || !form.title}>{saving ? "Enregistrement…" : "Enregistrer"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -178,9 +184,7 @@ export function FeaturesManager({ initialFeatures, isAdmin }: FeaturesManagerPro
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={() => deleteId && handleDelete(deleteId)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Supprimer
-            </AlertDialogAction>
+            <AlertDialogAction onClick={() => deleteId && handleDelete(deleteId)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Supprimer</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

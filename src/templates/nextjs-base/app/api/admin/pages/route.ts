@@ -5,7 +5,7 @@ import { verifySession } from "@/lib/dal"
 export async function GET() {
   const { role } = await verifySession()
   if (role !== "admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-  const pages = await prisma.page.findMany({ orderBy: { createdAt: "desc" } })
+  const pages = await prisma.page.findMany({ orderBy: { sortOrder: "asc" } })
   return NextResponse.json(pages)
 }
 
