@@ -88,7 +88,7 @@ export function AppSidebar({
         <NavMain items={items} />
         {mode === "admin" && adminSaasItems.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel>Gestion du SaaS</SidebarGroupLabel>
+            <SidebarGroupLabel>Gestion du SAAS</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {adminSaasItems.map((item) => (
