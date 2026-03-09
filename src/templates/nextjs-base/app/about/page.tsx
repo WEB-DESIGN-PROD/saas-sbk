@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { ScrollAnimations } from "@/components/scroll-animations"
-import { ArrowRight, Sparkles, Check, Zap, Shield, Users, Heart } from "lucide-react"
+import { CopyCommand } from "@/components/copy-command"
+import { ArrowRight, Sparkles, Check, Zap, Shield, Users } from "lucide-react"
 
 const VALUES = [
   {
@@ -205,21 +206,39 @@ export default function AboutPage() {
         </section>
 
         {/* CTA */}
-        <section className="py-24 text-center">
-          <div className="container mx-auto px-4">
-            <h2 className="mb-4 text-3xl font-bold" data-gsap="title">
-              <span className="bg-gradient-to-b from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent">
-                Prêt à démarrer ?
-              </span>
-            </h2>
-            <p className="mb-8 text-muted-foreground" data-gsap="subtitle">Une commande suffit pour lancer votre SaaS.</p>
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <Button size="lg" className="gap-2 shadow-[0_0_25px_rgba(0,0,0,0.3)] hover:shadow-[0_0_35px_hsl(var(--primary)/30%)] transition-all duration-300" asChild>
-                <Link href="{{AUTH_ENTRY_URL}}">Créer un compte <ArrowRight className="h-4 w-4" /></Link>
-              </Button>
-              <Button size="lg" variant="outline" className="border-white/[0.08] hover:border-white/[0.15]" asChild>
-                <Link href="/pricing">Voir les tarifs</Link>
-              </Button>
+        <section className="pb-24 px-4">
+          <div className="container mx-auto">
+            <div className="relative overflow-hidden rounded-3xl border border-white/[0.08] p-16 text-center">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.08] via-background to-violet-500/[0.06] backdrop-blur-sm" />
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/60" />
+              <div className="pointer-events-none absolute top-0 left-1/4 h-64 w-64 rounded-full bg-primary/15 blur-[100px]" aria-hidden />
+              <div className="pointer-events-none absolute bottom-0 right-1/4 h-48 w-48 rounded-full bg-violet-500/10 blur-[80px]" aria-hidden />
+
+              <div className="relative z-10">
+                <div className="badge-beam mb-4" data-gsap="badge">
+                  <div className="badge-beam-ring" />
+                  <div className="badge-beam-inner">
+                    <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Démarrez maintenant</span>
+                  </div>
+                </div>
+                <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl" data-gsap="title">
+                  <span className="bg-gradient-to-b from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent">
+                    Prêt à lancer votre SaaS ?
+                  </span>
+                </h2>
+                <p className="mb-10 text-muted-foreground text-lg max-w-sm mx-auto" data-gsap="subtitle">
+                  Une commande. Tout est configuré. Vos fonctionnalités sont prêtes à être implémentées.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-4">
+                  <Link href="{{AUTH_ENTRY_URL}}">
+                    <Button size="lg" className="gap-2 h-12 px-6 shadow-lg hover:shadow-[0_0_30px_hsl(var(--primary)/30%)] transition-all duration-300">
+                      Commencer gratuitement <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <CopyCommand />
+                </div>
+              </div>
             </div>
           </div>
         </section>
