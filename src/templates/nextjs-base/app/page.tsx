@@ -130,16 +130,16 @@ export default async function Home() {
             {/* Headline */}
             <h1 className="mb-6 text-6xl font-bold tracking-tight lg:text-7xl xl:text-8xl leading-none">
               <span className="block bg-gradient-to-b from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent pb-1">
-                Lancez votre SaaS
+                Configurez votre SaaS
               </span>
               <span className="block bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                en une commande
+                n&apos;a jamais été aussi simple
               </span>
             </h1>
 
             <p className="mx-auto mb-10 max-w-xl text-lg text-muted-foreground leading-relaxed">
               Auth, base de données, paiements, emails, stockage médias —
-              tout est configuré et prêt à déployer.
+              tout est prêt. Utilisez Claude Code pour générer vos fonctionnalités.
             </p>
 
             {/* CTAs */}
@@ -149,9 +149,12 @@ export default async function Home() {
                   Commencer gratuitement <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 h-12 font-mono text-sm backdrop-blur-sm hover:border-white/20 transition-colors cursor-default select-all">
-                <span className="text-primary">$</span>
-                <span className="text-foreground/70">npm create saas-sbk@latest</span>
+              <div className="flex items-center gap-2.5 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.04] px-4 h-12 backdrop-blur-sm hover:border-emerald-400/35 hover:bg-emerald-400/[0.07] transition-all duration-200 cursor-default">
+                <div className="flex h-5 w-5 items-center justify-center rounded-md bg-emerald-400/15 shrink-0">
+                  <Sparkles className="h-3 w-3 text-emerald-400" />
+                </div>
+                <span className="font-mono text-sm text-emerald-400">/generate-features</span>
+                <span className="text-xs text-muted-foreground hidden sm:inline">dans Claude Code</span>
               </div>
             </div>
 
@@ -163,6 +166,10 @@ export default async function Home() {
                   {f}
                 </span>
               ))}
+              <span className="flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-400/[0.04] px-3 py-1 text-xs text-emerald-400 backdrop-blur-sm">
+                <Sparkles className="h-3 w-3 shrink-0" />
+                /generate-features
+              </span>
             </div>
 
           </div>
@@ -393,9 +400,11 @@ export default async function Home() {
                       Commencer gratuitement <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
-                  <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 h-12 font-mono text-sm backdrop-blur-sm">
-                    <span className="text-primary">$</span>
-                    <span className="text-foreground/70">npm create saas-sbk@latest</span>
+                  <div className="flex items-center gap-2.5 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.04] px-4 h-12 backdrop-blur-sm">
+                    <div className="flex h-5 w-5 items-center justify-center rounded-md bg-emerald-400/15 shrink-0">
+                      <Sparkles className="h-3 w-3 text-emerald-400" />
+                    </div>
+                    <span className="font-mono text-sm text-emerald-400">/generate-features</span>
                   </div>
                 </div>
               </div>
