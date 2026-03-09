@@ -117,9 +117,14 @@ export default async function Home() {
           <div className="container mx-auto px-4 text-center relative z-10">
 
             {/* Badge */}
-            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/[0.07] px-4 py-1.5 text-sm text-primary backdrop-blur-sm ring-1 ring-primary/10">
-              <Sparkles className="h-3.5 w-3.5" />
-              Next.js 16 · App Router · Prêt en production
+            <div className="badge-beam mb-8">
+              <div className="badge-beam-ring" />
+              <div className="badge-beam-inner gap-2 px-4 py-1.5 text-sm">
+                <Sparkles className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                  Next.js 16 · App Router · Prêt en production
+                </span>
+              </div>
             </div>
 
             {/* Headline */}
