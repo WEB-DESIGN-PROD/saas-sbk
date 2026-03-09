@@ -139,7 +139,7 @@ export default async function Home() {
             </h1>
 
             <p className="mx-auto mb-10 max-w-xl text-lg text-muted-foreground leading-relaxed">
-              Tout est prêt. Maintenant utilisez Claude Code pour générer les fonctionnalités de votre SaaS.
+              Tout est prêt. Maintenant utilisez Claude Code pour générer les nouvelles fonctionnalités de votre SaaS.
             </p>
 
             {/* CTAs */}
