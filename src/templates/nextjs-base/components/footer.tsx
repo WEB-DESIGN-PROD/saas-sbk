@@ -12,15 +12,14 @@ export async function Footer() {
   return (
     <footer className="py-6">
       <div className="container mx-auto px-4 text-sm text-muted-foreground">
-        {footerPages.length > 0 && (
-          <nav className="flex flex-wrap justify-center gap-4 mb-8">
-            {footerPages.map((page) => (
-              <Link key={page.id} href={`/${page.slug}`} className="hover:text-foreground transition-colors">
-                {page.title}
-              </Link>
-            ))}
-          </nav>
-        )}
+        <nav className="flex flex-wrap justify-center gap-4 mb-8">
+          <Link href="/contact" className="hover:text-foreground transition-colors">Contact</Link>
+          {footerPages.map((page) => (
+            <Link key={page.id} href={`/${page.slug}`} className="hover:text-foreground transition-colors">
+              {page.title}
+            </Link>
+          ))}
+        </nav>
         <div className="flex items-center justify-between">
           <p>© 2026 {{PROJECT_NAME}}. Tous droits réservés.</p>
           <Link
