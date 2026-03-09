@@ -140,3 +140,86 @@
     cursor: pointer;
   }
 }
+
+/* Marquee animation */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+/* Badge beam border */
+@keyframes badge-beam-spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+.badge-beam {
+  position: relative;
+  display: inline-flex;
+  border-radius: 9999px;
+  padding: 1px;
+  overflow: hidden;
+}
+.badge-beam-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 300%;
+  aspect-ratio: 1;
+  background: conic-gradient(from 0deg, transparent 50%, #10b981 68%, #22d3ee 82%, transparent 94%);
+  animation: badge-beam-spin 3s linear infinite;
+  transform: translate(-50%, -50%);
+}
+.badge-beam-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 9999px;
+  background: var(--background);
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* Float animations for glass cards */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-12px); }
+}
+@keyframes float-medium {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+.animate-float-medium {
+  animation: float-medium 4s ease-in-out infinite;
+}
+
+/* Hero entrance animations */
+@keyframes hero-fade-up {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes hero-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.hero-fade {
+  opacity: 0;
+  animation: hero-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.hero-fade-in {
+  opacity: 0;
+  animation: hero-fade-in 1s ease forwards;
+}
+.hero-d0  { animation-delay: 0ms; }
+.hero-d1  { animation-delay: 100ms; }
+.hero-d2  { animation-delay: 220ms; }
+.hero-d3  { animation-delay: 360ms; }
+.hero-d4  { animation-delay: 500ms; }
+.hero-d5  { animation-delay: 650ms; }
+.hero-d6  { animation-delay: 900ms; }

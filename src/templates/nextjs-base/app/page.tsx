@@ -2,13 +2,22 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
+import { CopyCommand } from "@/components/copy-command";
+import { ScrollAnimations } from "@/components/scroll-animations";
 import { prisma } from "@/lib/db/client";
-import { Shield, Database, Layers, CreditCard, Mail, HardDrive, type LucideIcon } from "lucide-react";
+import {
+  Shield, Database, Layers, CreditCard, Mail, HardDrive,
+  ArrowRight, Sparkles, Check, type LucideIcon,
+} from "lucide-react";
 
-// Map nom icône → composant Lucide
 const ICONS: Record<string, LucideIcon> = {
   Shield, Database, Layers, CreditCard, Mail, HardDrive,
 };
+
+const TECH_NAMES = [
+  "Next.js", "React", "TypeScript", "Prisma", "Tailwind CSS",
+  "Stripe", "Resend", "Better Auth", "Docker", "Shadcn UI", "MinIO", "PostgreSQL",
+];
 
 const TESTIMONIALS = [
   { name: "Sophie M.", role: "Fondatrice, StartupX", text: "Ce starter kit m'a fait gagner des semaines de développement. L'architecture est propre et extensible.", avatar: "SM" },
@@ -19,18 +28,14 @@ const TESTIMONIALS = [
   { name: "Antoine V.", role: "Développeur fullstack", text: "MinIO intégré dès le départ, emails transactionnels Resend prêts à l'emploi. Rien à configurer, tout fonctionne.", avatar: "AV" },
 ];
 
-const TECH_LOGOS = [
-  { name: "Docker", svg: null },
-  { name: "Shadcn UI", svg: null },
-  { name: "MinIO", svg: null },
-  { name: "Next.js", svg: <svg viewBox="0 0 180 180" fill="currentColor" className="h-7 w-7"><path d="M90 0C40.3 0 0 40.3 0 90s40.3 90 90 90 90-40.3 90-90S139.7 0 90 0zm39.6 129.3L54.3 51H42v78.1h10.9V63.8l68.8 71.7c2.7-1.9 5.3-4 7.9-6.2zm-30.6-78.4h10.8V129H99V50.9z"/></svg> },
-  { name: "React", svg: <svg viewBox="0 0 841.9 595.3" fill="#61DAFB" className="h-7 w-auto"><g><circle cx="420.9" cy="296.5" r="45.7"/><path d="M420.9 128.3c-20.1 0-39.3 1.4-56.6 3.9C324.8 97 279.3 75 251 75c-10.9 0-20.3 2.4-27.7 7.5-16.1 11-22.3 33.1-17.4 62.1 1.3 7.8 3.5 16 6.4 24.4C194.3 182.9 185 198 185 213c0 15 9.2 30.1 27.2 44 -2.9 8.4-5 16.6-6.4 24.4-4.9 29 1.3 51.1 17.4 62.1 7.4 5.1 16.8 7.5 27.7 7.5 28.3 0 73.8-22 113.3-57.2 17.3 2.5 36.5 3.9 56.6 3.9 20.1 0 39.3-1.4 56.6-3.9 39.5 35.2 85 57.2 113.3 57.2 10.9 0 20.3-2.4 27.7-7.5 16.1-11 22.3-33.1 17.4-62.1-1.3-7.8-3.5-16-6.4-24.4 18-13.9 27.2-29 27.2-44 0-15-9.2-30.1-27.2-44 2.9-8.4 5-16.6 6.4-24.4 4.9-29-1.3-51.1-17.4-62.1C611.2 77.4 601.8 75 590.9 75c-28.3 0-73.8 22-113.3 57.2-17.4-2.5-36.6-3.9-56.7-3.9zm0 45.8c10.2 0 20.3.5 30.1 1.4-9.7 13.1-19.2 27.8-28 43.9-8.8 16.1-16.5 32.2-23.1 48-6.6-15.8-14.3-31.9-23.1-48-8.8-16.1-18.4-30.8-28-43.9 9.8-.9 19.9-1.4 30.1-1.4h42zm-128.5 20.3c3.7 4.6 7.4 9.5 11 14.7-4.5-.2-9-.3-13.4-.3-4.5 0-9 .1-13.4.3 3.6-5.2 7.3-10.1 11-14.7zm257 0c3.7 4.6 7.4 9.5 11 14.7-4.4-.2-8.9-.3-13.4-.3-4.5 0-9 .1-13.4.3 3.7-5.2 7.4-10.1 10.8-14.7zM247.4 238.5c2 4.7 4.1 9.4 6.3 14-2.2 4.6-4.3 9.3-6.3 14-10.5-4.6-19.7-9.5-27.3-14.5 7.6-4.9 16.8-9.8 27.3-13.5zm347.1 0c10.5 3.8 19.7 8.7 27.3 13.5-7.6 5.1-16.8 9.9-27.3 14.5-2-4.7-4.1-9.4-6.3-14 2.2-4.6 4.3-9.3 6.3-14zM420.9 302c7.3 0 14.4-.3 21.3-.8-3.6 6.1-7.2 12-10.8 17.6-3.5 5.5-7 10.8-10.5 15.8-3.5-5-7-10.3-10.5-15.8-3.6-5.6-7.2-11.5-10.8-17.6 6.9.5 14 .8 21.3.8zm80.6-10.5c-2 4.7-4.1 9.4-6.3 14 2.2 4.6 4.3 9.3 6.3 14 10.5-4.6 19.7-9.5 27.3-14.5-7.6-4.9-16.8-9.8-27.3-13.5zm-161.2 0c-10.5 3.8-19.7 8.7-27.3 13.5 7.6 5.1 16.8 9.9 27.3 14.5 2-4.7 4.1-9.4 6.3-14-2.2-4.6-4.3-9.3-6.3-14z"/></g></svg> },
-  { name: "TypeScript", svg: <svg viewBox="0 0 400 400" className="h-7 w-7"><rect width="400" height="400" rx="50" fill="#3178C6"/><path d="M87.6 200.5v22.4h35.7v101h27.2v-101h35.7v-22.4H87.6zm162.3 0v123.4h27.3v-51.3h2.7l27.3 51.3h31.7l-29-52.3c13.7-4.2 22.2-15.7 22.2-30.7 0-20-13.6-40.4-44.4-40.4h-37.8zm27.3 22.4h8.5c13.4 0 19.2 6.5 19.2 17.2 0 10.6-5.8 17.2-19.2 17.2h-8.5v-34.4z" fill="white"/></svg> },
-  { name: "Prisma", svg: <svg viewBox="0 0 256 310" className="h-7 w-5"><path d="M255.113 208.893L148.418 1.85a16.63 16.63 0 0 0-14.745-1.792 16.63 16.63 0 0 0-10.454 11.287L.113 273.283a16.63 16.63 0 0 0 3.28 15.432 16.63 16.63 0 0 0 14.744 5.38l150.037-25.056a16.63 16.63 0 0 0 13.462-15.432V98.38l56.19 119.594a16.63 16.63 0 0 0 15.103 9.602 16.63 16.63 0 0 0 2.184-.145 16.63 16.63 0 0 0 14.072-13.606 16.63 16.63 0 0 0-14.072-5.032z" fill="currentColor"/></svg> },
-  { name: "Tailwind", svg: <svg viewBox="0 0 248 31" fill="#38BDF8" className="h-5 w-auto"><path fillRule="evenodd" clipRule="evenodd" d="M25.517 0C18.712 0 14.46 3.382 12.758 10.146c2.552-3.382 5.529-4.65 8.931-3.805 1.941.482 3.329 1.882 4.864 3.432 2.502 2.524 5.398 5.445 11.722 5.445 6.804 0 11.057-3.382 12.758-10.145-2.551 3.382-5.528 4.65-8.93 3.804-1.942-.482-3.33-1.882-4.865-3.431C34.736 2.92 31.841 0 25.517 0zM12.758 15.218C5.954 15.218 1.701 18.6 0 25.364c2.552-3.382 5.529-4.65 8.93-3.805 1.942.482 3.33 1.882 4.865 3.432 2.502 2.524 5.397 5.445 11.722 5.445 6.804 0 11.057-3.382 12.758-10.145-2.552 3.382-5.529 4.65-8.931 3.805-1.941-.482-3.329-1.882-4.864-3.432-2.502-2.524-5.398-5.446-11.722-5.446z"/></svg> },
-  { name: "Stripe", svg: <svg viewBox="0 0 60 25" fill="#635BFF" className="h-5 w-auto"><path d="M59.64 14.28h-8.06c.19 1.93 1.6 2.55 3.2 2.55 1.64 0 2.96-.37 4.05-.95v3.32a8.33 8.33 0 0 1-4.56 1.1c-4.01 0-6.83-2.5-6.83-7.48 0-4.19 2.39-7.52 6.3-7.52 3.92 0 5.96 3.28 5.96 7.5 0 .4-.04 1.26-.06 1.48zm-5.92-5.62c-1.03 0-2.17.73-2.17 2.58h4.25c0-1.85-1.07-2.58-2.08-2.58zM40.95 20.3c-1.44 0-2.32-.6-2.9-1.04l-.02 4.63-4.12.87V5.57h3.76l.08 1.02a4.7 4.7 0 0 1 3.23-1.29c2.9 0 5.62 2.6 5.62 7.4 0 5.23-2.7 7.6-5.65 7.6zM40 8.95c-.95 0-1.54.34-1.97.81l.02 6.12c.4.44.98.78 1.95.78 1.52 0 2.54-1.65 2.54-3.87 0-2.15-1.04-3.84-2.54-3.84zM28.24 5.57h4.13v14.44h-4.13V5.57zm0-4.7L32.37 0v3.36l-4.13.88V.87zm-4.32 9.35v9.79H19.8V5.57h3.7l.12 1.22c1-1.77 3.07-1.41 3.62-1.22v3.79c-.52-.17-2.29-.43-3.32.86zm-8.55 4.72c0 2.43 2.6 1.68 3.12 1.46v3.36c-.55.3-1.54.54-2.89.54a4.15 4.15 0 0 1-4.27-4.24l.01-13.17 4.02-.86v3.54h3.14V9.1h-3.13v5.85zm-4.91.7c0 2.97-2.31 4.66-5.73 4.66a11.2 11.2 0 0 1-4.46-.93v-3.93c1.38.75 3.1 1.31 4.46 1.31.92 0 1.53-.24 1.53-1C6.26 13.77 0 14.51 0 9.95 0 7.04 2.28 5.3 5.62 5.3c1.36 0 2.72.2 4.09.75v3.88a9.23 9.23 0 0 0-4.1-1.06c-.86 0-1.44.25-1.44.9 0 1.85 6.29.97 6.29 5.88z"/></svg> },
-  { name: "Resend", svg: <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6"><path d="M0 0h24v24H0z" fill="none"/><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg> },
+const STATS = [
+  { value: "1", label: "commande pour démarrer" },
+  { value: "<5min", label: "mise en route complète" },
+  { value: "100%", label: "TypeScript strict" },
+  { value: "∞", label: "extensible à l'infini" },
 ];
+
+const STACK_ITEMS = ["N", "R", "TS", "P", "S", "🔐"];
 
 export default async function Home() {
   const [features, faqs] = await Promise.all([
@@ -39,119 +44,358 @@ export default async function Home() {
   ]);
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="relative flex min-h-screen flex-col overflow-x-clip">
+
+      {/* Gradient orbs — couvrent le viewport entier depuis y=0 (derrière la navbar) */}
+      <div className="pointer-events-none absolute inset-0 h-screen overflow-hidden" aria-hidden>
+        <div className="absolute top-1/3 left-1/4 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/20 blur-[180px] animate-pulse" />
+        <div className="absolute top-1/2 right-1/4 h-[500px] w-[500px] rounded-full bg-violet-500/15 blur-[150px] animate-pulse [animation-delay:2s]" />
+        <div className="absolute bottom-20 left-1/2 h-[350px] w-[350px] -translate-x-1/2 rounded-full bg-cyan-500/10 blur-[120px] animate-pulse [animation-delay:4s]" />
+      </div>
+
       <Navbar />
+      <ScrollAnimations />
 
-      {/* Hero + Marquee = 100vh */}
-      <main className="flex-1">
-        <div className="flex flex-col h-[calc(100vh-4rem)]">
-          {/* Hero */}
-          <section className="flex-1 flex items-center justify-center">
-            <div className="container mx-auto px-4 text-center">
-              <h1 className="mb-6 text-5xl font-bold tracking-tight">
-                Bienvenue sur {{PROJECT_NAME}}
-              </h1>
-              <p className="mb-8 text-xl text-muted-foreground max-w-2xl mx-auto">
-                Votre SAAS est prêt à démarrer. Commencez à construire votre application.
-              </p>
-              <div className="flex items-center justify-center gap-4">
-                <Link href="{{AUTH_ENTRY_URL}}">
-                  <Button size="lg">Commencer gratuitement</Button>
-                </Link>
-                <Link href="/about">
-                  <Button size="lg" variant="outline">En savoir plus</Button>
-                </Link>
+      {/* ─── HERO + MARQUEE = 100vh ─── */}
+      <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden relative">
+
+        {/* HERO */}
+        <section className="relative flex-1 flex items-center justify-center">
+
+          {/* Floating glass cards — decorative, large screens only */}
+          <div className="hidden xl:block" aria-hidden>
+
+            {/* Card: Users */}
+            <div className="animate-float-slow hero-fade-in hero-d6 absolute top-12 right-32 w-52 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_20px_40px_rgba(0,0,0,0.3)]">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
+                <span className="text-[11px] font-medium text-muted-foreground tracking-wide uppercase">Utilisateurs actifs</span>
               </div>
-            </div>
-          </section>
-
-          {/* Marquee — noms tech avec fondu sur les bords */}
-          <section className="border-y bg-muted/30 py-8 overflow-hidden shrink-0">
-            <div
-              className="relative"
-              style={{ maskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)" }}
-            >
-              <div className="flex gap-20 animate-marquee whitespace-nowrap items-center">
-                {[...TECH_LOGOS, ...TECH_LOGOS, ...TECH_LOGOS, ...TECH_LOGOS].map((logo, i) => (
-                  <span key={i} className="text-2xl font-bold tracking-tight shrink-0 bg-gradient-to-b from-foreground to-muted-foreground/30 bg-clip-text text-transparent">
-                    {logo.name}
-                  </span>
+              <div className="text-2xl font-bold text-foreground mb-3">2,847</div>
+              <div className="space-y-2">
+                {["Sophie M.", "Thomas L.", "Clara B."].map((name) => (
+                  <div key={name} className="flex items-center gap-2">
+                    <div className="h-6 w-6 rounded-full bg-primary/20 ring-1 ring-primary/30 text-[10px] flex items-center justify-center text-primary font-bold">
+                      {name[0]}
+                    </div>
+                    <span className="text-xs text-muted-foreground">{name}</span>
+                    <div className="ml-auto h-1.5 w-1.5 rounded-full bg-emerald-400/70" />
+                  </div>
                 ))}
               </div>
             </div>
-          </section>
-        </div>
 
-        {/* Features */}
-        {features.length > 0 && (
-          <section className="border-t bg-muted/50 py-24">
-            <div className="container mx-auto px-4">
-              <h2 className="mb-4 text-center text-3xl font-bold">Fonctionnalités</h2>
-              <p className="mb-12 text-center text-muted-foreground">Tout ce dont vous avez besoin, déjà intégré.</p>
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {features.map((feature) => {
-                  const Icon = feature.icon ? (ICONS[feature.icon] ?? Layers) : Layers;
-                  return (
-                    <div key={feature.id} className="rounded-xl border bg-card p-6 space-y-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                        <Icon className="h-5 w-5 text-primary" />
-                      </div>
-                      <h3 className="text-lg font-semibold">{feature.title}</h3>
-                      <p className="text-sm text-muted-foreground">{feature.description}</p>
-                    </div>
-                  );
-                })}
+            {/* Card: Revenue */}
+            <div className="animate-float-medium hero-fade-in hero-d6 absolute bottom-12 right-24 w-48 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_20px_40px_rgba(0,0,0,0.3)]">
+              <div className="text-[11px] text-muted-foreground uppercase tracking-wide mb-1">MRR</div>
+              <div className="text-2xl font-bold text-foreground">€12,840</div>
+              <div className="flex items-center gap-1 text-xs text-emerald-400 mt-0.5">
+                <span>↑</span><span>+24.3%</span>
+              </div>
+              <div className="mt-3 flex items-end gap-0.5 h-10">
+                {[35, 55, 40, 75, 50, 90, 68].map((h, i) => (
+                  <div
+                    key={i}
+                    className="flex-1 rounded-sm bg-primary/50"
+                    style={{ height: `${h}%`, opacity: 0.4 + (i / 7) * 0.6 }}
+                  />
+                ))}
               </div>
             </div>
-          </section>
-        )}
 
-        {/* Testimonials */}
-        <section className="py-24">
-          <div className="container mx-auto px-4">
-            <h2 className="mb-4 text-center text-3xl font-bold">Ce qu&apos;ils en disent</h2>
-            <p className="mb-12 text-center text-muted-foreground">Ils ont utilisé {{PROJECT_NAME}} pour lancer leur projet.</p>
-            <div className="grid gap-6 md:grid-cols-3">
-              {TESTIMONIALS.map((t) => (
-                <div key={t.name} className="rounded-xl border bg-card p-6 space-y-4">
-                  <p className="text-sm text-muted-foreground leading-relaxed">&ldquo;{t.text}&rdquo;</p>
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-                      {t.avatar}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">{t.name}</p>
-                      <p className="text-xs text-muted-foreground">{t.role}</p>
-                    </div>
+            {/* Card: Stack */}
+            <div className="animate-float-slow hero-fade-in hero-d6 absolute top-24 left-20 w-44 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_20px_40px_rgba(0,0,0,0.3)] [animation-delay:3s]">
+              <div className="text-[11px] text-muted-foreground uppercase tracking-wide mb-3">Stack inclus</div>
+              <div className="grid grid-cols-3 gap-1.5">
+                {STACK_ITEMS.map((item, i) => (
+                  <div key={i} className="aspect-square rounded-xl bg-white/[0.05] border border-white/[0.08] flex items-center justify-center text-[11px] font-bold text-muted-foreground hover:border-primary/30 hover:text-primary transition-colors">
+                    {item}
                   </div>
-                </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+
+          {/* Hero content */}
+          <div className="container mx-auto px-4 text-center relative z-10">
+
+            {/* Badge */}
+            <div className="badge-beam mb-8 hero-fade hero-d0">
+              <div className="badge-beam-ring" />
+              <div className="badge-beam-inner gap-2 px-4 py-1.5 text-sm">
+                <Sparkles className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                  Next.js · Vibe Coding · IA Ready
+                </span>
+              </div>
+            </div>
+
+            {/* Headline */}
+            <h1 className="mb-6 text-6xl font-bold tracking-tight lg:text-7xl xl:text-8xl leading-none">
+              <span className="block bg-gradient-to-b from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent pb-1 hero-fade hero-d1">
+                De l&apos;idée à la production
+              </span>
+              <span className="block bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent hero-fade hero-d2">
+                sans friction
+              </span>
+            </h1>
+
+            <p className="mx-auto mb-10 max-w-xl text-lg text-muted-foreground leading-relaxed hero-fade hero-d3">
+              Tout est prêt. Maintenant utilisez Claude Code pour générer les nouvelles fonctionnalités de votre SaaS.
+            </p>
+
+            {/* CTAs */}
+            <div className="flex flex-wrap items-center justify-center gap-3 mb-10 hero-fade hero-d4">
+              <Link href="{{AUTH_ENTRY_URL}}">
+                <Button size="lg" className="gap-2 h-12 px-6 shadow-[0_0_25px_rgba(0,0,0,0.3)] hover:shadow-[0_0_35px_hsl(var(--primary)/30%)] transition-all duration-300">
+                  Commencer gratuitement <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+              <CopyCommand />
+            </div>
+
+            {/* Feature pills */}
+            <div className="flex flex-wrap items-center justify-center gap-2 hero-fade hero-d5">
+              {["Better Auth", "Prisma ORM", "Stripe", "Resend", "MinIO S3", "Admin panel"].map((f) => (
+                <span key={f} className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.02] px-3 py-1 text-xs text-muted-foreground backdrop-blur-sm hover:border-white/[0.15] hover:text-foreground transition-all duration-200">
+                  <Check className="h-3 w-3 text-primary shrink-0" />
+                  {f}
+                </span>
+              ))}
+              <span className="flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-400/[0.04] px-3 py-1 text-xs text-emerald-400 backdrop-blur-sm">
+                <Sparkles className="h-3 w-3 shrink-0" />
+                /generate-features
+              </span>
+            </div>
+
+          </div>
+        </section>
+
+        {/* MARQUEE */}
+        <section className="py-7 overflow-hidden shrink-0">
+          <div
+            className="relative"
+            style={{ maskImage: "linear-gradient(to right, transparent, black 12%, black 88%, transparent)" }}
+          >
+            <div className="flex gap-20 animate-marquee whitespace-nowrap items-center">
+              {[...TECH_NAMES, ...TECH_NAMES, ...TECH_NAMES, ...TECH_NAMES].map((name, i) => (
+                <span key={i} className="text-xl font-bold tracking-tight shrink-0 bg-gradient-to-b from-foreground to-muted-foreground/30 bg-clip-text text-transparent">
+                  {name}
+                </span>
               ))}
             </div>
           </div>
         </section>
 
-        {/* FAQ */}
+        {/* Fade bottom */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background to-transparent" aria-hidden />
+      </div>
+      {/* ─── END HERO + MARQUEE ─── */}
+
+      <main className="flex-1">
+
+        {/* ─── FEATURES BENTO GRID ─── */}
+        {features.length > 0 && (
+          <section className="py-28">
+            <div className="container mx-auto px-4">
+
+              <div className="mb-16 text-center">
+                <div className="badge-beam mb-4" data-gsap="badge">
+                  <div className="badge-beam-ring" />
+                  <div className="badge-beam-inner">
+                    <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Fonctionnalités</span>
+                  </div>
+                </div>
+                <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl" data-gsap="title">
+                  <span className="bg-gradient-to-b from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent">
+                    Tout ce dont vous avez besoin
+                  </span>
+                </h2>
+                <p className="text-muted-foreground text-lg" data-gsap="subtitle">Déjà intégré, déjà testé, prêt à être personnalisé.</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[200px]" data-gsap="stagger">
+                {features.map((feature, index) => {
+                  const Icon = feature.icon ? (ICONS[feature.icon] ?? Layers) : Layers;
+                  const isWide = index === 0 || index === features.length - 1;
+                  const isTall = index === 1;
+                  const accentColors = [
+                    { bg: "bg-primary/[0.08] group-hover:bg-primary/15", ring: "ring-primary/[0.15] group-hover:ring-primary/30", icon: "text-primary", glow: "bg-primary/10" },
+                    { bg: "bg-emerald-400/[0.08] group-hover:bg-emerald-400/15", ring: "ring-emerald-400/[0.15] group-hover:ring-emerald-400/30", icon: "text-emerald-400", glow: "bg-emerald-400/10" },
+                    { bg: "bg-cyan-400/[0.08] group-hover:bg-cyan-400/15", ring: "ring-cyan-400/[0.15] group-hover:ring-cyan-400/30", icon: "text-cyan-400", glow: "bg-cyan-400/10" },
+                    { bg: "bg-violet-400/[0.08] group-hover:bg-violet-400/15", ring: "ring-violet-400/[0.15] group-hover:ring-violet-400/30", icon: "text-violet-400", glow: "bg-violet-400/10" },
+                  ];
+                  const accent = accentColors[index % accentColors.length];
+                  return (
+                    <div
+                      key={feature.id}
+                      data-gsap="card"
+                      className={[
+                        "group relative overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.015] p-6 backdrop-blur-sm",
+                        "transition-all duration-500 hover:border-white/[0.14] hover:bg-white/[0.03]",
+                        "hover:-translate-y-0.5 hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)]",
+                        isWide ? "md:col-span-2" : "",
+                        isTall ? "md:row-span-2" : "",
+                      ].filter(Boolean).join(" ")}
+                    >
+                      {/* Glow blob */}
+                      <div className={`pointer-events-none absolute -top-1/2 -right-1/2 h-3/4 w-3/4 rounded-full ${accent.glow} blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
+                      {/* Top border gradient */}
+                      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 via-emerald-400/30 to-cyan-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                      <div className="relative z-10 h-full flex flex-col">
+                        <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl ring-1 group-hover:scale-110 transition-all duration-300 ${accent.bg} ${accent.ring}`}>
+                          <Icon className={`h-5 w-5 ${accent.icon}`} />
+                        </div>
+                        <h3 className="mb-2 font-semibold text-foreground text-base leading-tight">{feature.title}</h3>
+                        <p className="text-sm leading-relaxed text-muted-foreground flex-1">{feature.description}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+            </div>
+          </section>
+        )}
+
+
+        {/* ─── TESTIMONIALS ─── */}
+        <section className="py-28">
+          <div className="container mx-auto px-4">
+            <div className="mb-16 text-center">
+              <div className="badge-beam mb-4" data-gsap="badge">
+                <div className="badge-beam-ring" />
+                <div className="badge-beam-inner">
+                  <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Témoignages</span>
+                </div>
+              </div>
+              <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl" data-gsap="title">
+                <span className="bg-gradient-to-b from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent">
+                  Ce qu&apos;ils en disent
+                </span>
+              </h2>
+              <p className="text-muted-foreground text-lg" data-gsap="subtitle">Ils ont lancé leur projet avec <code className="font-mono text-sm">npm create saas-sbk@latest</code>.</p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-3" data-gsap="stagger">
+              {TESTIMONIALS.map((t, i) => {
+                const glowColors = ["bg-primary/10", "bg-emerald-400/10", "bg-cyan-400/10"];
+                const quoteColors = ["text-primary/25", "text-emerald-400/25", "text-cyan-400/25"];
+                const avatarColors = [
+                  "bg-primary/10 text-primary ring-primary/20",
+                  "bg-emerald-400/10 text-emerald-400 ring-emerald-400/20",
+                  "bg-cyan-400/10 text-cyan-400 ring-cyan-400/20",
+                ];
+                return (
+                  <div
+                    key={t.name}
+                    data-gsap="card"
+                    className="group relative overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.015] p-6 backdrop-blur-sm transition-all duration-300 hover:border-white/[0.14] hover:bg-white/[0.03] hover:-translate-y-0.5"
+                  >
+                    <div className={`pointer-events-none absolute -top-8 -right-8 h-28 w-28 rounded-full ${glowColors[i % 3]} blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                    {/* Quote mark */}
+                    <div className={`mb-4 text-4xl font-serif leading-none select-none ${quoteColors[i % 3]}`}>&ldquo;</div>
+                    <p className="relative mb-5 text-sm leading-relaxed text-muted-foreground">
+                      {t.text}
+                    </p>
+                    <div className="relative flex items-center gap-3">
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold ring-1 shrink-0 ${avatarColors[i % 3]}`}>
+                        {t.avatar}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">{t.name}</p>
+                        <p className="text-xs text-muted-foreground">{t.role}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* ─── FAQ ─── */}
         {faqs.length > 0 && (
-          <section className="border-t bg-muted/50 py-24">
+          <section className="py-28">
             <div className="container mx-auto max-w-2xl px-4">
-              <h2 className="mb-4 text-center text-3xl font-bold">Questions fréquentes</h2>
-              <p className="mb-12 text-center text-muted-foreground">Tout ce que vous devez savoir.</p>
-              <div className="space-y-4">
+              <div className="mb-16 text-center">
+                <div className="badge-beam mb-4" data-gsap="badge">
+                  <div className="badge-beam-ring" />
+                  <div className="badge-beam-inner">
+                    <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">FAQ</span>
+                  </div>
+                </div>
+                <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl" data-gsap="title">
+                  <span className="bg-gradient-to-b from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent">
+                    Questions fréquentes
+                  </span>
+                </h2>
+                <p className="text-muted-foreground text-lg" data-gsap="subtitle">Tout ce que vous devez savoir.</p>
+              </div>
+              <div className="space-y-3" data-gsap="stagger">
                 {faqs.map((faq) => (
-                  <details key={faq.id} className="group rounded-xl border bg-card">
-                    <summary className="flex cursor-pointer items-center justify-between p-5 font-medium text-sm list-none">
-                      {faq.question}
-                      <svg className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <details
+                    key={faq.id}
+                    data-gsap="card"
+                    className="group rounded-2xl border border-white/[0.07] bg-white/[0.015] backdrop-blur-sm transition-all hover:border-white/[0.12] overflow-hidden open:border-primary/20 open:bg-primary/[0.02]"
+                  >
+                    <summary className="flex cursor-pointer items-center justify-between px-6 py-4 font-medium text-sm list-none select-none gap-4">
+                      <span>{faq.question}</span>
+                      <svg className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                     </summary>
-                    <p className="px-5 pb-5 text-sm text-muted-foreground">{faq.answer}</p>
+                    <p className="px-6 pb-5 text-sm text-muted-foreground leading-relaxed">{faq.answer}</p>
                   </details>
                 ))}
               </div>
             </div>
           </section>
         )}
+
+        {/* ─── FINAL CTA ─── */}
+        <section className="pb-24 px-4">
+          <div className="container mx-auto">
+            <div className="relative overflow-hidden rounded-3xl border border-white/[0.08] p-16 text-center">
+              {/* Glass background */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.08] via-background to-violet-500/[0.06] backdrop-blur-sm" />
+              {/* Top shine */}
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+              {/* Bottom vignette */}
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/60" />
+              {/* Orbs */}
+              <div className="pointer-events-none absolute top-0 left-1/4 h-64 w-64 rounded-full bg-primary/15 blur-[100px]" aria-hidden />
+              <div className="pointer-events-none absolute bottom-0 right-1/4 h-48 w-48 rounded-full bg-violet-500/10 blur-[80px]" aria-hidden />
+
+              <div className="relative z-10">
+                <div className="badge-beam mb-4" data-gsap="badge">
+                  <div className="badge-beam-ring" />
+                  <div className="badge-beam-inner">
+                    <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Démarrez maintenant</span>
+                  </div>
+                </div>
+                <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl" data-gsap="title">
+                  <span className="bg-gradient-to-b from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent">
+                    Prêt à lancer votre SaaS ?
+                  </span>
+                </h2>
+                <p className="mb-10 text-muted-foreground text-lg max-w-sm mx-auto">
+                  Une commande. Tout est configuré. Vos fonctionnalités sont prêtes à être implémentées.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-4">
+                  <Link href="{{AUTH_ENTRY_URL}}">
+                    <Button size="lg" className="gap-2 h-12 px-6 shadow-lg hover:shadow-[0_0_30px_hsl(var(--primary)/30%)] transition-all duration-300">
+                      Commencer gratuitement <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <CopyCommand />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
       </main>
 
       <Footer />
