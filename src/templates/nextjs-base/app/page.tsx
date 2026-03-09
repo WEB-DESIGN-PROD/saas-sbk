@@ -170,7 +170,7 @@ export default async function Home() {
         </section>
 
         {/* MARQUEE */}
-        <section className="border-t border-white/[0.06] bg-white/[0.015] py-7 overflow-hidden shrink-0 backdrop-blur-sm">
+        <section className="py-7 overflow-hidden shrink-0">
           <div
             className="relative"
             style={{ maskImage: "linear-gradient(to right, transparent, black 12%, black 88%, transparent)" }}
