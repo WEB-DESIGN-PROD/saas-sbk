@@ -9,7 +9,7 @@ export async function Footer() {
   })
 
   return (
-    <footer className="border-t py-6">
+    <footer className="py-6">
       <div className="container mx-auto px-4 flex flex-col items-center gap-3 text-sm text-muted-foreground">
         {footerPages.length > 0 && (
           <nav className="flex flex-wrap justify-center gap-4">

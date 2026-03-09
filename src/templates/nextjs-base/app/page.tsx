@@ -308,7 +308,7 @@ export default async function Home() {
 
         {/* ─── FAQ ─── */}
         {faqs.length > 0 && (
-          <section className="py-28 border-t border-white/[0.06]">
+          <section className="py-28">
             <div className="container mx-auto max-w-2xl px-4">
               <div className="mb-16 text-center">
                 <div className="badge-beam mb-4">
