@@ -43,6 +43,7 @@ export function generatePackageJson(config, projectPath = null) {
     'better-auth': '^1.3.0',
     '@prisma/client': '^6.19.0',
     'next-themes': packageJson.dependencies?.['next-themes'] || '^0.4.6',
+    'gsap': '^3.12.5',
   };
 
   // Stripe
