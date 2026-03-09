@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
+import { CopyCommand } from "@/components/copy-command";
 import { prisma } from "@/lib/db/client";
 import {
   Shield, Database, Layers, CreditCard, Mail, HardDrive,
@@ -149,13 +150,7 @@ export default async function Home() {
                   Commencer gratuitement <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <div className="flex items-center gap-2.5 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.04] px-4 h-12 backdrop-blur-sm hover:border-emerald-400/35 hover:bg-emerald-400/[0.07] transition-all duration-200 cursor-default">
-                <div className="flex h-5 w-5 items-center justify-center rounded-md bg-emerald-400/15 shrink-0">
-                  <Sparkles className="h-3 w-3 text-emerald-400" />
-                </div>
-                <span className="font-mono text-sm text-emerald-400">/generate-features</span>
-                <span className="text-xs text-muted-foreground hidden sm:inline">dans Claude Code</span>
-              </div>
+              <CopyCommand />
             </div>
 
             {/* Feature pills */}
@@ -400,12 +395,7 @@ export default async function Home() {
                       Commencer gratuitement <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
-                  <div className="flex items-center gap-2.5 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.04] px-4 h-12 backdrop-blur-sm">
-                    <div className="flex h-5 w-5 items-center justify-center rounded-md bg-emerald-400/15 shrink-0">
-                      <Sparkles className="h-3 w-3 text-emerald-400" />
-                    </div>
-                    <span className="font-mono text-sm text-emerald-400">/generate-features</span>
-                  </div>
+                  <CopyCommand />
                 </div>
               </div>
             </div>
