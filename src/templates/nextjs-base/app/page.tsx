@@ -71,9 +71,9 @@ export default async function Home() {
               className="relative"
               style={{ maskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)" }}
             >
-              <div className="flex gap-16 animate-marquee whitespace-nowrap">
+              <div className="flex gap-20 animate-marquee whitespace-nowrap items-center">
                 {[...TECH_LOGOS, ...TECH_LOGOS, ...TECH_LOGOS, ...TECH_LOGOS].map((logo, i) => (
-                  <span key={i} className="text-sm font-semibold tracking-wide text-muted-foreground shrink-0">
+                  <span key={i} className="text-2xl font-bold tracking-tight shrink-0 bg-gradient-to-b from-foreground to-muted-foreground/30 bg-clip-text text-transparent">
                     {logo.name}
                   </span>
                 ))}
