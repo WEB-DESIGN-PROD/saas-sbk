@@ -375,7 +375,7 @@ export default async function Home() {
                   </span>
                 </h2>
                 <p className="mb-10 text-muted-foreground text-lg max-w-sm mx-auto">
-                  Une commande. Tout configuré. Vos fonctionnalités prêtes à implémenter.
+                  Une commande. Tout est configuré. Vos fonctionnalités sont prêtes à être implémentées.
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-4">
                   <Link href="{{AUTH_ENTRY_URL}}">
