@@ -130,10 +130,10 @@ export default async function Home() {
             {/* Headline */}
             <h1 className="mb-6 text-6xl font-bold tracking-tight lg:text-7xl xl:text-8xl leading-none">
               <span className="block bg-gradient-to-b from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent pb-1">
-                Configurez votre SaaS
+                De l&apos;idée à la production
               </span>
               <span className="block bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                n&apos;a jamais été aussi simple
+                sans friction
               </span>
             </h1>
 
