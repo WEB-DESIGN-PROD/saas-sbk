@@ -4,7 +4,7 @@ import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { ScrollAnimations } from "@/components/scroll-animations"
 import { CopyCommand } from "@/components/copy-command"
-import { ArrowRight, Sparkles, Check, Zap, Shield, Users } from "lucide-react"
+import { ArrowRight, Sparkles, Check, Zap, Shield, Users, Target } from "lucide-react"
 
 const VALUES = [
   {
@@ -92,81 +92,113 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Mission */}
-        <section className="pb-24">
-          <div className="container mx-auto px-4">
-            <div className="mx-auto max-w-3xl">
-
-              <div className="mb-10 text-center">
-                <div className="badge-beam mb-4" data-gsap="badge">
-                  <div className="badge-beam-ring" />
-                  <div className="badge-beam-inner">
-                    <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Mission</span>
-                  </div>
-                </div>
-                <h2 className="text-3xl font-bold tracking-tight" data-gsap="title">
-                  <span className="bg-gradient-to-b from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent">
-                    Notre mission
-                  </span>
-                </h2>
-              </div>
-
-              <div
-                className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-8 backdrop-blur-sm space-y-4 text-muted-foreground leading-relaxed"
-                data-gsap="subtitle"
-              >
-                <p>
-                  {{PROJECT_NAME}} a été créé avec la mission de simplifier et d&apos;accélérer
-                  le développement de projets SaaS modernes. Nous croyons que chaque
-                  développeur devrait avoir accès à une infrastructure de qualité
-                  professionnelle sans avoir à réinventer la roue.
-                </p>
-                <p>
-                  Notre plateforme combine les meilleures technologies du marché dans
-                  un ensemble cohérent et prêt à l&apos;emploi, vous permettant de vous
-                  concentrer sur ce qui compte vraiment : créer de la valeur pour vos utilisateurs.
-                </p>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* Values */}
+        {/* Mission & Valeurs — Bento */}
         <section className="py-24">
           <div className="container mx-auto px-4">
 
-            <div className="mb-12 text-center">
+            <div className="mb-16 text-center">
               <div className="badge-beam mb-4" data-gsap="badge">
                 <div className="badge-beam-ring" />
                 <div className="badge-beam-inner">
-                  <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Valeurs</span>
+                  <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Mission & Valeurs</span>
                 </div>
               </div>
-              <h2 className="text-3xl font-bold tracking-tight" data-gsap="title">
+              <h2 className="text-4xl font-bold tracking-tight lg:text-5xl" data-gsap="title">
                 <span className="bg-gradient-to-b from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent">
-                  Nos valeurs
+                  Ce qui nous anime
                 </span>
               </h2>
+              <p className="mt-4 text-muted-foreground text-lg" data-gsap="subtitle">Notre approche du développement SaaS moderne.</p>
             </div>
 
-            <div className="mx-auto max-w-3xl grid gap-4 md:grid-cols-2" data-gsap="stagger">
-              {VALUES.map(({ icon: Icon, label, desc, bg, ring, icon_color, glow }) => (
-                <div
-                  key={label}
-                  data-gsap="card"
-                  className="group rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 backdrop-blur-sm hover:border-white/[0.14] transition-all duration-300"
-                >
-                  <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-xl ${bg} ring-1 ${ring} transition-all duration-300 relative`}>
-                    <div className={`absolute inset-0 rounded-xl ${glow} blur-sm opacity-0 group-hover:opacity-100 transition-opacity`} />
-                    <Icon className={`h-5 w-5 ${icon_color} relative`} />
-                  </div>
-                  <h3 className="mb-2 font-semibold">{label}</h3>
-                  <p className="text-sm text-muted-foreground">{desc}</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[200px]" data-gsap="stagger">
+
+              {/* Mission — wide + tall */}
+              <div
+                data-gsap="card"
+                className="group relative md:col-span-2 md:row-span-2 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-8 backdrop-blur-sm hover:border-white/[0.14] transition-all duration-300 overflow-hidden flex flex-col justify-between"
+              >
+                <div className="pointer-events-none absolute bottom-0 right-0 h-48 w-48 rounded-full bg-primary/10 blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/[0.08] ring-1 ring-primary/[0.15] relative mb-6">
+                  <div className="absolute inset-0 rounded-xl bg-primary/10 blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <Target className="h-5 w-5 text-primary relative" />
                 </div>
-              ))}
-            </div>
+                <div className="flex-1 flex flex-col justify-center space-y-4 text-muted-foreground leading-relaxed">
+                  <h3 className="text-xl font-bold text-foreground">Notre mission</h3>
+                  <p className="text-sm">
+                    {{PROJECT_NAME}} a été créé pour simplifier et accélérer le développement
+                    de projets SaaS modernes. Chaque développeur mérite une infrastructure
+                    de qualité professionnelle sans réinventer la roue.
+                  </p>
+                  <p className="text-sm">
+                    Notre plateforme combine les meilleures technologies dans un ensemble
+                    cohérent et prêt à l&apos;emploi — pour que vous puissiez vous concentrer
+                    sur ce qui compte vraiment : créer de la valeur.
+                  </p>
+                </div>
+              </div>
 
+              {/* Simplicité */}
+              <div
+                data-gsap="card"
+                className="group rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 backdrop-blur-sm hover:border-white/[0.14] transition-all duration-300 overflow-hidden flex flex-col justify-between"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/[0.08] ring-1 ring-primary/[0.15] relative">
+                  <div className="absolute inset-0 rounded-xl bg-primary/10 blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <Zap className="h-5 w-5 text-primary relative" />
+                </div>
+                <div>
+                  <h3 className="mb-1 font-semibold">Simplicité</h3>
+                  <p className="text-sm text-muted-foreground">Des outils intuitifs et une documentation claire pour démarrer rapidement.</p>
+                </div>
+              </div>
+
+              {/* Qualité */}
+              <div
+                data-gsap="card"
+                className="group rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 backdrop-blur-sm hover:border-white/[0.14] transition-all duration-300 overflow-hidden flex flex-col justify-between"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-400/[0.08] ring-1 ring-emerald-400/[0.15] relative">
+                  <div className="absolute inset-0 rounded-xl bg-emerald-400/10 blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <Shield className="h-5 w-5 text-emerald-400 relative" />
+                </div>
+                <div>
+                  <h3 className="mb-1 font-semibold">Qualité</h3>
+                  <p className="text-sm text-muted-foreground">Code propre, bonnes pratiques et sécurité au cœur de notre approche.</p>
+                </div>
+              </div>
+
+              {/* Innovation */}
+              <div
+                data-gsap="card"
+                className="group rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 backdrop-blur-sm hover:border-white/[0.14] transition-all duration-300 overflow-hidden flex flex-col justify-between"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-400/[0.08] ring-1 ring-cyan-400/[0.15] relative">
+                  <div className="absolute inset-0 rounded-xl bg-cyan-400/10 blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <Sparkles className="h-5 w-5 text-cyan-400 relative" />
+                </div>
+                <div>
+                  <h3 className="mb-1 font-semibold">Innovation</h3>
+                  <p className="text-sm text-muted-foreground">Utilisation des technologies les plus modernes et performantes.</p>
+                </div>
+              </div>
+
+              {/* Communauté — wide */}
+              <div
+                data-gsap="card"
+                className="group md:col-span-2 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 backdrop-blur-sm hover:border-white/[0.14] transition-all duration-300 overflow-hidden flex items-center gap-6"
+              >
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-400/[0.08] ring-1 ring-violet-400/[0.15] relative">
+                  <div className="absolute inset-0 rounded-xl bg-violet-400/10 blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <Users className="h-5 w-5 text-violet-400 relative" />
+                </div>
+                <div>
+                  <h3 className="mb-1 font-semibold">Communauté</h3>
+                  <p className="text-sm text-muted-foreground">Collaboration et partage de connaissances avec nos utilisateurs — open source, extensible, fait pour durer.</p>
+                </div>
+              </div>
+
+            </div>
           </div>
         </section>
 
