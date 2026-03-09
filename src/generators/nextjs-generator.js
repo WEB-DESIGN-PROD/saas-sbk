@@ -1100,7 +1100,7 @@ function copyConditionalVariants(projectPath, config, replacements) {
     copyVariantFile(path.join(i18nDir, 'i18n/request.ts'), path.join(projectPath, 'i18n/request.ts'), i18nReplacements);
 
     // Middleware i18n : proxy.ts dans le variant → middleware.ts dans le projet généré
-    copyVariantFile(path.join(i18nDir, 'proxy.ts'), path.join(projectPath, 'middleware.ts'), i18nReplacements);
+    copyVariantFile(path.join(i18nDir, 'proxy.ts'), path.join(projectPath, 'proxy.ts'), i18nReplacements);
 
     // next.config.ts avec withNextIntl (remplace le shadcn-base)
     copyVariantFile(path.join(i18nDir, 'next.config.ts'), path.join(projectPath, 'next.config.ts'), i18nReplacements);
