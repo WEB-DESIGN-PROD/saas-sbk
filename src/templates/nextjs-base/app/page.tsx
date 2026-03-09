@@ -209,7 +209,7 @@ export default async function Home() {
                     Tout ce dont vous avez besoin
                   </span>
                 </h2>
-                <p className="text-muted-foreground text-lg">Déjà intégré, déjà testé, prêt à personnaliser.</p>
+                <p className="text-muted-foreground text-lg">Déjà intégré, déjà testé, prêt à être personnalisé.</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[200px]">
@@ -272,7 +272,7 @@ export default async function Home() {
                   Ce qu&apos;ils en disent
                 </span>
               </h2>
-              <p className="text-muted-foreground text-lg">Ils ont lancé leur projet avec {{PROJECT_NAME}}.</p>
+              <p className="text-muted-foreground text-lg">Ils ont lancé leur projet avec <code className="font-mono text-sm">npm create saas-sbk@latest</code>.</p>
             </div>
             <div className="grid gap-4 md:grid-cols-3">
               {TESTIMONIALS.map((t, i) => {
@@ -375,7 +375,7 @@ export default async function Home() {
                   </span>
                 </h2>
                 <p className="mb-10 text-muted-foreground text-lg max-w-sm mx-auto">
-                  Une commande. Tout configuré. Prêt à déployer.
+                  Une commande. Tout configuré. Vos fonctionnalités prêtes à implémenter.
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-4">
                   <Link href="{{AUTH_ENTRY_URL}}">
