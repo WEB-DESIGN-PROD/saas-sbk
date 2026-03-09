@@ -44,7 +44,7 @@ export default async function Home() {
   ]);
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-x-hidden">
+    <div className="relative flex min-h-screen flex-col overflow-x-clip">
       <Navbar />
       <ScrollAnimations />
 
