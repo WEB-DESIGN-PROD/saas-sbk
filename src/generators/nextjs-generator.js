@@ -1106,6 +1106,11 @@ function copyConditionalVariants(projectPath, config, replacements) {
         );
       }
     }
+
+    // Page racine : redirection vers la locale par défaut (fallback si middleware absent)
+    const defaultLang = config.i18n?.defaultLanguage || 'fr';
+    const rootPageContent = `import { redirect } from 'next/navigation'\n\nexport default function RootPage() {\n  redirect('/${defaultLang}')\n}\n`;
+    fs.writeFileSync(path.join(projectPath, 'app/page.tsx'), rootPageContent, 'utf-8');
   }
 
   // Plus de pages /magic-link ou /otp séparées — la page /login gère tout selon loginMethod
