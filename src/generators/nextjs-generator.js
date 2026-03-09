@@ -22,23 +22,25 @@ export function generateNextjsProject(projectPath, config) {
   // 2. Copier les fichiers de configuration spécifiques par-dessus
   copyConfigFiles(projectPath, config, templatesDir);
 
-  // 3. Générer lib/auth/config.ts, lib/auth/client.ts et app/login/page.tsx dynamiquement
+  // 3. Générer lib/auth/config.ts, lib/auth/client.ts dynamiquement
   generateAuthConfig(projectPath, config);
   generateAuthClient(projectPath, config);
-  generateLoginPage(projectPath, config);
 
   // 3b. Générer lib/email/client.ts dynamiquement selon le provider
   if (config.email && config.email.provider !== 'none') {
     generateEmailClient(projectPath, config);
   }
 
-  // 4. Copier les variantes conditionnelles (OAuth, Stripe, email, etc.)
+  // 4. Copier les variantes conditionnelles (OAuth, Stripe, email, i18n, etc.)
   copyConditionalVariants(projectPath, config, replacementsForVariants(config));
 
-  // 5. Générer .gitignore
+  // 5. Générer app/login/page.tsx dynamiquement APRÈS les variantes (évite d'être écrasé par copyDirWithReplacements)
+  generateLoginPage(projectPath, config);
+
+  // 6. Générer .gitignore
   generateGitignore(projectPath);
 
-  // 6. Générer README.md
+  // 7. Générer README.md
   generateReadme(projectPath, config);
 
   logger.successWithComment('Structure du projet Next.js créée', 'Votre application web');
@@ -82,8 +84,8 @@ function copyConfigFiles(projectPath, config, templatesDir) {
     'app/error.tsx',
     'app/not-found.tsx',
     // app/login/page.tsx est généré dynamiquement par generateLoginPage()
-    // app/register/page.tsx est toujours présent (inscription universelle)
-    'app/register/page.tsx',
+    // app/register/page.tsx : présent seulement si i18n désactivé (sinon variant i18n le fournit dans [locale])
+    ...(hasI18n ? [] : ['app/register/page.tsx']),
     // Pages publiques : copiées seulement si i18n désactivé (sinon variant i18n les fournit)
     ...(hasI18n ? [] : [
       'app/page.tsx',
@@ -98,7 +100,8 @@ function copyConfigFiles(projectPath, config, templatesDir) {
     'lib/db/client.ts',
     'lib/dal.ts',
     'components/auth/logout-button.tsx',
-    'components/auth/github-button.tsx',
+    // github-button/google-button : version i18n copiée plus tard si hasI18n activé
+    ...(hasI18n ? [] : ['components/auth/github-button.tsx']),
     'components/app-sidebar.tsx',
     'components/site-header.tsx',
     'components/nav-user.tsx',
@@ -145,12 +148,16 @@ function copyConfigFiles(projectPath, config, templatesDir) {
 
   if (hasEmail) {
     conditionalCopy.push('lib/email/templates.ts');
-    // verify-email : toujours présent quand email provider (inscription universelle)
-    conditionalCopy.push('app/verify-email/page.tsx');
+    // verify-email : présent quand email provider, mais seulement si i18n désactivé
+    // (en mode i18n, la page est dans app/[locale]/verify-email/ fournie par le variant i18n)
+    if (!hasI18n) {
+      conditionalCopy.push('app/verify-email/page.tsx');
+    }
   }
 
-  // forgot-password / reset-password : seulement si loginMethod = email-password
-  if (hasEmail && loginMethod === 'email-password') {
+  // forgot-password / reset-password : seulement si loginMethod = email-password et i18n désactivé
+  // (en mode i18n, les pages sont dans app/[locale]/ fournies par le variant i18n)
+  if (hasEmail && loginMethod === 'email-password' && !hasI18n) {
     conditionalCopy.push(
       'app/forgot-password/page.tsx',
       'app/reset-password/page.tsx',
@@ -514,29 +521,40 @@ function generateLoginPage(projectPath, config) {
   const hasGithub = config.auth?.methods?.includes('github');
   const hasGoogle = config.auth?.methods?.includes('google');
   const hasSocial = hasGithub || hasGoogle;
+  const hasI18n = config.i18n && config.i18n.languages && config.i18n.languages.length > 1;
+
+  // En mode i18n, Link et useRouter proviennent de @/i18n/navigation (préfixage locale automatique)
+  const linkImport = hasI18n ? 'import { Link } from "@/i18n/navigation"' : 'import Link from "next/link"';
+  const routerImport = hasI18n ? 'import { useRouter } from "@/i18n/navigation"' : 'import { useRouter } from "next/navigation"';
+  const i18nImport = hasI18n ? '\nimport { useTranslations } from "next-intl"' : '';
 
   // Boutons sociaux communs à tous les cas
   const githubImport = hasGithub ? '\nimport { GitHubButton } from "@/components/auth/github-button"' : '';
   const googleImport = hasGoogle ? '\nimport { GoogleButton } from "@/components/auth/google-button"' : '';
+  const orLabel = hasI18n ? '{t("or")}' : 'ou';
   const socialButtons = !hasSocial ? '' : `
             <div className="flex flex-col items-center gap-2 w-full">
               <div className="relative w-full">
                 <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">ou</span>
+                  <span className="bg-background px-2 text-muted-foreground">${orLabel}</span>
                 </div>
               </div>${hasGithub ? '\n              <GitHubButton />' : ''}${hasGoogle ? '\n              <GoogleButton />' : ''}
             </div>`;
 
   let content;
 
+  // Helpers : valeurs de texte selon i18n ou non
+  const T = (key, fallback) => hasI18n ? `{t("${key}")}` : fallback;
+  const Tstr = (key, fallback) => hasI18n ? `t("${key}")` : `"${fallback}"`;
+
   if (loginMethod === 'email-password') {
     // ── Email + mot de passe ──
     content = `"use client"
 
 import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
+${linkImport}
+${routerImport}${i18nImport}
 import { toast } from "sonner"
 import { signIn } from "@/lib/auth/client"
 import { Button } from "@/components/ui/button"
@@ -545,7 +563,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"${githubImport}${googleImport}
 
 export default function LoginPage() {
-  const router = useRouter()
+  const router = useRouter()${hasI18n ? '\n  const t = useTranslations("auth")' : ''}
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -556,12 +574,12 @@ export default function LoginPage() {
     try {
       const result = await signIn.email({ email, password })
       if (result.error) {
-        toast.error("Échec de la connexion", { description: result.error.message || "Email ou mot de passe incorrect" })
+        toast.error(${Tstr('error_generic', 'Échec de la connexion')}, { description: result.error.message })
         return
       }
       router.push("/dashboard")
     } catch (error: any) {
-      toast.error("Erreur de connexion", { description: error?.message || "Une erreur est survenue" })
+      toast.error(${Tstr('error_generic', 'Erreur de connexion')}, { description: error?.message })
     } finally {
       setIsLoading(false)
     }
@@ -571,30 +589,30 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-muted/50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Connexion</CardTitle>
-          <CardDescription>Entrez vos identifiants pour accéder à votre compte</CardDescription>
+          <CardTitle className="text-2xl font-bold">${T('login_title', 'Connexion')}</CardTitle>
+          <CardDescription>${T('login_desc_password', 'Entrez vos identifiants pour accéder à votre compte')}</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4 pb-6">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="nom@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} />
+              <Label htmlFor="email">${T('email', 'Email')}</Label>
+              <Input id="email" type="email" placeholder={${Tstr('email_placeholder', 'nom@exemple.com')}} value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Mot de passe</Label>
-                <Link href="/forgot-password" className="text-sm text-muted-foreground hover:underline">Mot de passe oublié ?</Link>
+                <Label htmlFor="password">${T('password', 'Mot de passe')}</Label>
+                <Link href="/forgot-password" className="text-sm text-muted-foreground hover:underline">${T('forgot_password', 'Mot de passe oublié ?')}</Link>
               </div>
               <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isLoading} />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Connexion..." : "Se connecter"}
+              {isLoading ? ${T('signing_in', 'Connexion...')} : ${T('sign_in', 'Se connecter')}}
             </Button>${socialButtons}
             <p className="text-center text-sm text-muted-foreground">
-              Pas encore de compte ?{" "}
-              <Link href="/register" className="font-medium underline underline-offset-4">Créer un compte</Link>
+              ${T('no_account', 'Pas encore de compte ?')}{" "}
+              <Link href="/register" className="font-medium underline underline-offset-4">${T('create_account', 'Créer un compte')}</Link>
             </p>
           </CardFooter>
         </form>
@@ -609,7 +627,7 @@ export default function LoginPage() {
     content = `"use client"
 
 import { useState } from "react"
-import Link from "next/link"
+${linkImport}${i18nImport}
 import { toast } from "sonner"
 import { authClient } from "@/lib/auth/client"
 import { Button } from "@/components/ui/button"
@@ -617,7 +635,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"${githubImport}${googleImport}
 
-export default function LoginPage() {
+export default function LoginPage() {${hasI18n ? '\n  const t = useTranslations("auth")' : ''}
   const [email, setEmail] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [sent, setSent] = useState(false)
@@ -628,12 +646,12 @@ export default function LoginPage() {
     try {
       const result = await authClient.signIn.magicLink({ email, callbackURL: "/dashboard" })
       if (result.error) {
-        toast.error("Erreur", { description: result.error.message || "Impossible d'envoyer le lien" })
+        toast.error(${Tstr('error_generic', 'Erreur')}, { description: result.error.message })
         return
       }
       setSent(true)
     } catch {
-      toast.error("Erreur", { description: "Une erreur est survenue. Réessayez." })
+      toast.error(${Tstr('error_generic', 'Erreur')})
     } finally {
       setIsLoading(false)
     }
@@ -645,11 +663,11 @@ export default function LoginPage() {
         <Card className="w-full max-w-md text-center">
           <CardHeader>
             <div className="mx-auto mb-2 text-4xl">✉️</div>
-            <CardTitle className="text-2xl font-bold">Vérifiez vos emails</CardTitle>
-            <CardDescription>Un lien de connexion a été envoyé à {email}. Il expire dans 15 minutes.</CardDescription>
+            <CardTitle className="text-2xl font-bold">${T('magic_sent_title', 'Vérifiez vos emails')}</CardTitle>
+            <CardDescription>${hasI18n ? '{t("magic_sent_desc", { email })}' : 'Un lien de connexion a été envoyé à {email}. Il expire dans 15 minutes.'}</CardDescription>
           </CardHeader>
           <CardFooter className="justify-center">
-            <button className="text-sm text-muted-foreground hover:underline" onClick={() => setSent(false)}>Renvoyer un lien</button>
+            <button className="text-sm text-muted-foreground hover:underline" onClick={() => setSent(false)}>${T('resend_link', 'Renvoyer un lien')}</button>
           </CardFooter>
         </Card>
       </div>
@@ -660,23 +678,23 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-muted/50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Connexion</CardTitle>
-          <CardDescription>Entrez votre email pour recevoir un lien de connexion</CardDescription>
+          <CardTitle className="text-2xl font-bold">${T('login_title', 'Connexion')}</CardTitle>
+          <CardDescription>${T('login_desc_magic', 'Entrez votre email pour recevoir un lien de connexion')}</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4 pb-6">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="nom@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} />
+              <Label htmlFor="email">${T('email', 'Email')}</Label>
+              <Input id="email" type="email" placeholder={${Tstr('email_placeholder', 'nom@exemple.com')}} value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Envoi en cours..." : "Recevoir un lien de connexion"}
+              {isLoading ? ${T('sending', 'Envoi en cours...')} : ${T('send_link', 'Recevoir un lien de connexion')}}
             </Button>${socialButtons}
             <p className="text-center text-sm text-muted-foreground">
-              Pas encore de compte ?{" "}
-              <Link href="/register" className="font-medium underline underline-offset-4">Créer un compte</Link>
+              ${T('no_account', 'Pas encore de compte ?')}{" "}
+              <Link href="/register" className="font-medium underline underline-offset-4">${T('create_account', 'Créer un compte')}</Link>
             </p>
           </CardFooter>
         </form>
@@ -691,8 +709,8 @@ export default function LoginPage() {
     content = `"use client"
 
 import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
+${linkImport}
+${routerImport}${i18nImport}
 import { toast } from "sonner"
 import { authClient } from "@/lib/auth/client"
 import { Button } from "@/components/ui/button"
@@ -702,7 +720,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from "@/comp
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"${githubImport}${googleImport}
 
 export default function LoginPage() {
-  const router = useRouter()
+  const router = useRouter()${hasI18n ? '\n  const t = useTranslations("auth")' : ''}
   const [step, setStep] = useState<"email" | "otp">("email")
   const [email, setEmail] = useState("")
   const [otp, setOtp] = useState("")
@@ -714,13 +732,13 @@ export default function LoginPage() {
     try {
       const result = await authClient.emailOtp.sendVerificationOtp({ email, type: "sign-in" })
       if (result.error) {
-        toast.error("Erreur", { description: result.error.message || "Impossible d'envoyer le code" })
+        toast.error(${Tstr('error_generic', 'Erreur')}, { description: result.error.message })
         return
       }
       setStep("otp")
-      toast.success("Code envoyé !", { description: "Vérifiez votre boîte mail." })
+      toast.success(${Tstr('error_generic', 'Code envoyé !')})
     } catch {
-      toast.error("Erreur", { description: "Une erreur est survenue. Réessayez." })
+      toast.error(${Tstr('error_generic', 'Erreur')})
     } finally {
       setIsLoading(false)
     }
@@ -729,19 +747,19 @@ export default function LoginPage() {
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault()
     if (otp.length !== 6) {
-      toast.error("Code incomplet", { description: "Entrez les 6 chiffres du code." })
+      toast.error(${Tstr('error_generic', 'Code incomplet')})
       return
     }
     setIsLoading(true)
     try {
       const result = await authClient.signIn.emailOtp({ email, otp })
       if (result.error) {
-        toast.error("Code invalide", { description: result.error.message || "Code incorrect ou expiré" })
+        toast.error(${Tstr('error_generic', 'Code invalide')}, { description: result.error.message })
         return
       }
       router.push("/dashboard")
     } catch {
-      toast.error("Erreur", { description: "Une erreur est survenue. Réessayez." })
+      toast.error(${Tstr('error_generic', 'Erreur')})
     } finally {
       setIsLoading(false)
     }
@@ -751,26 +769,26 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-muted/50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Connexion</CardTitle>
+          <CardTitle className="text-2xl font-bold">${T('login_title', 'Connexion')}</CardTitle>
           <CardDescription>
-            {step === "email" ? "Entrez votre email pour recevoir un code de connexion" : \`Code envoyé à \${email}\`}
+            {step === "email" ? ${hasI18n ? 't("login_desc_otp")' : '"Entrez votre email pour recevoir un code de connexion"'} : ${hasI18n ? 't("otp_step2_desc", { email })' : '`Code envoyé à ${email}`'}}
           </CardDescription>
         </CardHeader>
         {step === "email" ? (
           <form onSubmit={handleSendOtp}>
             <CardContent className="space-y-4 pb-6">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="nom@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} />
+                <Label htmlFor="email">${T('email', 'Email')}</Label>
+                <Input id="email" type="email" placeholder={${Tstr('email_placeholder', 'nom@exemple.com')}} value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} />
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Envoi en cours..." : "Recevoir un code"}
+                {isLoading ? ${T('sending', 'Envoi en cours...')} : ${T('send_code', 'Recevoir un code')}}
               </Button>${socialButtons}
               <p className="text-center text-sm text-muted-foreground">
-                Pas encore de compte ?{" "}
-                <Link href="/register" className="font-medium underline underline-offset-4">Créer un compte</Link>
+                ${T('no_account', 'Pas encore de compte ?')}{" "}
+                <Link href="/register" className="font-medium underline underline-offset-4">${T('create_account', 'Créer un compte')}</Link>
               </p>
             </CardFooter>
           </form>
@@ -778,7 +796,7 @@ export default function LoginPage() {
           <form onSubmit={handleVerifyOtp}>
             <CardContent className="pb-6">
               <div className="space-y-3">
-                <Label>Code à 6 chiffres</Label>
+                <Label>${T('otp_step2_title', 'Code à 6 chiffres')}</Label>
                 <div className="flex justify-center">
                   <InputOTP maxLength={6} value={otp} onChange={setOtp} disabled={isLoading}>
                     <InputOTPGroup>
@@ -794,15 +812,14 @@ export default function LoginPage() {
                     </InputOTPGroup>
                   </InputOTP>
                 </div>
-                <p className="text-center text-xs text-muted-foreground">Ce code expire dans 10 minutes</p>
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <Button type="submit" className="w-full" disabled={isLoading || otp.length !== 6}>
-                {isLoading ? "Vérification..." : "Se connecter"}
+                {isLoading ? ${T('otp_verifying', 'Vérification...')} : ${T('otp_verify', 'Vérifier le code')}}
               </Button>
               <button type="button" className="text-sm text-muted-foreground hover:underline" onClick={() => { setStep("email"); setOtp("") }}>
-                Changer d'email
+                ${T('otp_change_email', "Changer d'email")}
               </button>
             </CardFooter>
           </form>
@@ -814,7 +831,9 @@ export default function LoginPage() {
 `;
   }
 
-  const dest = path.join(projectPath, 'app/login/page.tsx');
+  // En mode i18n, la page login est dans app/[locale]/login/
+  const loginDestPath = hasI18n ? 'app/[locale]/login/page.tsx' : 'app/login/page.tsx';
+  const dest = path.join(projectPath, loginDestPath);
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   fs.writeFileSync(dest, content, 'utf-8');
 }
@@ -1091,9 +1110,25 @@ function copyConditionalVariants(projectPath, config, replacements) {
     copyVariantFile(path.join(i18nDir, 'components/navbar-client.tsx'), path.join(projectPath, 'components/navbar-client.tsx'), i18nReplacements);
     copyVariantFile(path.join(i18nDir, 'components/footer.tsx'), path.join(projectPath, 'components/footer.tsx'), i18nReplacements);
 
-    // Pages publiques localisées (app/[locale]/...)
+    // Boutons OAuth i18n (utilisent useTranslations au lieu de strings hardcodées)
+    copyVariantFile(path.join(i18nDir, 'components/auth/github-button.tsx'), path.join(projectPath, 'components/auth/github-button.tsx'), i18nReplacements);
+    copyVariantFile(path.join(i18nDir, 'components/auth/google-button.tsx'), path.join(projectPath, 'components/auth/google-button.tsx'), i18nReplacements);
+
+    // Pages publiques localisées (app/[locale]/...) — exclure les pages auth gérées séparément
     const localeDir = path.join(i18nDir, 'app/[locale]');
-    copyDirWithReplacements(localeDir, path.join(projectPath, 'app/[locale]'), i18nReplacements);
+    const authPageDirs = new Set(['login', 'register', 'verify-email', 'forgot-password', 'reset-password']);
+    const localeEntries = fs.readdirSync(localeDir, { withFileTypes: true });
+    fs.mkdirSync(path.join(projectPath, 'app/[locale]'), { recursive: true });
+    for (const entry of localeEntries) {
+      if (entry.isDirectory() && authPageDirs.has(entry.name)) continue; // gérées séparément
+      const srcPath = path.join(localeDir, entry.name);
+      const destPath = path.join(projectPath, 'app/[locale]', entry.name);
+      if (entry.isDirectory()) {
+        copyDirWithReplacements(srcPath, destPath, i18nReplacements);
+      } else {
+        copyVariantFile(srcPath, destPath, i18nReplacements);
+      }
+    }
 
     // Fichiers de messages selon les langues configurées
     const availableMessages = ['fr', 'en', 'es', 'de'];
@@ -1105,6 +1140,41 @@ function copyConditionalVariants(projectPath, config, replacements) {
           i18nReplacements
         );
       }
+    }
+
+    // Pages auth localisées (register, verify-email, forgot-password, reset-password)
+    // Note : login est généré dynamiquement par generateLoginPage() → app/[locale]/login/page.tsx (après copyConditionalVariants)
+    const hasEmail = config.email && config.email.provider !== 'none';
+    const loginMethod = config.auth?.loginMethod || 'email-password';
+
+    // register : toujours présent (inscription universelle)
+    copyVariantFile(
+      path.join(i18nDir, 'app/[locale]/register/page.tsx'),
+      path.join(projectPath, 'app/[locale]/register/page.tsx'),
+      i18nReplacements
+    );
+
+    // verify-email : présent si provider email activé
+    if (hasEmail) {
+      copyVariantFile(
+        path.join(i18nDir, 'app/[locale]/verify-email/page.tsx'),
+        path.join(projectPath, 'app/[locale]/verify-email/page.tsx'),
+        i18nReplacements
+      );
+    }
+
+    // forgot-password / reset-password : seulement si loginMethod = email-password
+    if (hasEmail && loginMethod === 'email-password') {
+      copyVariantFile(
+        path.join(i18nDir, 'app/[locale]/forgot-password/page.tsx'),
+        path.join(projectPath, 'app/[locale]/forgot-password/page.tsx'),
+        i18nReplacements
+      );
+      copyVariantFile(
+        path.join(i18nDir, 'app/[locale]/reset-password/page.tsx'),
+        path.join(projectPath, 'app/[locale]/reset-password/page.tsx'),
+        i18nReplacements
+      );
     }
 
     // Page racine : redirection vers la locale par défaut (fallback si middleware absent)
