@@ -45,18 +45,19 @@ export default async function Home() {
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-clip">
+
+      {/* Gradient orbs — couvrent le viewport entier depuis y=0 (derrière la navbar) */}
+      <div className="pointer-events-none absolute inset-0 h-screen overflow-hidden" aria-hidden>
+        <div className="absolute top-1/3 left-1/4 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/20 blur-[180px] animate-pulse" />
+        <div className="absolute top-1/2 right-1/4 h-[500px] w-[500px] rounded-full bg-violet-500/15 blur-[150px] animate-pulse [animation-delay:2s]" />
+        <div className="absolute bottom-20 left-1/2 h-[350px] w-[350px] -translate-x-1/2 rounded-full bg-cyan-500/10 blur-[120px] animate-pulse [animation-delay:4s]" />
+      </div>
+
       <Navbar />
       <ScrollAnimations />
 
       {/* ─── HERO + MARQUEE = 100vh ─── */}
       <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden relative">
-
-        {/* Gradient orbs — liquid glass background */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-          <div className="absolute top-1/3 left-1/4 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/20 blur-[180px] animate-pulse" />
-          <div className="absolute top-1/2 right-1/4 h-[500px] w-[500px] rounded-full bg-violet-500/15 blur-[150px] animate-pulse [animation-delay:2s]" />
-          <div className="absolute bottom-20 left-1/2 h-[350px] w-[350px] -translate-x-1/2 rounded-full bg-cyan-500/10 blur-[120px] animate-pulse [animation-delay:4s]" />
-        </div>
 
         {/* HERO */}
         <section className="relative flex-1 flex items-center justify-center">
