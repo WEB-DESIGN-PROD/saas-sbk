@@ -22,12 +22,16 @@ interface NavPage { id: string; title: string; slug: string }
 export function Navbar({ headerPages = [] }: { headerPages?: NavPage[] }) {
   const { data: session } = useSession()
   const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const isLoggedIn = mounted && !!session?.user
 
   return (
     <div className="sticky top-0 z-50 flex justify-center px-4 pt-3 pb-1 pointer-events-none">
-      <header className="pointer-events-auto w-full max-w-4xl rounded-2xl border border-white/[0.08] bg-background/80 backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.05)]">
+      <header className="pointer-events-auto w-full max-w-6xl rounded-2xl border border-white/[0.06] bg-background/20 backdrop-blur-xl shadow-[0_2px_16px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.04)]">
       <div className="flex h-14 items-center px-5">
 
         {/* Gauche : Logo */}
