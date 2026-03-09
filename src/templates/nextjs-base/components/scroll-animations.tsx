@@ -10,7 +10,7 @@ function addViewportFade(
   el: HTMLElement,
   opts: { y?: number; blur?: number; entryStart?: string; entryEnd?: string; exitStart?: string; exitEnd?: string } = {}
 ) {
-  const { y = 24, blur = 7, entryStart = "top 96%", entryEnd = "top 68%", exitStart = "bottom 30%", exitEnd = "bottom 2%" } = opts
+  const { y = 16, blur = 6, entryStart = "top 102%", entryEnd = "top 88%", exitStart = "bottom 12%", exitEnd = "bottom -2%" } = opts
 
   // Entrée depuis le bas : fade + unblur + remontée
   gsap.fromTo(el,
@@ -39,31 +39,31 @@ export function ScrollAnimations() {
 
       // Badges
       gsap.utils.toArray<HTMLElement>("[data-gsap='badge']").forEach((el) => {
-        addViewportFade(el, { y: 12, blur: 5 })
+        addViewportFade(el, { y: 8, blur: 4 })
       })
 
-      // Titres : plus de déplacement et de blur
+      // Titres
       gsap.utils.toArray<HTMLElement>("[data-gsap='title']").forEach((el) => {
-        addViewportFade(el, { y: 44, blur: 12 })
+        addViewportFade(el, { y: 20, blur: 8 })
       })
 
       // Sous-titres
       gsap.utils.toArray<HTMLElement>("[data-gsap='subtitle']").forEach((el) => {
-        addViewportFade(el, { y: 18, blur: 5 })
+        addViewportFade(el, { y: 10, blur: 4 })
       })
 
-      // Cards : stagger par décalage du start/end de chaque card
+      // Cards : stagger léger via décalage du trigger
       gsap.utils.toArray<HTMLElement>("[data-gsap='stagger']").forEach((container) => {
         const cards = Array.from(container.querySelectorAll<HTMLElement>("[data-gsap='card']"))
         cards.forEach((card, i) => {
-          const staggerOffset = i * 18 // px de décalage pour simuler le stagger avec scrub
+          const offset = i * 12
           addViewportFade(card, {
-            y: 36,
-            blur: 6,
-            entryStart: `top+=${staggerOffset} 96%`,
-            entryEnd:   `top+=${staggerOffset} 70%`,
-            exitStart:  "bottom 30%",
-            exitEnd:    "bottom 2%",
+            y: 18,
+            blur: 5,
+            entryStart: `top+=${offset} 102%`,
+            entryEnd:   `top+=${offset} 88%`,
+            exitStart:  "bottom 12%",
+            exitEnd:    "bottom -2%",
           })
         })
       })
