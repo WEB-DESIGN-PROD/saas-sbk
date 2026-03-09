@@ -191,8 +191,9 @@ export default async function Home() {
 
               <div className="mb-16 text-center">
                 <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
-                  <span className="bg-gradient-to-b from-foreground to-foreground/50 bg-clip-text text-transparent">
-                    Tout ce dont vous avez besoin
+                  Tout ce dont vous avez{" "}
+                  <span className="bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                    besoin
                   </span>
                 </h2>
                 <p className="text-muted-foreground text-lg">Déjà intégré, déjà testé, prêt à personnaliser.</p>
@@ -203,6 +204,13 @@ export default async function Home() {
                   const Icon = feature.icon ? (ICONS[feature.icon] ?? Layers) : Layers;
                   const isWide = index === 0 || index === features.length - 1;
                   const isTall = index === 1;
+                  const accentColors = [
+                    { bg: "bg-primary/[0.08] group-hover:bg-primary/15", ring: "ring-primary/[0.15] group-hover:ring-primary/30", icon: "text-primary", glow: "bg-primary/10" },
+                    { bg: "bg-emerald-400/[0.08] group-hover:bg-emerald-400/15", ring: "ring-emerald-400/[0.15] group-hover:ring-emerald-400/30", icon: "text-emerald-400", glow: "bg-emerald-400/10" },
+                    { bg: "bg-cyan-400/[0.08] group-hover:bg-cyan-400/15", ring: "ring-cyan-400/[0.15] group-hover:ring-cyan-400/30", icon: "text-cyan-400", glow: "bg-cyan-400/10" },
+                    { bg: "bg-violet-400/[0.08] group-hover:bg-violet-400/15", ring: "ring-violet-400/[0.15] group-hover:ring-violet-400/30", icon: "text-violet-400", glow: "bg-violet-400/10" },
+                  ];
+                  const accent = accentColors[index % accentColors.length];
                   return (
                     <div
                       key={feature.id}
@@ -215,13 +223,13 @@ export default async function Home() {
                       ].filter(Boolean).join(" ")}
                     >
                       {/* Glow blob */}
-                      <div className="pointer-events-none absolute -top-1/2 -right-1/2 h-3/4 w-3/4 rounded-full bg-primary/10 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                      <div className={`pointer-events-none absolute -top-1/2 -right-1/2 h-3/4 w-3/4 rounded-full ${accent.glow} blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
                       {/* Top border gradient */}
-                      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 via-emerald-400/30 to-cyan-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                       <div className="relative z-10 h-full flex flex-col">
-                        <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/[0.08] ring-1 ring-primary/[0.15] group-hover:bg-primary/15 group-hover:ring-primary/30 group-hover:scale-110 transition-all duration-300">
-                          <Icon className="h-5 w-5 text-primary" />
+                        <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl ring-1 group-hover:scale-110 transition-all duration-300 ${accent.bg} ${accent.ring}`}>
+                          <Icon className={`h-5 w-5 ${accent.icon}`} />
                         </div>
                         <h3 className="mb-2 font-semibold text-foreground text-base leading-tight">{feature.title}</h3>
                         <p className="text-sm leading-relaxed text-muted-foreground flex-1">{feature.description}</p>
@@ -239,9 +247,15 @@ export default async function Home() {
         <section className="border-y border-white/[0.06] bg-white/[0.015] py-20">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-              {STATS.map(({ value, label }) => (
+              {STATS.map(({ value, label }, i) => (
                 <div key={label} className="group text-center">
-                  <div className="mb-2 text-5xl font-bold tabular-nums bg-gradient-to-b from-foreground to-foreground/50 bg-clip-text text-transparent group-hover:to-primary transition-all duration-500">
+                  <div className={[
+                    "mb-2 text-5xl font-bold tabular-nums bg-clip-text text-transparent transition-all duration-500",
+                    i === 0 ? "bg-gradient-to-b from-foreground to-foreground/50 group-hover:from-primary group-hover:to-emerald-400" :
+                    i === 1 ? "bg-gradient-to-b from-foreground to-foreground/50 group-hover:from-emerald-400 group-hover:to-cyan-400" :
+                    i === 2 ? "bg-gradient-to-b from-foreground to-foreground/50 group-hover:from-cyan-400 group-hover:to-primary" :
+                              "bg-gradient-to-b from-foreground to-foreground/50 group-hover:from-violet-400 group-hover:to-primary"
+                  ].join(" ")}>
                     {value}
                   </div>
                   <div className="text-sm text-muted-foreground leading-snug">{label}</div>
@@ -256,35 +270,45 @@ export default async function Home() {
           <div className="container mx-auto px-4">
             <div className="mb-16 text-center">
               <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
-                <span className="bg-gradient-to-b from-foreground to-foreground/50 bg-clip-text text-transparent">
-                  Ce qu&apos;ils en disent
+                Ce qu&apos;ils en{" "}
+                <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                  disent
                 </span>
               </h2>
               <p className="text-muted-foreground text-lg">Ils ont lancé leur projet avec {{PROJECT_NAME}}.</p>
             </div>
             <div className="grid gap-4 md:grid-cols-3">
-              {TESTIMONIALS.map((t) => (
-                <div
-                  key={t.name}
-                  className="group relative overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.015] p-6 backdrop-blur-sm transition-all duration-300 hover:border-white/[0.14] hover:bg-white/[0.03] hover:-translate-y-0.5"
-                >
-                  <div className="pointer-events-none absolute -top-8 -right-8 h-28 w-28 rounded-full bg-primary/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  {/* Quote mark */}
-                  <div className="mb-4 text-4xl font-serif text-primary/20 leading-none select-none">&ldquo;</div>
-                  <p className="relative mb-5 text-sm leading-relaxed text-muted-foreground">
-                    {t.text}
-                  </p>
-                  <div className="relative flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary ring-1 ring-primary/20 shrink-0">
-                      {t.avatar}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">{t.name}</p>
-                      <p className="text-xs text-muted-foreground">{t.role}</p>
+              {TESTIMONIALS.map((t, i) => {
+                const glowColors = ["bg-primary/10", "bg-emerald-400/10", "bg-cyan-400/10"];
+                const quoteColors = ["text-primary/25", "text-emerald-400/25", "text-cyan-400/25"];
+                const avatarColors = [
+                  "bg-primary/10 text-primary ring-primary/20",
+                  "bg-emerald-400/10 text-emerald-400 ring-emerald-400/20",
+                  "bg-cyan-400/10 text-cyan-400 ring-cyan-400/20",
+                ];
+                return (
+                  <div
+                    key={t.name}
+                    className="group relative overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.015] p-6 backdrop-blur-sm transition-all duration-300 hover:border-white/[0.14] hover:bg-white/[0.03] hover:-translate-y-0.5"
+                  >
+                    <div className={`pointer-events-none absolute -top-8 -right-8 h-28 w-28 rounded-full ${glowColors[i % 3]} blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                    {/* Quote mark */}
+                    <div className={`mb-4 text-4xl font-serif leading-none select-none ${quoteColors[i % 3]}`}>&ldquo;</div>
+                    <p className="relative mb-5 text-sm leading-relaxed text-muted-foreground">
+                      {t.text}
+                    </p>
+                    <div className="relative flex items-center gap-3">
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold ring-1 shrink-0 ${avatarColors[i % 3]}`}>
+                        {t.avatar}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">{t.name}</p>
+                        <p className="text-xs text-muted-foreground">{t.role}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
@@ -295,8 +319,9 @@ export default async function Home() {
             <div className="container mx-auto max-w-2xl px-4">
               <div className="mb-16 text-center">
                 <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
-                  <span className="bg-gradient-to-b from-foreground to-foreground/50 bg-clip-text text-transparent">
-                    Questions fréquentes
+                  Questions{" "}
+                  <span className="bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                    fréquentes
                   </span>
                 </h2>
                 <p className="text-muted-foreground text-lg">Tout ce que vous devez savoir.</p>
@@ -337,8 +362,9 @@ export default async function Home() {
 
               <div className="relative z-10">
                 <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
-                  <span className="bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">
-                    Prêt à lancer votre SaaS ?
+                  Prêt à lancer votre{" "}
+                  <span className="bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                    SaaS ?
                   </span>
                 </h2>
                 <p className="mb-10 text-muted-foreground text-lg max-w-sm mx-auto">
