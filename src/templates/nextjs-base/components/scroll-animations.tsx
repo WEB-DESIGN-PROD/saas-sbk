@@ -6,30 +6,17 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
 
 gsap.registerPlugin(ScrollTrigger)
 
-function addViewportFade(
-  el: HTMLElement,
-  opts: { y?: number; blur?: number; entryStart?: string; entryEnd?: string; exitStart?: string; exitEnd?: string } = {}
-) {
-  const { y = 10, blur = 5, entryStart = "top 100%", entryEnd = "top 93%", exitStart = "bottom 7%", exitEnd = "bottom 0%" } = opts
-
-  // Entrée depuis le bas : fade + unblur + remontée
+// Blur scrub uniquement aux bords du viewport (ne touche pas opacity/y)
+function addEdgeBlur(el: HTMLElement, blur = 5) {
   gsap.fromTo(el,
-    { opacity: 0, filter: `blur(${blur}px)`, y },
-    {
-      opacity: 1, filter: "blur(0px)", y: 0,
-      ease: "none",
-      scrollTrigger: { trigger: el, start: entryStart, end: entryEnd, scrub: 0.8 },
-    }
+    { filter: `blur(${blur}px)` },
+    { filter: "blur(0px)", ease: "none",
+      scrollTrigger: { trigger: el, start: "top 100%", end: "top 93%", scrub: 0.6 } }
   )
-
-  // Sortie vers le haut : fade + blur
   gsap.fromTo(el,
-    { opacity: 1, filter: "blur(0px)" },
-    {
-      opacity: 0, filter: `blur(${blur * 0.6}px)`,
-      ease: "none",
-      scrollTrigger: { trigger: el, start: exitStart, end: exitEnd, scrub: 0.8 },
-    }
+    { filter: "blur(0px)" },
+    { filter: `blur(${blur}px)`, ease: "none",
+      scrollTrigger: { trigger: el, start: "bottom 7%", end: "bottom 0%", scrub: 0.6 } }
   )
 }
 
@@ -39,33 +26,51 @@ export function ScrollAnimations() {
 
       // Badges
       gsap.utils.toArray<HTMLElement>("[data-gsap='badge']").forEach((el) => {
-        addViewportFade(el, { y: 8, blur: 4 })
+        gsap.fromTo(el,
+          { opacity: 0, scale: 0.88 },
+          { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(1.7)",
+            scrollTrigger: { trigger: el, start: "top 90%", toggleActions: "play none none reverse" } }
+        )
+        addEdgeBlur(el, 3)
       })
 
       // Titres
       gsap.utils.toArray<HTMLElement>("[data-gsap='title']").forEach((el) => {
-        addViewportFade(el, { y: 20, blur: 8 })
+        gsap.fromTo(el,
+          { opacity: 0, y: 30 },
+          { opacity: 1, y: 0, duration: 0.8, ease: "power3.out",
+            scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none reverse" } }
+        )
+        addEdgeBlur(el, 8)
       })
 
       // Sous-titres
       gsap.utils.toArray<HTMLElement>("[data-gsap='subtitle']").forEach((el) => {
-        addViewportFade(el, { y: 10, blur: 4 })
+        gsap.fromTo(el,
+          { opacity: 0, y: 15 },
+          { opacity: 1, y: 0, duration: 0.6, ease: "power2.out",
+            scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none reverse" } }
+        )
+        addEdgeBlur(el, 3)
       })
 
-      // Cards : stagger léger via décalage du trigger
+      // Cards : stagger one-time + blur d'arête séparé
       gsap.utils.toArray<HTMLElement>("[data-gsap='stagger']").forEach((container) => {
         const cards = Array.from(container.querySelectorAll<HTMLElement>("[data-gsap='card']"))
-        cards.forEach((card, i) => {
-          const offset = i * 8
-          addViewportFade(card, {
-            y: 10,
-            blur: 4,
-            entryStart: `top+=${offset} 100%`,
-            entryEnd:   `top+=${offset} 93%`,
-            exitStart:  "bottom 7%",
-            exitEnd:    "bottom 0%",
-          })
-        })
+
+        // Stagger entrée (opacity + y)
+        gsap.fromTo(cards,
+          { opacity: 0, y: 44 },
+          {
+            opacity: 1, y: 0,
+            duration: 0.55, ease: "power2.out",
+            stagger: 0.09,
+            scrollTrigger: { trigger: container, start: "top 82%", toggleActions: "play none none reverse" },
+          }
+        )
+
+        // Blur aux bords pour chaque card (filter uniquement)
+        cards.forEach((card) => addEdgeBlur(card, 5))
       })
 
     })
