@@ -111,6 +111,7 @@ export function generatePackageJson(config, projectPath = null) {
   packageJson.devDependencies = {
     ...packageJson.devDependencies,
     'prisma': '^6.19.0',
+    'tsx': '^4.19.2',
   };
 
   return JSON.stringify(packageJson, null, 2);
