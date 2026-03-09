@@ -5,7 +5,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "@/lib/auth/client"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { User, LayoutDashboard, Globe, Menu, X } from "lucide-react"
+import { User, LayoutDashboard, Globe, Menu, X, Sparkles } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,7 +46,10 @@ export function Navbar({ headerPages = [] }: { headerPages?: NavPage[] }) {
 
           {/* Gauche : Logo */}
           <div className="flex-1">
-            <Link href="/" className="text-xl font-bold" onClick={() => setMenuOpen(false)}>
+            <Link href="/" className="flex items-center gap-2 text-xl font-bold" onClick={() => setMenuOpen(false)}>
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400/20 to-cyan-400/20 ring-1 ring-emerald-400/20">
+                <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
+              </div>
               {{PROJECT_NAME}}
             </Link>
           </div>
