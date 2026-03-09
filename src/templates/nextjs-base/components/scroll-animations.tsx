@@ -17,7 +17,7 @@ export function ScrollAnimations() {
           {
             opacity: 1, scale: 1,
             duration: 0.5, ease: "back.out(1.7)",
-            scrollTrigger: { trigger: el, start: "top 90%", toggleActions: "play none none none" },
+            scrollTrigger: { trigger: el, start: "top 90%", toggleActions: "play none none reverse" },
           }
         )
       })
@@ -29,7 +29,7 @@ export function ScrollAnimations() {
           {
             opacity: 1, y: 0, filter: "blur(0px)",
             duration: 0.85, ease: "power3.out",
-            scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none none" },
+            scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none reverse" },
           }
         )
       })
@@ -42,7 +42,7 @@ export function ScrollAnimations() {
             opacity: 1, y: 0,
             duration: 0.6, ease: "power2.out",
             delay: 0.1,
-            scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none none" },
+            scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none reverse" },
           }
         )
       })
@@ -57,7 +57,7 @@ export function ScrollAnimations() {
             opacity: 1, y: 0, filter: "blur(0px)",
             duration: 0.55, ease: "power2.out",
             stagger: 0.08,
-            scrollTrigger: { trigger: container, start: "top 82%", toggleActions: "play none none none" },
+            scrollTrigger: { trigger: container, start: "top 82%", toggleActions: "play none none reverse" },
           }
         )
       })
