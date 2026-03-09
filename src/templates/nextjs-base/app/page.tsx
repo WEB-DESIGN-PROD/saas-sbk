@@ -190,11 +190,11 @@ export default async function Home() {
             <div className="container mx-auto px-4">
 
               <div className="mb-16 text-center">
+                <div className="mb-4 inline-flex items-center rounded-full border border-primary/25 bg-primary/[0.07] px-3 py-1 text-xs font-medium backdrop-blur-sm">
+                  <span className="bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent">Fonctionnalités</span>
+                </div>
                 <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
-                  Tout ce dont vous avez{" "}
-                  <span className="bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                    besoin
-                  </span>
+                  Tout ce dont vous avez besoin
                 </h2>
                 <p className="text-muted-foreground text-lg">Déjà intégré, déjà testé, prêt à personnaliser.</p>
               </div>
@@ -269,11 +269,11 @@ export default async function Home() {
         <section className="py-28">
           <div className="container mx-auto px-4">
             <div className="mb-16 text-center">
+              <div className="mb-4 inline-flex items-center rounded-full border border-primary/25 bg-primary/[0.07] px-3 py-1 text-xs font-medium backdrop-blur-sm">
+                <span className="bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent">Témoignages</span>
+              </div>
               <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
-                Ce qu&apos;ils en{" "}
-                <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                  disent
-                </span>
+                Ce qu&apos;ils en disent
               </h2>
               <p className="text-muted-foreground text-lg">Ils ont lancé leur projet avec {{PROJECT_NAME}}.</p>
             </div>
@@ -318,11 +318,11 @@ export default async function Home() {
           <section className="py-28 border-t border-white/[0.06]">
             <div className="container mx-auto max-w-2xl px-4">
               <div className="mb-16 text-center">
+                <div className="mb-4 inline-flex items-center rounded-full border border-primary/25 bg-primary/[0.07] px-3 py-1 text-xs font-medium backdrop-blur-sm">
+                  <span className="bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent">FAQ</span>
+                </div>
                 <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
-                  Questions{" "}
-                  <span className="bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                    fréquentes
-                  </span>
+                  Questions fréquentes
                 </h2>
                 <p className="text-muted-foreground text-lg">Tout ce que vous devez savoir.</p>
               </div>
@@ -361,11 +361,11 @@ export default async function Home() {
               <div className="pointer-events-none absolute bottom-0 right-1/4 h-48 w-48 rounded-full bg-violet-500/10 blur-[80px]" aria-hidden />
 
               <div className="relative z-10">
+                <div className="mb-4 inline-flex items-center rounded-full border border-primary/25 bg-primary/[0.07] px-3 py-1 text-xs font-medium backdrop-blur-sm">
+                  <span className="bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent">Démarrez maintenant</span>
+                </div>
                 <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
-                  Prêt à lancer votre{" "}
-                  <span className="bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                    SaaS ?
-                  </span>
+                  Prêt à lancer votre SaaS ?
                 </h2>
                 <p className="mb-10 text-muted-foreground text-lg max-w-sm mx-auto">
                   Une commande. Tout configuré. Prêt à déployer.
