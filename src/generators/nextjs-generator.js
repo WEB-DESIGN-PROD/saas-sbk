@@ -101,6 +101,8 @@ function copyConfigFiles(projectPath, config, templatesDir) {
     'components/navbar.tsx',
     'components/navbar-client.tsx',
     'components/footer.tsx',
+    'components/copy-command.tsx',
+    'components/scroll-animations.tsx',
     'components/theme-provider.tsx',
     'components/theme-toggle.tsx',
     'types/index.ts',
