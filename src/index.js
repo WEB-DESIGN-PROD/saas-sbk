@@ -226,7 +226,7 @@ export async function main() {
       console.log(chalk.cyan('  npm run docker:up    ') + chalk.gray('# Démarre PostgreSQL'));
     }
 
-    console.log(chalk.cyan('  npm run db:push      ') + chalk.gray('# Crée les tables'));
+    console.log(chalk.cyan('  npm run db:setup     ') + chalk.gray('# Crée les tables + données initiales'));
     console.log(chalk.cyan('  npm run dev          ') + chalk.gray('# Lance le serveur'));
     console.log('');
 

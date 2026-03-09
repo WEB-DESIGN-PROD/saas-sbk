@@ -22,6 +22,7 @@ export function generatePackageJson(config, projectPath = null) {
   packageJson.scripts = {
     ...packageJson.scripts,
     postinstall: 'prisma generate',
+    'db:setup': 'prisma db push && tsx prisma/seed.ts',
     'db:push': 'prisma db push',
     'db:migrate': 'prisma migrate dev',
     'db:studio': 'prisma studio',
