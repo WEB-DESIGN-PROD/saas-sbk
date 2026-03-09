@@ -123,7 +123,7 @@ export default async function Home() {
               <div className="badge-beam-inner gap-2 px-4 py-1.5 text-sm">
                 <Sparkles className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
                 <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                  Next.js 16 · App Router · Prêt en production
+                  Next.js 16 · Vibe Coding · IA Ready
                 </span>
               </div>
             </div>
