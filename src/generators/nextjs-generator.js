@@ -608,7 +608,7 @@ export default function LoginPage() {
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? ${T('signing_in', 'Connexion...')} : ${T('sign_in', 'Se connecter')}}
+              {isLoading ? ${Tstr('signing_in', 'Connexion...')} : ${Tstr('sign_in', 'Se connecter')}}
             </Button>${socialButtons}
             <p className="text-center text-sm text-muted-foreground">
               ${T('no_account', 'Pas encore de compte ?')}{" "}
@@ -690,7 +690,7 @@ export default function LoginPage() {${hasI18n ? '\n  const t = useTranslations(
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? ${T('sending', 'Envoi en cours...')} : ${T('send_link', 'Recevoir un lien de connexion')}}
+              {isLoading ? ${Tstr('sending', 'Envoi en cours...')} : ${Tstr('send_link', 'Recevoir un lien de connexion')}}
             </Button>${socialButtons}
             <p className="text-center text-sm text-muted-foreground">
               ${T('no_account', 'Pas encore de compte ?')}{" "}
@@ -784,7 +784,7 @@ export default function LoginPage() {
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? ${T('sending', 'Envoi en cours...')} : ${T('send_code', 'Recevoir un code')}}
+                {isLoading ? ${Tstr('sending', 'Envoi en cours...')} : ${Tstr('send_code', 'Recevoir un code')}}
               </Button>${socialButtons}
               <p className="text-center text-sm text-muted-foreground">
                 ${T('no_account', 'Pas encore de compte ?')}{" "}
@@ -816,7 +816,7 @@ export default function LoginPage() {
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <Button type="submit" className="w-full" disabled={isLoading || otp.length !== 6}>
-                {isLoading ? ${T('otp_verifying', 'Vérification...')} : ${T('otp_verify', 'Vérifier le code')}}
+                {isLoading ? ${Tstr('otp_verifying', 'Vérification...')} : ${Tstr('otp_verify', 'Vérifier le code')}}
               </Button>
               <button type="button" className="text-sm text-muted-foreground hover:underline" onClick={() => { setStep("email"); setOtp("") }}>
                 ${T('otp_change_email', "Changer d'email")}
