@@ -150,6 +150,39 @@
   animation: marquee 30s linear infinite;
 }
 
+/* Badge beam border */
+@keyframes badge-beam-spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+.badge-beam {
+  position: relative;
+  display: inline-flex;
+  border-radius: 9999px;
+  padding: 1px;
+  overflow: hidden;
+}
+.badge-beam-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 300%;
+  aspect-ratio: 1;
+  background: conic-gradient(from 0deg, transparent 50%, #10b981 68%, #22d3ee 82%, transparent 94%);
+  animation: badge-beam-spin 3s linear infinite;
+  transform: translate(-50%, -50%);
+}
+.badge-beam-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 9999px;
+  background: var(--background);
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
 /* Float animations for glass cards */
 @keyframes float-slow {
   0%, 100% { transform: translateY(0px); }

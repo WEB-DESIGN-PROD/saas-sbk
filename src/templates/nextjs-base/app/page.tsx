@@ -190,8 +190,11 @@ export default async function Home() {
             <div className="container mx-auto px-4">
 
               <div className="mb-16 text-center">
-                <div className="mb-4 inline-flex items-center rounded-full border border-primary/25 bg-primary/[0.07] px-3 py-1 text-xs font-medium backdrop-blur-sm">
-                  <span className="bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent">Fonctionnalités</span>
+                <div className="badge-beam mb-4">
+                  <div className="badge-beam-ring" />
+                  <div className="badge-beam-inner">
+                    <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Fonctionnalités</span>
+                  </div>
                 </div>
                 <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
                   Tout ce dont vous avez besoin
@@ -269,8 +272,11 @@ export default async function Home() {
         <section className="py-28">
           <div className="container mx-auto px-4">
             <div className="mb-16 text-center">
-              <div className="mb-4 inline-flex items-center rounded-full border border-primary/25 bg-primary/[0.07] px-3 py-1 text-xs font-medium backdrop-blur-sm">
-                <span className="bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent">Témoignages</span>
+              <div className="badge-beam mb-4">
+                <div className="badge-beam-ring" />
+                <div className="badge-beam-inner">
+                  <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Témoignages</span>
+                </div>
               </div>
               <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
                 Ce qu&apos;ils en disent
@@ -318,8 +324,11 @@ export default async function Home() {
           <section className="py-28 border-t border-white/[0.06]">
             <div className="container mx-auto max-w-2xl px-4">
               <div className="mb-16 text-center">
-                <div className="mb-4 inline-flex items-center rounded-full border border-primary/25 bg-primary/[0.07] px-3 py-1 text-xs font-medium backdrop-blur-sm">
-                  <span className="bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent">FAQ</span>
+                <div className="badge-beam mb-4">
+                  <div className="badge-beam-ring" />
+                  <div className="badge-beam-inner">
+                    <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">FAQ</span>
+                  </div>
                 </div>
                 <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
                   Questions fréquentes
@@ -361,8 +370,11 @@ export default async function Home() {
               <div className="pointer-events-none absolute bottom-0 right-1/4 h-48 w-48 rounded-full bg-violet-500/10 blur-[80px]" aria-hidden />
 
               <div className="relative z-10">
-                <div className="mb-4 inline-flex items-center rounded-full border border-primary/25 bg-primary/[0.07] px-3 py-1 text-xs font-medium backdrop-blur-sm">
-                  <span className="bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent">Démarrez maintenant</span>
+                <div className="badge-beam mb-4">
+                  <div className="badge-beam-ring" />
+                  <div className="badge-beam-inner">
+                    <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Démarrez maintenant</span>
+                  </div>
                 </div>
                 <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
                   Prêt à lancer votre SaaS ?
