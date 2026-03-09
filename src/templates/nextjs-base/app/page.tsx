@@ -139,8 +139,7 @@ export default async function Home() {
             </h1>
 
             <p className="mx-auto mb-10 max-w-xl text-lg text-muted-foreground leading-relaxed">
-              Auth, base de données, paiements, emails, stockage médias —
-              tout est prêt. Utilisez Claude Code pour générer vos fonctionnalités.
+              Tout est prêt. Utilisez Claude Code pour générer vos propres fonctionnalités.
             </p>
 
             {/* CTAs */}
