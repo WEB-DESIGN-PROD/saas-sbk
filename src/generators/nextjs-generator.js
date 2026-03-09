@@ -1114,6 +1114,9 @@ function copyConditionalVariants(projectPath, config, replacements) {
     copyVariantFile(path.join(i18nDir, 'components/auth/github-button.tsx'), path.join(projectPath, 'components/auth/github-button.tsx'), i18nReplacements);
     copyVariantFile(path.join(i18nDir, 'components/auth/google-button.tsx'), path.join(projectPath, 'components/auth/google-button.tsx'), i18nReplacements);
 
+    // CopyCommand i18n (traduit "Copié !" et "dans Claude Code")
+    copyVariantFile(path.join(i18nDir, 'components/copy-command.tsx'), path.join(projectPath, 'components/copy-command.tsx'), i18nReplacements);
+
     // Pages publiques localisées (app/[locale]/...) — exclure les pages auth gérées séparément
     const localeDir = path.join(i18nDir, 'app/[locale]');
     const authPageDirs = new Set(['login', 'register', 'verify-email', 'forgot-password', 'reset-password']);
