@@ -26,8 +26,9 @@ export function Navbar({ headerPages = [] }: { headerPages?: NavPage[] }) {
   const isLoggedIn = mounted && !!session?.user
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center px-4">
+    <div className="sticky top-0 z-50 flex justify-center px-4 pt-3 pb-1 pointer-events-none">
+      <header className="pointer-events-auto w-full max-w-4xl rounded-2xl border border-white/[0.08] bg-background/80 backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.05)]">
+      <div className="flex h-14 items-center px-5">
 
         {/* Gauche : Logo */}
         <div className="flex-1">
@@ -100,5 +101,6 @@ export function Navbar({ headerPages = [] }: { headerPages?: NavPage[] }) {
 
       </div>
     </header>
+    </div>
   )
 }
