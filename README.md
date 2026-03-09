@@ -255,7 +255,8 @@ Pour installer Claude Code : https://claude.ai/docs/cli
 - ✅ **Pages dynamiques** — Navbar et Footer injectent les pages DB (inHeader / inFooter)
 - ✅ **Page `/contact`** — formulaire envoyant un email au super admin via Resend
 - ✅ Sidebar admin organisée avec séparateurs "Gestion du SAAS" et "Gestion du blog"
-- 🚧 Templates multilingues (FR, EN, ES, DE)
+- ✅ **Templates multilingues** — Front traduit (FR, EN, ES, DE) : landing, auth, pages publiques, boutons OAuth, composants (v0.13.0)
+- 📅 Traduction de la zone `/admin`
 - 📅 Configuration MongoDB et SQLite
 - 📅 Template sans système de connexion
 

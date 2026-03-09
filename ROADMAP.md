@@ -1,5 +1,22 @@
 # 🗺️ Roadmap - create-saas-sbk
 
+## 🚧 v0.13.0 - mars 2026 (EN COURS)
+
+### 🌍 Internationalisation du front (next-intl)
+
+- ✅ **Routing `app/[locale]/`** — toutes les pages publiques (home, about, pricing, contact, [slug]) localisées
+- ✅ **Pages auth localisées** — login, register, verify-email, forgot-password, reset-password dans `[locale]`
+- ✅ **3 méthodes de connexion traduites** — email/password, magic link, OTP avec `useTranslations("auth")`
+- ✅ **Boutons OAuth traduits** — `GitHubButton` et `GoogleButton` utilisent `useTranslations`
+- ✅ **Composant `CopyCommand` traduit** — "Copié !" / "dans Claude Code" via `useTranslations("common")`
+- ✅ **Navbar et Footer i18n** — sélecteur de langue, liens traduits
+- ✅ **Messages FR / EN / ES / DE** — 75 clés auth + clés communes + home/about/pricing/contact/blog
+- ✅ **OAuth sans préfixe locale** — `callbackURL: "/dashboard"` inchangé, `/api/auth/callback/*` exclu du middleware
+- ✅ **Middleware `proxy.ts`** — convention Next.js 16+ (remplacement de `middleware.ts`)
+- 📅 Traduction de la zone `/admin`
+
+---
+
 ## 🚧 v0.11.0 - mars 2026 (EN COURS)
 
 ### 🔐 RBAC complet sur le blog
