@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { CopyCommand } from "@/components/copy-command";
+import { ScrollAnimations } from "@/components/scroll-animations";
 import { prisma } from "@/lib/db/client";
 import {
   Shield, Database, Layers, CreditCard, Mail, HardDrive,
@@ -45,6 +46,7 @@ export default async function Home() {
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden">
       <Navbar />
+      <ScrollAnimations />
 
       {/* ─── HERO + MARQUEE = 100vh ─── */}
       <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden relative">
@@ -198,21 +200,21 @@ export default async function Home() {
             <div className="container mx-auto px-4">
 
               <div className="mb-16 text-center">
-                <div className="badge-beam mb-4">
+                <div className="badge-beam mb-4" data-gsap="badge">
                   <div className="badge-beam-ring" />
                   <div className="badge-beam-inner">
                     <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Fonctionnalités</span>
                   </div>
                 </div>
-                <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
+                <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl" data-gsap="title">
                   <span className="bg-gradient-to-b from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent">
                     Tout ce dont vous avez besoin
                   </span>
                 </h2>
-                <p className="text-muted-foreground text-lg">Déjà intégré, déjà testé, prêt à être personnalisé.</p>
+                <p className="text-muted-foreground text-lg" data-gsap="subtitle">Déjà intégré, déjà testé, prêt à être personnalisé.</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[200px]">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[200px]" data-gsap="stagger">
                 {features.map((feature, index) => {
                   const Icon = feature.icon ? (ICONS[feature.icon] ?? Layers) : Layers;
                   const isWide = index === 0 || index === features.length - 1;
@@ -227,6 +229,7 @@ export default async function Home() {
                   return (
                     <div
                       key={feature.id}
+                      data-gsap="card"
                       className={[
                         "group relative overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.015] p-6 backdrop-blur-sm",
                         "transition-all duration-500 hover:border-white/[0.14] hover:bg-white/[0.03]",
@@ -261,20 +264,20 @@ export default async function Home() {
         <section className="py-28">
           <div className="container mx-auto px-4">
             <div className="mb-16 text-center">
-              <div className="badge-beam mb-4">
+              <div className="badge-beam mb-4" data-gsap="badge">
                 <div className="badge-beam-ring" />
                 <div className="badge-beam-inner">
                   <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Témoignages</span>
                 </div>
               </div>
-              <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
+              <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl" data-gsap="title">
                 <span className="bg-gradient-to-b from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent">
                   Ce qu&apos;ils en disent
                 </span>
               </h2>
-              <p className="text-muted-foreground text-lg">Ils ont lancé leur projet avec <code className="font-mono text-sm">npm create saas-sbk@latest</code>.</p>
+              <p className="text-muted-foreground text-lg" data-gsap="subtitle">Ils ont lancé leur projet avec <code className="font-mono text-sm">npm create saas-sbk@latest</code>.</p>
             </div>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-3" data-gsap="stagger">
               {TESTIMONIALS.map((t, i) => {
                 const glowColors = ["bg-primary/10", "bg-emerald-400/10", "bg-cyan-400/10"];
                 const quoteColors = ["text-primary/25", "text-emerald-400/25", "text-cyan-400/25"];
@@ -286,6 +289,7 @@ export default async function Home() {
                 return (
                   <div
                     key={t.name}
+                    data-gsap="card"
                     className="group relative overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.015] p-6 backdrop-blur-sm transition-all duration-300 hover:border-white/[0.14] hover:bg-white/[0.03] hover:-translate-y-0.5"
                   >
                     <div className={`pointer-events-none absolute -top-8 -right-8 h-28 w-28 rounded-full ${glowColors[i % 3]} blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
@@ -315,23 +319,24 @@ export default async function Home() {
           <section className="py-28">
             <div className="container mx-auto max-w-2xl px-4">
               <div className="mb-16 text-center">
-                <div className="badge-beam mb-4">
+                <div className="badge-beam mb-4" data-gsap="badge">
                   <div className="badge-beam-ring" />
                   <div className="badge-beam-inner">
                     <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">FAQ</span>
                   </div>
                 </div>
-                <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
+                <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl" data-gsap="title">
                   <span className="bg-gradient-to-b from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent">
                     Questions fréquentes
                   </span>
                 </h2>
-                <p className="text-muted-foreground text-lg">Tout ce que vous devez savoir.</p>
+                <p className="text-muted-foreground text-lg" data-gsap="subtitle">Tout ce que vous devez savoir.</p>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-3" data-gsap="stagger">
                 {faqs.map((faq) => (
                   <details
                     key={faq.id}
+                    data-gsap="card"
                     className="group rounded-2xl border border-white/[0.07] bg-white/[0.015] backdrop-blur-sm transition-all hover:border-white/[0.12] overflow-hidden open:border-primary/20 open:bg-primary/[0.02]"
                   >
                     <summary className="flex cursor-pointer items-center justify-between px-6 py-4 font-medium text-sm list-none select-none gap-4">
@@ -363,13 +368,13 @@ export default async function Home() {
               <div className="pointer-events-none absolute bottom-0 right-1/4 h-48 w-48 rounded-full bg-violet-500/10 blur-[80px]" aria-hidden />
 
               <div className="relative z-10">
-                <div className="badge-beam mb-4">
+                <div className="badge-beam mb-4" data-gsap="badge">
                   <div className="badge-beam-ring" />
                   <div className="badge-beam-inner">
                     <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Démarrez maintenant</span>
                   </div>
                 </div>
-                <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
+                <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl" data-gsap="title">
                   <span className="bg-gradient-to-b from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent">
                     Prêt à lancer votre SaaS ?
                   </span>
