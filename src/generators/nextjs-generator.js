@@ -72,18 +72,24 @@ function copyConfigFiles(projectPath, config, templatesDir) {
     '{{AUTH_ENTRY_URL}}': '/register',   // toujours /register
   };
 
+  const hasI18n = config.i18n && config.i18n.languages && config.i18n.languages.length > 1;
+
   // Fichiers toujours copiés (écrasent le shadcn-base)
   // Note: lib/auth/config.ts, lib/auth/client.ts et app/login/page.tsx sont générés dynamiquement
+  // Note: si i18n activé, les pages publiques sont dans app/[locale]/ (variant i18n)
   const alwaysCopy = [
-    'app/page.tsx',
     'app/layout.tsx',
     'app/error.tsx',
     'app/not-found.tsx',
     // app/login/page.tsx est généré dynamiquement par generateLoginPage()
     // app/register/page.tsx est toujours présent (inscription universelle)
     'app/register/page.tsx',
-    'app/pricing/page.tsx',
-    'app/about/page.tsx',
+    // Pages publiques : copiées seulement si i18n désactivé (sinon variant i18n les fournit)
+    ...(hasI18n ? [] : [
+      'app/page.tsx',
+      'app/pricing/page.tsx',
+      'app/about/page.tsx',
+    ]),
     'app/dashboard/layout.tsx',
     'app/dashboard/page.tsx',
     'app/dashboard/account/page.tsx',
@@ -98,9 +104,12 @@ function copyConfigFiles(projectPath, config, templatesDir) {
     'components/nav-user.tsx',
     'components/nav-main.tsx',
     'components/nav-secondary.tsx',
-    'components/navbar.tsx',
-    'components/navbar-client.tsx',
-    'components/footer.tsx',
+    // navbar/footer : copiés depuis nextjs-base si pas i18n (le variant i18n fournit les versions i18n)
+    ...(hasI18n ? [] : [
+      'components/navbar.tsx',
+      'components/navbar-client.tsx',
+      'components/footer.tsx',
+    ]),
     'components/copy-command.tsx',
     'components/scroll-animations.tsx',
     'components/theme-provider.tsx',
@@ -112,9 +121,12 @@ function copyConfigFiles(projectPath, config, templatesDir) {
     'components/billing/buy-credits-dialog.tsx',
     'app/dashboard/billing/page.tsx',
     'app/api/user/plan/route.ts',
-    'app/contact/page.tsx',
-    'app/contact/layout.tsx',
-    'app/[slug]/page.tsx',
+    // Pages publiques contact/slug : copiées seulement si i18n désactivé
+    ...(hasI18n ? [] : [
+      'app/contact/page.tsx',
+      'app/contact/layout.tsx',
+      'app/[slug]/page.tsx',
+    ]),
     'app/loading.tsx',
     'DEVELOPMENT.md',
     // API Contact (formulaire de contact)
@@ -1018,6 +1030,24 @@ function copyVariantFile(src, dest, replacements) {
 }
 
 /**
+ * Copie récursivement un dossier avec remplacement de variables dans chaque fichier
+ */
+function copyDirWithReplacements(srcDir, destDir, replacements) {
+  if (!fs.existsSync(srcDir)) return;
+  fs.mkdirSync(destDir, { recursive: true });
+  const entries = fs.readdirSync(srcDir, { withFileTypes: true });
+  for (const entry of entries) {
+    const srcPath = path.join(srcDir, entry.name);
+    const destPath = path.join(destDir, entry.name);
+    if (entry.isDirectory()) {
+      copyDirWithReplacements(srcPath, destPath, replacements);
+    } else {
+      copyVariantFile(srcPath, destPath, replacements);
+    }
+  }
+}
+
+/**
  * Copie les variantes conditionnelles selon la configuration
  */
 function copyConditionalVariants(projectPath, config, replacements) {
@@ -1030,6 +1060,52 @@ function copyConditionalVariants(projectPath, config, replacements) {
       path.join(projectPath, 'app/dashboard/billing/page.tsx'),
       replacements
     );
+  }
+
+  // Internationalisation (i18n) avec next-intl
+  const hasI18n = config.i18n && config.i18n.languages && config.i18n.languages.length > 1;
+  if (hasI18n) {
+    const i18nDir = path.join(variantsDir, 'i18n');
+    const allLanguages = [
+      ...(config.i18n?.defaultLanguage ? [config.i18n.defaultLanguage] : ['fr']),
+      ...(config.i18n?.languages || []).filter(l => l !== config.i18n?.defaultLanguage),
+    ];
+    const i18nReplacements = {
+      ...replacements,
+      '{{LOCALES_ARRAY}}': allLanguages.map(l => `'${l}'`).join(', '),
+    };
+
+    // Config next-intl
+    copyVariantFile(path.join(i18nDir, 'i18n/routing.ts'), path.join(projectPath, 'i18n/routing.ts'), i18nReplacements);
+    copyVariantFile(path.join(i18nDir, 'i18n/navigation.ts'), path.join(projectPath, 'i18n/navigation.ts'), i18nReplacements);
+    copyVariantFile(path.join(i18nDir, 'i18n/request.ts'), path.join(projectPath, 'i18n/request.ts'), i18nReplacements);
+
+    // Middleware i18n : proxy.ts dans le variant → middleware.ts dans le projet généré
+    copyVariantFile(path.join(i18nDir, 'proxy.ts'), path.join(projectPath, 'middleware.ts'), i18nReplacements);
+
+    // next.config.ts avec withNextIntl (remplace le shadcn-base)
+    copyVariantFile(path.join(i18nDir, 'next.config.ts'), path.join(projectPath, 'next.config.ts'), i18nReplacements);
+
+    // Composants navbar/footer avec i18n
+    copyVariantFile(path.join(i18nDir, 'components/navbar.tsx'), path.join(projectPath, 'components/navbar.tsx'), i18nReplacements);
+    copyVariantFile(path.join(i18nDir, 'components/navbar-client.tsx'), path.join(projectPath, 'components/navbar-client.tsx'), i18nReplacements);
+    copyVariantFile(path.join(i18nDir, 'components/footer.tsx'), path.join(projectPath, 'components/footer.tsx'), i18nReplacements);
+
+    // Pages publiques localisées (app/[locale]/...)
+    const localeDir = path.join(i18nDir, 'app/[locale]');
+    copyDirWithReplacements(localeDir, path.join(projectPath, 'app/[locale]'), i18nReplacements);
+
+    // Fichiers de messages selon les langues configurées
+    const availableMessages = ['fr', 'en', 'es', 'de'];
+    for (const lang of allLanguages) {
+      if (availableMessages.includes(lang)) {
+        copyVariantFile(
+          path.join(i18nDir, `messages/${lang}.json`),
+          path.join(projectPath, `messages/${lang}.json`),
+          i18nReplacements
+        );
+      }
+    }
   }
 
   // Plus de pages /magic-link ou /otp séparées — la page /login gère tout selon loginMethod
