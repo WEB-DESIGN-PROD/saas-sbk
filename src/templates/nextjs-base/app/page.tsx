@@ -49,7 +49,7 @@ export default async function Home() {
       <ScrollAnimations />
 
       {/* ─── HERO + MARQUEE = 100vh ─── */}
-      <div className="flex flex-col h-screen overflow-hidden relative">
+      <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden relative">
 
         {/* Gradient orbs — liquid glass background */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
