@@ -205,7 +205,9 @@ export default async function Home() {
                   </div>
                 </div>
                 <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
-                  Tout ce dont vous avez besoin
+                  <span className="bg-gradient-to-b from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent">
+                    Tout ce dont vous avez besoin
+                  </span>
                 </h2>
                 <p className="text-muted-foreground text-lg">Déjà intégré, déjà testé, prêt à personnaliser.</p>
               </div>
@@ -266,7 +268,9 @@ export default async function Home() {
                 </div>
               </div>
               <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
-                Ce qu&apos;ils en disent
+                <span className="bg-gradient-to-b from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent">
+                  Ce qu&apos;ils en disent
+                </span>
               </h2>
               <p className="text-muted-foreground text-lg">Ils ont lancé leur projet avec {{PROJECT_NAME}}.</p>
             </div>
@@ -318,7 +322,9 @@ export default async function Home() {
                   </div>
                 </div>
                 <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
-                  Questions fréquentes
+                  <span className="bg-gradient-to-b from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent">
+                    Questions fréquentes
+                  </span>
                 </h2>
                 <p className="text-muted-foreground text-lg">Tout ce que vous devez savoir.</p>
               </div>
@@ -364,7 +370,9 @@ export default async function Home() {
                   </div>
                 </div>
                 <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
-                  Prêt à lancer votre SaaS ?
+                  <span className="bg-gradient-to-b from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent">
+                    Prêt à lancer votre SaaS ?
+                  </span>
                 </h2>
                 <p className="mb-10 text-muted-foreground text-lg max-w-sm mx-auto">
                   Une commande. Tout configuré. Prêt à déployer.
