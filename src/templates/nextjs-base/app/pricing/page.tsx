@@ -213,7 +213,7 @@ export default async function PricingPage() {
                           variant={pack.popular ? "default" : "outline"}
                           asChild
                         >
-                          <Link href="/register">Acheter</Link>
+                          <Link href="{{AUTH_ENTRY_URL}}">Acheter</Link>
                         </Button>
                       </div>
                     </div>
