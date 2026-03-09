@@ -10,7 +10,7 @@ function addViewportFade(
   el: HTMLElement,
   opts: { y?: number; blur?: number; entryStart?: string; entryEnd?: string; exitStart?: string; exitEnd?: string } = {}
 ) {
-  const { y = 16, blur = 6, entryStart = "top 102%", entryEnd = "top 88%", exitStart = "bottom 12%", exitEnd = "bottom -2%" } = opts
+  const { y = 10, blur = 5, entryStart = "top 100%", entryEnd = "top 93%", exitStart = "bottom 7%", exitEnd = "bottom 0%" } = opts
 
   // Entrée depuis le bas : fade + unblur + remontée
   gsap.fromTo(el,
@@ -56,14 +56,14 @@ export function ScrollAnimations() {
       gsap.utils.toArray<HTMLElement>("[data-gsap='stagger']").forEach((container) => {
         const cards = Array.from(container.querySelectorAll<HTMLElement>("[data-gsap='card']"))
         cards.forEach((card, i) => {
-          const offset = i * 12
+          const offset = i * 8
           addViewportFade(card, {
-            y: 18,
-            blur: 5,
-            entryStart: `top+=${offset} 102%`,
-            entryEnd:   `top+=${offset} 88%`,
-            exitStart:  "bottom 12%",
-            exitEnd:    "bottom -2%",
+            y: 10,
+            blur: 4,
+            entryStart: `top+=${offset} 100%`,
+            entryEnd:   `top+=${offset} 93%`,
+            exitStart:  "bottom 7%",
+            exitEnd:    "bottom 0%",
           })
         })
       })
