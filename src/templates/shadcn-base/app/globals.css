@@ -198,3 +198,28 @@
 .animate-float-medium {
   animation: float-medium 4s ease-in-out infinite;
 }
+
+/* Hero entrance animations */
+@keyframes hero-fade-up {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes hero-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.hero-fade {
+  opacity: 0;
+  animation: hero-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.hero-fade-in {
+  opacity: 0;
+  animation: hero-fade-in 1s ease forwards;
+}
+.hero-d0  { animation-delay: 0ms; }
+.hero-d1  { animation-delay: 100ms; }
+.hero-d2  { animation-delay: 220ms; }
+.hero-d3  { animation-delay: 360ms; }
+.hero-d4  { animation-delay: 500ms; }
+.hero-d5  { animation-delay: 650ms; }
+.hero-d6  { animation-delay: 900ms; }

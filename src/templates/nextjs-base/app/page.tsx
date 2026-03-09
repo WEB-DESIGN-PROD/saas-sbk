@@ -66,7 +66,7 @@ export default async function Home() {
           <div className="hidden xl:block" aria-hidden>
 
             {/* Card: Users */}
-            <div className="animate-float-slow absolute top-12 right-32 w-52 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_20px_40px_rgba(0,0,0,0.3)]">
+            <div className="animate-float-slow hero-fade-in hero-d6 absolute top-12 right-32 w-52 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_20px_40px_rgba(0,0,0,0.3)]">
               <div className="flex items-center gap-2 mb-3">
                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
                 <span className="text-[11px] font-medium text-muted-foreground tracking-wide uppercase">Utilisateurs actifs</span>
@@ -86,7 +86,7 @@ export default async function Home() {
             </div>
 
             {/* Card: Revenue */}
-            <div className="animate-float-medium absolute bottom-12 right-24 w-48 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_20px_40px_rgba(0,0,0,0.3)]">
+            <div className="animate-float-medium hero-fade-in hero-d6 absolute bottom-12 right-24 w-48 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_20px_40px_rgba(0,0,0,0.3)]">
               <div className="text-[11px] text-muted-foreground uppercase tracking-wide mb-1">MRR</div>
               <div className="text-2xl font-bold text-foreground">€12,840</div>
               <div className="flex items-center gap-1 text-xs text-emerald-400 mt-0.5">
@@ -104,7 +104,7 @@ export default async function Home() {
             </div>
 
             {/* Card: Stack */}
-            <div className="animate-float-slow absolute top-24 left-20 w-44 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_20px_40px_rgba(0,0,0,0.3)] [animation-delay:3s]">
+            <div className="animate-float-slow hero-fade-in hero-d6 absolute top-24 left-20 w-44 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_20px_40px_rgba(0,0,0,0.3)] [animation-delay:3s]">
               <div className="text-[11px] text-muted-foreground uppercase tracking-wide mb-3">Stack inclus</div>
               <div className="grid grid-cols-3 gap-1.5">
                 {STACK_ITEMS.map((item, i) => (
@@ -121,7 +121,7 @@ export default async function Home() {
           <div className="container mx-auto px-4 text-center relative z-10">
 
             {/* Badge */}
-            <div className="badge-beam mb-8">
+            <div className="badge-beam mb-8 hero-fade hero-d0">
               <div className="badge-beam-ring" />
               <div className="badge-beam-inner gap-2 px-4 py-1.5 text-sm">
                 <Sparkles className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
@@ -133,20 +133,20 @@ export default async function Home() {
 
             {/* Headline */}
             <h1 className="mb-6 text-6xl font-bold tracking-tight lg:text-7xl xl:text-8xl leading-none">
-              <span className="block bg-gradient-to-b from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent pb-1">
+              <span className="block bg-gradient-to-b from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent pb-1 hero-fade hero-d1">
                 De l&apos;idée à la production
               </span>
-              <span className="block bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent hero-fade hero-d2">
                 sans friction
               </span>
             </h1>
 
-            <p className="mx-auto mb-10 max-w-xl text-lg text-muted-foreground leading-relaxed">
+            <p className="mx-auto mb-10 max-w-xl text-lg text-muted-foreground leading-relaxed hero-fade hero-d3">
               Tout est prêt. Maintenant utilisez Claude Code pour générer les nouvelles fonctionnalités de votre SaaS.
             </p>
 
             {/* CTAs */}
-            <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
+            <div className="flex flex-wrap items-center justify-center gap-3 mb-10 hero-fade hero-d4">
               <Link href="{{AUTH_ENTRY_URL}}">
                 <Button size="lg" className="gap-2 h-12 px-6 shadow-[0_0_25px_rgba(0,0,0,0.3)] hover:shadow-[0_0_35px_hsl(var(--primary)/30%)] transition-all duration-300">
                   Commencer gratuitement <ArrowRight className="h-4 w-4" />
@@ -156,7 +156,7 @@ export default async function Home() {
             </div>
 
             {/* Feature pills */}
-            <div className="flex flex-wrap items-center justify-center gap-2">
+            <div className="flex flex-wrap items-center justify-center gap-2 hero-fade hero-d5">
               {["Better Auth", "Prisma ORM", "Stripe", "Resend", "MinIO S3", "Admin panel"].map((f) => (
                 <span key={f} className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.02] px-3 py-1 text-xs text-muted-foreground backdrop-blur-sm hover:border-white/[0.15] hover:text-foreground transition-all duration-200">
                   <Check className="h-3 w-3 text-primary shrink-0" />
