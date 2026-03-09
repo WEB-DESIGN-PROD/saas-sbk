@@ -252,27 +252,6 @@ export default async function Home() {
           </section>
         )}
 
-        {/* ─── STATS ─── */}
-        <section className="border-y border-white/[0.06] bg-white/[0.015] py-20">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-              {STATS.map(({ value, label }, i) => (
-                <div key={label} className="group text-center">
-                  <div className={[
-                    "mb-2 text-5xl font-bold tabular-nums bg-clip-text text-transparent transition-all duration-500",
-                    i === 0 ? "bg-gradient-to-b from-foreground to-foreground/50 group-hover:from-primary group-hover:to-emerald-400" :
-                    i === 1 ? "bg-gradient-to-b from-foreground to-foreground/50 group-hover:from-emerald-400 group-hover:to-cyan-400" :
-                    i === 2 ? "bg-gradient-to-b from-foreground to-foreground/50 group-hover:from-cyan-400 group-hover:to-primary" :
-                              "bg-gradient-to-b from-foreground to-foreground/50 group-hover:from-violet-400 group-hover:to-primary"
-                  ].join(" ")}>
-                    {value}
-                  </div>
-                  <div className="text-sm text-muted-foreground leading-snug">{label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* ─── TESTIMONIALS ─── */}
         <section className="py-28">
